@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plane, Clock, MapPin, Wallet } from "lucide-react";
+import { Search, Plane, MapPin, Wallet, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +14,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { useWeb3 } from "@/contexts/web3-context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+
+interface FlightData {
+  flightNumber: string;
+  estimatedArrivalUTC: string;
+  estimatedDepartureUTC: string;
+  arrivalCity: string;
+  departureCity: string;
+  operatingAirline: string;
+  departureGate: string;
+  arrivalGate: string;
+  flightStatus: string;
+  equipmentModel: string;
+  exists: boolean;
+}
 
 export default function FlightSearch() {
   const {
@@ -25,7 +40,7 @@ export default function FlightSearch() {
     searchFlight,
   } = useWeb3();
   const [flightNumber, setFlightNumber] = useState("");
-  const [flightData, setFlightData] = useState<any>(null);
+  const [flightData, setFlightData] = useState<FlightData | null>(null);
   const [searchError, setSearchError] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState<
@@ -40,24 +55,68 @@ export default function FlightSearch() {
 
     try {
       const flight = await searchFlight(flightNumber);
+      if (!flight.exists) {
+        throw new Error("Flight not found");
+      }
       setFlightData(flight);
       setSearchError("");
     } catch (err) {
-      setSearchError("Failed to fetch flight data");
+      setSearchError(
+        err instanceof Error ? err.message : "Failed to fetch flight data"
+      );
       setFlightData(null);
     }
   };
 
-  const handleSubscribe = async (months: number) => {
+  const handleSubscribe = async (months: number, value: string) => {
     try {
       setSubscriptionLoading((prev) => ({ ...prev, [months]: true }));
-      await subscribeToService(months);
+      await subscribeToService(months, value);
       setIsSubscribed(true);
     } catch (err) {
       console.error("Failed to subscribe:", err);
     } finally {
       setSubscriptionLoading((prev) => ({ ...prev, [months]: false }));
     }
+  };
+
+  const getFlightTimeStatus = (flight: FlightData) => {
+    const now = new Date();
+    const departureTime = new Date(flight.estimatedDepartureUTC);
+    const arrivalTime = new Date(flight.estimatedArrivalUTC);
+
+    if (flight.flightStatus.toLowerCase() === "cancelled") {
+      return {
+        status: "Not Live",
+        color: "bg-gray-500",
+        message: "Flight Cancelled",
+      };
+    }
+
+    const timeToDeparture = Math.floor(
+      (departureTime.getTime() - now.getTime()) / (1000 * 60)
+    ); // in minutes
+    const timeToArrival = Math.floor(
+      (arrivalTime.getTime() - now.getTime()) / (1000 * 60)
+    ); // in minutes
+
+    if (timeToDeparture > 0) {
+      return {
+        status: "Ready for Takeoff",
+        color: "bg-yellow-500",
+        message: `Departure in ${timeToDeparture} min`,
+      };
+    }
+
+    if (timeToDeparture <= 0 && timeToArrival > 0) {
+      return {
+        status: "In Air",
+        color: "bg-blue-500",
+        message: `Arrival in ${timeToArrival} min`,
+      };
+    }
+
+    return { status: "Landed", color: "bg-green-500", message: " " };
   };
 
   const formatDateTime = (utcDateTime: string) => {
@@ -67,31 +126,44 @@ export default function FlightSearch() {
     });
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "on time":
+        return "bg-green-500";
+      case "delayed":
+        return "bg-yellow-500";
+      case "cancelled":
+        return "bg-red-500";
+      default:
+        return "bg-blue-500";
+    }
+  };
+
   const subscriptionPlans = [
     {
       name: "Monthly",
-      price: "0.1 CAM",
+      price: "0.1",
       duration: "1 month",
       months: 1,
       features: ["Unlimited searches", "24/7 support", "Real-time updates"],
     },
     {
       name: "Quarterly",
-      price: "0.25 CAM",
+      price: "0.25",
       duration: "3 months",
       months: 3,
       features: ["All Monthly features", "Priority support", "Flight alerts"],
     },
     {
       name: "Bi-annual",
-      price: "0.45 CAM",
+      price: "0.45",
       duration: "6 months",
       months: 6,
       features: ["All Quarterly features", "Price tracking", "Historical data"],
     },
     {
       name: "Annual",
-      price: "0.8 CAM",
+      price: "0.8",
       duration: "1 year",
       months: 12,
       features: ["All Bi-annual features", "VIP support", "Custom reports"],
@@ -111,6 +183,7 @@ export default function FlightSearch() {
           <CardContent>
             {error && (
               <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -130,7 +203,7 @@ export default function FlightSearch() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Go Travel X</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">Flight Tracker</h1>
 
       {!isSubscribed ? (
         <div>
@@ -145,7 +218,9 @@ export default function FlightSearch() {
                   <CardDescription>{plan.duration}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <div className="text-3xl font-bold mb-4">{plan.price}</div>
+                  <div className="text-3xl font-bold mb-4">
+                    {plan.price} CAM
+                  </div>
                   <ul className="space-y-2">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-center text-sm">
@@ -158,7 +233,7 @@ export default function FlightSearch() {
                 <CardFooter>
                   <Button
                     className="w-full"
-                    onClick={() => handleSubscribe(plan.months)}
+                    onClick={() => handleSubscribe(plan.months, plan.price)}
                     disabled={subscriptionLoading[plan.months]}
                   >
                     {subscriptionLoading[plan.months]
@@ -176,7 +251,7 @@ export default function FlightSearch() {
             <CardHeader>
               <CardTitle>Search Flight</CardTitle>
               <CardDescription>
-                Enter a flight number (e.g., 1234)
+                Enter a flight number to get real-time information
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -190,37 +265,50 @@ export default function FlightSearch() {
                 />
                 <Button onClick={handleSearch} disabled={isLoading}>
                   <Search className="h-4 w-4 mr-2" />
-                  {isLoading ? "Searching..." : "Search"}
+                  {isLoading ? "Req...." : "Request Data"}
                 </Button>
               </div>
 
               {searchError && (
-                <p className="text-red-500 mt-2">{searchError}</p>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{searchError}</AlertDescription>
+                </Alert>
               )}
 
               {flightData && (
                 <div className="mt-6">
-                  <Card className="bg-muted/50">
+                  <Card>
                     <CardHeader>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="flex items-center">
-                            <Plane className="mr-2 h-5 w-5" />
-                            Flight {flightData.FlightNumber}
+                          <CardTitle className="flex items-center gap-2">
+                            <Plane className="h-5 w-5" />
+                            Flight {flightData.flightNumber}
+                            <Badge variant="outline">
+                              {flightData.operatingAirline}
+                            </Badge>
                           </CardTitle>
-                          <CardDescription>
-                            {flightData.Fleet} • {flightData.partner} •{" "}
-                            {flightData.FlightType}
+                          <CardDescription className="mt-1">
+                            {flightData.equipmentModel}
                           </CardDescription>
                         </div>
-                        <div className="text-right">
-                          <div className="font-semibold">Date</div>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(
-                              flightData.FlightOriginationDate
-                            ).toLocaleDateString()}
-                          </div>
-                        </div>
+
+                        {/* Display Live Status */}
+                        {(() => {
+                          const { status, color, message } =
+                            getFlightTimeStatus(flightData);
+                          return (
+                            <Badge className={color}>
+                              {status} - {message}
+                            </Badge>
+                          );
+                        })()}
+                        <Badge
+                          className={getStatusColor(flightData.flightStatus)}
+                        >
+                          {flightData.flightStatus}
+                        </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -233,19 +321,16 @@ export default function FlightSearch() {
                             </div>
                             <div className="pl-6">
                               <p className="text-2xl font-bold">
-                                {flightData.DepartureAirport}
+                                {flightData.departureCity}
                               </p>
                               <div className="space-y-1">
                                 <p className="text-sm text-muted-foreground">
-                                  Scheduled:{" "}
-                                  {formatDateTime(
-                                    flightData.DepartureUTCDateTime
-                                  )}
+                                  Gate: {flightData.departureGate}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  Estimated:{" "}
+                                  Time:{" "}
                                   {formatDateTime(
-                                    flightData.EstimatedDepartureUTCTime
+                                    flightData.estimatedDepartureUTC
                                   )}
                                 </p>
                               </div>
@@ -258,35 +343,20 @@ export default function FlightSearch() {
                             </div>
                             <div className="pl-6">
                               <p className="text-2xl font-bold">
-                                {flightData.ArrivalAirport}
+                                {flightData.arrivalCity}
                               </p>
                               <div className="space-y-1">
                                 <p className="text-sm text-muted-foreground">
-                                  Scheduled:{" "}
-                                  {formatDateTime(
-                                    flightData.ArrivalUTCDateTime
-                                  )}
+                                  Gate: {flightData.arrivalGate}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  Estimated:{" "}
+                                  Time:{" "}
                                   {formatDateTime(
-                                    flightData.EstimatedArrivalUTCTime
+                                    flightData.estimatedArrivalUTC
                                   )}
                                 </p>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                          <div>
-                            <h3 className="font-semibold flex items-center">
-                              <Clock className="mr-2 h-4 w-4" />
-                              Terminal & Gate
-                            </h3>
-                            <p className="mt-1">{flightData.ArrivalTermimal}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Gate {flightData.ArrivalGate}
-                            </p>
                           </div>
                         </div>
                       </div>

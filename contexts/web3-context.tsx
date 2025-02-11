@@ -1,40 +1,26 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState } from "react"
-import { ethers } from "ethers"
+import { createContext, useContext, useState } from "react";
+import { ethers } from "ethers";
 
 // Contract configuration
-const flightSubscriptionAddress = "0x617Cc2481DDb5c3f22Bdefad3C62b6AC33Fdf9c8"
-const flightSubscriptionAbi = [
-  {
-    inputs: [{ internalType: "address", name: "flightSearchAddress", type: "address" }],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
+const flightContractAddress = "0xE9b4A9a470c69b376B1644658587F5d501CCeFeb";
+const flightContractAbi = [
   {
     inputs: [{ internalType: "string", name: "flightNumber", type: "string" }],
-    name: "searchFlight",
+    name: "getFlightData",
     outputs: [
-      {
-        components: [
-          { internalType: "string", name: "FlightNumber", type: "string" },
-          { internalType: "string", name: "FlightOriginationDate", type: "string" },
-          { internalType: "string", name: "ArrivalUTCDateTime", type: "string" },
-          { internalType: "string", name: "DepartureUTCDateTime", type: "string" },
-          { internalType: "string", name: "partner", type: "string" },
-          { internalType: "string", name: "Fleet", type: "string" },
-          { internalType: "string", name: "ArrivalGate", type: "string" },
-          { internalType: "string", name: "FlightType", type: "string" },
-          { internalType: "string", name: "ArrivalTermimal", type: "string" },
-          { internalType: "string", name: "EstimatedArrivalUTCTime", type: "string" },
-          { internalType: "string", name: "EstimatedDepartureUTCTime", type: "string" },
-          { internalType: "string", name: "DepartureAirport", type: "string" },
-          { internalType: "string", name: "ArrivalAirport", type: "string" },
-        ],
-        internalType: "struct FlightSearch.Flight",
-        name: "",
-        type: "tuple",
-      },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "string", name: "", type: "string" },
+      { internalType: "bool", name: "", type: "bool" },
     ],
     stateMutability: "view",
     type: "function",
@@ -43,103 +29,124 @@ const flightSubscriptionAbi = [
     inputs: [{ internalType: "uint256", name: "months", type: "uint256" }],
     name: "subscribe",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
-]
+];
 
-type Web3ContextType = {
-  isConnected: boolean
-  isLoading: boolean
-  error: string | null
-  connectWallet: () => Promise<void>
-  subscribeToService: (months: number) => Promise<void>
-  searchFlight: (flightNumber: string) => Promise<any>
+interface FlightData {
+  flightNumber: string;
+  estimatedArrivalUTC: string;
+  estimatedDepartureUTC: string;
+  arrivalCity: string;
+  departureCity: string;
+  operatingAirline: string;
+  departureGate: string;
+  arrivalGate: string;
+  flightStatus: string;
+  equipmentModel: string;
+  exists: boolean;
 }
 
-const Web3Context = createContext<Web3ContextType | undefined>(undefined)
+type Web3ContextType = {
+  isConnected: boolean;
+  isLoading: boolean;
+  error: string | null;
+  connectWallet: () => Promise<void>;
+  subscribeToService: (months: number, value: string) => Promise<void>;
+  searchFlight: (flightNumber: string) => Promise<FlightData>;
+};
+
+const Web3Context = createContext<Web3ContextType | undefined>(undefined);
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
-  const [isConnected, setIsConnected] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [contract, setContract] = useState<ethers.Contract | null>(null)
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
 
   const connectWallet = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
       if (!window.ethereum) {
-        throw new Error("MetaMask not installed")
+        throw new Error("MetaMask not installed");
       }
 
-      await window.ethereum.request({ method: "eth_requestAccounts" })
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-      const flightContract = new ethers.Contract(flightSubscriptionAddress, flightSubscriptionAbi, signer)
+      const flightContract = new ethers.Contract(
+        flightContractAddress,
+        flightContractAbi,
+        signer
+      );
 
-      setContract(flightContract)
-      setIsConnected(true)
+      setContract(flightContract);
+      setIsConnected(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect wallet")
+      setError(err instanceof Error ? err.message : "Failed to connect wallet");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const subscribeToService = async (months: number) => {
+  const subscribeToService = async (months: number, value: string) => {
     if (!contract) {
-      throw new Error("Wallet not connected")
+      throw new Error("Wallet not connected");
     }
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const tx = await contract.subscribe(months)
-      await tx.wait()
+      const tx = await contract.subscribe(months, {
+        value: ethers.parseEther(value),
+      });
+      await tx.wait();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to subscribe")
-      throw err
+      setError(err instanceof Error ? err.message : "Failed to subscribe");
+      throw err;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const searchFlight = async (flightNumber: string) => {
+  const searchFlight = async (flightNumber: string): Promise<FlightData> => {
     if (!contract) {
-      throw new Error("Wallet not connected")
+      throw new Error("Wallet not connected");
     }
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const flight = await contract.searchFlight(flightNumber)
+      const result = await contract.getFlightData(flightNumber);
+
       return {
-        FlightNumber: flight[0],
-        FlightOriginationDate: flight[1],
-        ArrivalUTCDateTime: flight[2],
-        DepartureUTCDateTime: flight[3],
-        partner: flight[4],
-        Fleet: flight[5],
-        ArrivalGate: flight[6],
-        FlightType: flight[7],
-        ArrivalTermimal: flight[8],
-        EstimatedArrivalUTCTime: flight[9],
-        EstimatedDepartureUTCTime: flight[10],
-        DepartureAirport: flight[11],
-        ArrivalAirport: flight[12],
-      }
+        flightNumber: result[5],
+        estimatedDepartureUTC: result[1],
+        estimatedArrivalUTC: result[0],
+        departureCity: result[2],
+        arrivalCity: result[3], 
+        operatingAirline: result[4],
+        departureGate: result[6],
+        arrivalGate: result[7],
+        flightStatus: result[8],
+        equipmentModel: result[9],
+        exists: result[10],
+      };
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch flight data")
-      throw err
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch flight data"
+      );
+      throw err;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Web3Context.Provider
@@ -154,14 +161,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     >
       {children}
     </Web3Context.Provider>
-  )
+  );
 }
 
 export function useWeb3() {
-  const context = useContext(Web3Context)
+  const context = useContext(Web3Context);
   if (context === undefined) {
-    throw new Error("useWeb3 must be used within a Web3Provider")
+    throw new Error("useWeb3 must be used within a Web3Provider");
   }
-  return context
+  return context;
 }
-
