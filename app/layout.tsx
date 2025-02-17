@@ -1,5 +1,10 @@
+import { ThemeProvider } from "@/components/theme-provider"
 import { Web3Provider } from "@/contexts/web3-context"
-import type React from "react"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import type React from "react" // Added import for React
+
+const inter = Inter({ subsets: ["latin"] })
 
 export default function RootLayout({
   children,
@@ -7,9 +12,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Web3Provider>{children}</Web3Provider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Web3Provider>{children}</Web3Provider>
+        </ThemeProvider>
       </body>
     </html>
   )
@@ -18,3 +25,7 @@ export default function RootLayout({
 
 
 import './globals.css'
+
+export const metadata = {
+      generator: 'v0.dev'
+    };
