@@ -1,17 +1,17 @@
 import type { ethers } from "ethers"
-import { getFlightStatus } from "./flight-api"
-
+import { fetchFlightData } from "./api"
+ 
 export async function getAndUpdateFlightData(contract: ethers.Contract, flightNumber: string) {
   try {
     // First try to get data from smart contract
     const contractData = await contract.getFlightData(flightNumber)
-
+ 
     // If flight exists in contract
     if (contractData[10]) {
       // exists boolean is the last item
       // Get fresh data from API
-      const apiData = await getFlightStatus(flightNumber)
-
+      const apiData = await fetchFlightData(flightNumber)
+ 
       // Compare and update if needed
       const needsUpdate =
         contractData[0] !== apiData.estimatedArrivalUTC ||
@@ -23,7 +23,7 @@ export async function getAndUpdateFlightData(contract: ethers.Contract, flightNu
         contractData[6] !== apiData.arrivalGate ||
         contractData[7] !== apiData.flightStatus ||
         contractData[8] !== apiData.equipmentModel
-
+ 
       if (needsUpdate) {
         // Update contract with new data
         await contract.setFlightData(
@@ -39,13 +39,13 @@ export async function getAndUpdateFlightData(contract: ethers.Contract, flightNu
           apiData.equipmentModel,
         )
       }
-
+ 
       // Return the most recent data
       return apiData
     } else {
       // If flight doesn't exist in contract, get from API and store
-      const apiData = await getFlightStatus(flightNumber)
-
+      const apiData = await fetchFlightData(flightNumber)
+ 
       // Store in contract
       await contract.setFlightData(
         flightNumber,
@@ -59,7 +59,7 @@ export async function getAndUpdateFlightData(contract: ethers.Contract, flightNu
         apiData.flightStatus,
         apiData.equipmentModel,
       )
-
+ 
       return apiData
     }
   } catch (error) {
@@ -67,4 +67,3 @@ export async function getAndUpdateFlightData(contract: ethers.Contract, flightNu
     throw error
   }
 }
-
