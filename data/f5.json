@@ -1,0 +1,83 @@
+{
+    "EstimatedArrivalUTCTime": "2025-02-21T19:00:00",
+    "EstimatedDepartureUTCTime": "2025-02-21T12:00:00",
+    "ArrivalUTCDateTime": "2025-02-21T14:05:00",
+    "DepartureUTCDateTime": "2025-02-21T12:00:00",
+    "FlightNumber": "2343",
+    "Equipment": {
+        "NoseNumber": "7313",
+        "Model": {
+            "Genre": "7M8",
+            "Description": "Boeing 737 MAX 8",
+            "VendorName": "B ",
+            "Key": "37E",
+            "Fleet": "737",
+            "SubFleet": "822",
+            "StndrdFleetDesc": "B737-MAX8"
+        },
+        "OffUTCTime": "2025-02-21T12:33:00",
+        "OutUTCTime": "2025-02-21T12:23:00",
+        "DepartureAirport": {
+            "IATACode": "ORD",
+            "ICAOCode": "KORD",
+            "Name": "Chicago, IL, US (ORD)",
+            "ShortName": "CHICAGO O`HARE INTL",
+            "Address": {
+                "City": "CHICAGO",
+                "StateProvince": {
+                    "Name": "IL"
+                }
+            },
+            "IATACountryCode": {
+                "CountryCode": "USA"
+            },
+            "StateProvince": {
+                "StateProvinceCode": "IL"
+            }
+        },
+        "ArrivalAirport": {
+            "IATACode": "EWR",
+            "ICAOCode": "KEWR",
+            "Name": "New York/Newark, NJ, US (EWR)",
+            "ShortName": "NEWARK LIBERTY INTL",
+            "Address": {
+                "City": "NEWARK",
+                "StateProvince": {
+                    "Name": "NJ"
+                }
+            },
+            "IATACountryCode": {
+                "CountryCode": "USA"
+            },
+            "StateProvince": {
+                "StateProvinceCode": "NJ"
+            }
+        },
+        "FlightStatuses": [
+            {
+                "StatusType": "DepartureStatus",
+                "Description": "Delayed",
+                "Code": "DLY"
+            },
+            {
+                "StatusType": "ArrivalStatus",
+                "Description": "Delayed",
+                "Code": "DLY"
+            },
+            {
+                "StatusType": "LegStatus",
+                "Description": "Canceled",
+                "Code": "CNCL"
+            },
+            {
+                "StatusType": "FlightStatus",
+                "Description": "Canceled",
+                "Code": "Cancelled"
+            },
+            {
+                "StatusType": "ShortFlightStatus",
+                "Description": "Canceled",
+                "Code": "Cancelled"
+            }
+        ]
+    }

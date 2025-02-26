@@ -5,7 +5,7 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { ethers } from "ethers"
 import { FlightContractService } from "@/services/contract"
-import type { FlightData } from "@/services/api"
+import { FlightData, fetchFlightData } from "@/services/api"
 import type { FlightUpdates } from "@/services/contract"
 import { storageService, type StoredTransaction } from "@/services/storage"
 
@@ -112,6 +112,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Update the searchAndStoreFlight function to handle the new contract structure
   const searchAndStoreFlight = async (flightNumber: string): Promise<FlightData> => {
     if (!contractService) {
       throw new Error("Wallet not connected")
@@ -121,10 +122,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setError(null)
 
     try {
+      // Store flight data in contract
       const status = await contractService.storeFlightData(flightNumber)
       setTransactions(storageService.getTransactions())
 
-      const flightData = await contractService.getFlightData(flightNumber)
+      // Get the updated flight data
+      //  const flightData = await contractService.getFlightData(flightNumber)
+      const flightData = await fetchFlightData(flightNumber)
       setCurrentFlightNumber(flightNumber)
 
       return flightData

@@ -1,459 +1,459 @@
 import { ethers } from "ethers"
-import { type FlightData, fetchFlightData } from "./api"
 import { storageService } from "./storage"
+import { FlightData, fetchFlightData } from "./api"
+import type { TransactionStatus, FlightUpdates } from "@/types/flight"
 
 // Contract configuration
-const CONTRACT_ADDRESS = "0xAC39D87b3eD641FA792aE1852051B866E5528Dfa"
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x524D29349a2d7E534eec248990B8e9C606DeB8C9"
 
-// Complete ABI from the contract
+// Updated ABI to match new contract
 const CONTRACT_ABI = [
   {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "string",
-        name: "flightNumber",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "flightNumber",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "estimatedArrivalUTC",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "arrivalCity",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "estimatedDepartureUTC",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "departureCity",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "arrivalCity",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "operatingAirline",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "departureCity",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "arrivalGate",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "operatingAirline",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "departureGate",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "departureGate",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "flightStatus",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "arrivalGate",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "flightStatus",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "equipmentModel",
-        type: "string",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "equipmentModel",
+        "type": "string"
+      }
     ],
-    name: "FlightDataSet",
-    type: "event",
+    "name": "FlightDataSet",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "string",
-        name: "flightNumber",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "flightNumber",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string[]",
-        name: "fieldsUpdated",
-        type: "string[]",
+        "indexed": false,
+        "internalType": "string",
+        "name": "flight_times",
+        "type": "string"
       },
       {
-        indexed: false,
-        internalType: "string[]",
-        name: "newValues",
-        type: "string[]",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "status",
+        "type": "string"
+      }
     ],
-    name: "FlightDataUpdated",
-    type: "event",
+    "name": "FlightStatusUpdated",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: true,
-        internalType: "address",
-        name: "user",
-        type: "address",
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       },
       {
-        indexed: false,
-        internalType: "uint256",
-        name: "expiry",
-        type: "uint256",
-      },
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "expiry",
+        "type": "uint256"
+      }
     ],
-    name: "Subscribed",
-    type: "event",
+    "name": "Subscribed",
+    "type": "event"
   },
   {
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
+        "indexed": false,
+        "internalType": "string",
+        "name": "ArrivalUTC",
+        "type": "string"
       },
-    ],
-    name: "flightNumbers",
-    outputs: [
       {
-        internalType: "string",
-        name: "",
-        type: "string",
+        "indexed": false,
+        "internalType": "string",
+        "name": "DepartureUTC",
+        "type": "string"
       },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "estimatedArrivalUTC",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "estimatedDepartureUTC",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "scheduledArrivalUTC",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "scheduledDepartureUTC",
+        "type": "string"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "name": "UTCTimeSet",
+    "type": "event"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
     ],
-    name: "flights",
-    outputs: [
+    "name": "UtcTimes",
+    "outputs": [
       {
-        internalType: "string",
-        name: "estimatedArrivalUTC",
-        type: "string",
+        "internalType": "string",
+        "name": "ArrivalUTC",
+        "type": "string"
       },
       {
-        internalType: "string",
-        name: "estimatedDepartureUTC",
-        type: "string",
+        "internalType": "string",
+        "name": "DepartureUTC",
+        "type": "string"
       },
       {
-        internalType: "string",
-        name: "arrivalCity",
-        type: "string",
+        "internalType": "string",
+        "name": "estimatedArrivalUTC",
+        "type": "string"
       },
       {
-        internalType: "string",
-        name: "departureCity",
-        type: "string",
+        "internalType": "string",
+        "name": "estimatedDepartureUTC",
+        "type": "string"
       },
       {
-        internalType: "string",
-        name: "operatingAirline",
-        type: "string",
+        "internalType": "string",
+        "name": "scheduledArrivalUTC",
+        "type": "string"
       },
       {
-        internalType: "string",
-        name: "flightNumber",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "departureGate",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "arrivalGate",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "flightStatus",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "equipmentModel",
-        type: "string",
-      },
-      {
-        internalType: "bool",
-        name: "exists",
-        type: "bool",
-      },
+        "internalType": "string",
+        "name": "scheduledDepartureUTC",
+        "type": "string"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "flightNumber",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
     ],
-    name: "getFlightData",
-    outputs: [
+    "name": "checkFlightStatus",
+    "outputs": [
       {
-        components: [
+        "internalType": "string",
+        "name": "flightStatusCode",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "flightStatusDescription",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "outUtc",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "offUtc",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "onUtc",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "inUtc",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "flightNumbers",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "flights",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "flightNumber",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "arrivalCity",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "departureCity",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "operatingAirline",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "arrivalGate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "departureGate",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "flightStatus",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "equipmentModel",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "flightNumber",
+        "type": "string"
+      }
+    ],
+    "name": "getFlightData",
+    "outputs": [
+      {
+        "components": [
           {
-            internalType: "string",
-            name: "estimatedArrivalUTC",
-            type: "string",
+            "internalType": "string",
+            "name": "flightNumber",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "estimatedDepartureUTC",
-            type: "string",
+            "internalType": "string",
+            "name": "arrivalCity",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "arrivalCity",
-            type: "string",
+            "internalType": "string",
+            "name": "departureCity",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "departureCity",
-            type: "string",
+            "internalType": "string",
+            "name": "operatingAirline",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "operatingAirline",
-            type: "string",
+            "internalType": "string",
+            "name": "arrivalGate",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "flightNumber",
-            type: "string",
+            "internalType": "string",
+            "name": "departureGate",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "departureGate",
-            type: "string",
+            "internalType": "string",
+            "name": "flightStatus",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "arrivalGate",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "flightStatus",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "equipmentModel",
-            type: "string",
-          },
-          {
-            internalType: "bool",
-            name: "exists",
-            type: "bool",
-          },
+            "internalType": "string",
+            "name": "equipmentModel",
+            "type": "string"
+          }
         ],
-        internalType: "struct FlightStatusOracle.FlightData",
-        name: "",
-        type: "tuple",
-      },
+        "internalType": "struct FlightStatusOracle.FlightData",
+        "name": "",
+        "type": "tuple"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "flightNumber",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "estimatedArrivalUTC",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "estimatedDepartureUTC",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "arrivalCity",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "departureCity",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "operatingAirline",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "departureGate",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "arrivalGate",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "flightStatus",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "equipmentModel",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "flightNumber",
+        "type": "string"
+      }
     ],
-    name: "setFlightData",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "getFlightStatus",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "uint256",
-        name: "months",
-        type: "uint256",
+        "internalType": "string[]",
+        "name": "flightdata",
+        "type": "string[]"
       },
+      {
+        "internalType": "string[]",
+        "name": "Utctimes",
+        "type": "string[]"
+      },
+      {
+        "internalType": "string[]",
+        "name": "status",
+        "type": "string[]"
+      }
     ],
-    name: "subscribe",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
+    "name": "setFlightData",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
+        "internalType": "uint256",
+        "name": "months",
+        "type": "uint256"
+      }
     ],
-    name: "subscriptions",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
+    "name": "subscribe",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "flightNumber",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "estimatedArrivalUTC",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "estimatedDepartureUTC",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "arrivalCity",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "departureCity",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "operatingAirline",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "departureGate",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "arrivalGate",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "flightStatus",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "equipmentModel",
-        type: "string",
-      },
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
     ],
-    name: "updateFlightData",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
+    "name": "subscriptions",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
 ]
 
-export interface TransactionStatus {
-  hash: string
-  status: "pending" | "completed" | "failed"
-  type: "set" | "update"
-  timestamp: number
-  flightNumber: string
-  updatedFields?: string[]
-}
-
-export interface FlightUpdates {
-  flightNumber: string
-  updates: {
-    field: string
-    newValue: string
-    timestamp: number
-  }[]
-}
+type FlightPhase = "not_departed" | "out" | "off" | "on" | "in"
 
 export class FlightContractService {
   private contract: ethers.Contract
@@ -464,152 +464,151 @@ export class FlightContractService {
     this.contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
   }
 
-  // Check if flight exists in contract
-  private async checkFlightExists(flightNumber: string): Promise<boolean> {
-    try {
-      const flightData = await this.contract.flights(flightNumber)
-      return flightData.exists
-    } catch (error) {
-      return false
-    }
-  }
-
-  // Store or update flight data
-  async storeFlightData(flightNumber: string): Promise<TransactionStatus> {
-    try {
-      const flightData = await fetchFlightData(flightNumber)
-      const exists = await this.checkFlightExists(flightNumber)
-
-      let tx
-      const timestamp = Date.now()
-
-      if (!exists) {
-        // Store new flight data using setFlightData
-        tx = await this.contract.setFlightData(
-          flightNumber,
-          flightData.estimatedArrivalUTC,
-          flightData.estimatedDepartureUTC,
-          flightData.arrivalCity,
-          flightData.departureCity,
-          flightData.operatingAirline,
-          flightData.departureGate,
-          flightData.arrivalGate,
-          flightData.flightStatus,
-          flightData.equipmentModel,
-        )
-
-        const status: TransactionStatus = {
-          hash: tx.hash,
-          status: "pending",
-          type: "set",
-          timestamp,
-          flightNumber,
-        }
-
-        // Save to local storage
-        storageService.saveTransaction({
-          ...status,
-          updatedFields: ["all"],
-        })
-
-        await tx.wait()
-        storageService.updateTransactionStatus(tx.hash, "completed")
-        status.status = "completed"
-
-        return status
-      } else {
-        // Update existing flight data using updateFlightData
-        tx = await this.contract.updateFlightData(
-          flightNumber,
-          flightData.estimatedArrivalUTC,
-          flightData.estimatedDepartureUTC,
-          flightData.arrivalCity,
-          flightData.departureCity,
-          flightData.operatingAirline,
-          flightData.departureGate,
-          flightData.arrivalGate,
-          flightData.flightStatus,
-          flightData.equipmentModel,
-        )
-
-        const status: TransactionStatus = {
-          hash: tx.hash,
-          status: "pending",
-          type: "update",
-          timestamp,
-          flightNumber,
-        }
-
-        // Save to local storage
-        storageService.saveTransaction(status)
-
-        await tx.wait()
-        storageService.updateTransactionStatus(tx.hash, "completed")
-        status.status = "completed"
-
-        return status
-      }
-    } catch (error) {
-      console.error("Error storing flight data:", error)
-      throw error
-    }
-  }
-
   // Get flight data from contract
-  async getFlightData(flightNumber: string): Promise<FlightData & { exists: boolean }> {
+  async getFlightData(flightNumber: string): Promise<FlightData> {
     try {
-      const data = await this.contract.getFlightData(flightNumber)
+      // Fetch flight data and status from the contract
+      const data = await this.contract.getFlightData(flightNumber);
+      const statusData = await this.contract.checkFlightStatus(flightNumber);
+
+      // Determine phase based on status
+      const phase = this.getPhaseFromStatus(statusData.flightStatusDescription);
+      const statusCode = statusData.flightStatusCode || "NDPT";
+      const isCanceled = statusCode === "CNCL";
+
+      // Return the flight data using the correct keys from the contract
       return {
-        estimatedArrivalUTC: data[0],
-        estimatedDepartureUTC: data[1],
-        arrivalCity: data[2],
-        departureCity: data[3],
-        operatingAirline: data[4],
-        flightNumber: data[5],
-        departureGate: data[6],
-        arrivalGate: data[7],
-        flightStatus: data[8],
-        equipmentModel: data[9],
-        exists: data[10],
-      }
+        flightNumber: data.flightNumber,
+        estimatedArrivalUTC: data.estimatedArrivalUTC,
+        estimatedDepartureUTC: data.estimatedDepartureUTC,
+        arrivalCity: data.arrivalCity,
+        departureCity: data.departureCity,
+        operatingAirline: data.operatingAirline,
+        departureGate: data.departureGate,
+        arrivalGate: data.arrivalGate,
+        flightStatus: data.flightStatus,
+        statusCode, // Using the status code that was fetched
+        equipmentModel: data.equipmentModel,
+        phase, // Phase derived from flight status
+        departureTerminal: data.departureTerminal || "TBD", // Handling undefined fields
+        arrivalTerminal: data.arrivalTerminal || "TBD",
+        actualDepartureUTC: data.actualDepartureUTC,
+        actualArrivalUTC: data.actualArrivalUTC,
+        outTimeUTC: data.outTimeUTC,
+        offTimeUTC: data.offTimeUTC,
+        onTimeUTC: data.onTimeUTC,
+        inTimeUTC: data.inTimeUTC,
+        baggageClaim: data.baggageClaim || "TBD", // Default to "TBD" if not available
+        departureDelayMinutes: data.departureDelayMinutes || 0, // Default to 0 if not available
+        arrivalDelayMinutes: data.arrivalDelayMinutes || 0, // Default to 0 if not available
+        boardingTime: data.boardingTime || "TBD", // Handle missing fields
+        isCanceled,
+        scheduledArrivalUTCDateTime: data.scheduledArrivalUTCDateTime,
+        scheduledDepartureUTCDateTime: data.scheduledDepartureUTCDateTime,
+      };
     } catch (error) {
-      console.error("Error fetching flight data:", error)
-      throw error
+      console.error("Error fetching flight data:", error);
+      throw error;
     }
   }
+
+
+
+  // Helper method to determine phase from status
+  // Helper function to determine the flight phase based on the flight status description
+  getPhaseFromStatus(statusDescription: string): FlightPhase {
+    switch (statusDescription) {
+      case "Departed":
+        return "out";
+      case "In Flight":
+        return "on";
+      case "Landed":
+        return "in";
+      case "Not Departed":
+        return "not_departed";
+      default:
+        return "not_departed"; // Default phase if status is not recognized
+    }
+  }
+
 
   // Setup event listener for flight updates
   setupFlightUpdateListener(flightNumber: string, callback: (updates: FlightUpdates) => void) {
-    const handler = (updatedFlightNumber: string, fieldsUpdated: string[], newValues: string[]) => {
+    // Listen for FlightStatusUpdated events
+    const statusHandler = (updatedFlightNumber: string, flight_times: string, status: string) => {
       if (updatedFlightNumber === flightNumber) {
-        const updates = fieldsUpdated.map((field, index) => ({
-          field,
-          newValue: newValues[index],
+        const update = {
+          field: "flightStatus",
+          newValue: status,
           timestamp: Date.now(),
-        }))
+        }
+
+        callback({
+          flightNumber,
+          updates: [update],
+        })
 
         // Save update to local storage
         storageService.saveTransaction({
-          hash: "update_" + Date.now(),
+          hash: `status_${Date.now()}`,
           status: "completed",
           type: "update",
           timestamp: Date.now(),
           flightNumber,
-          updatedFields: fieldsUpdated,
+          updatedFields: ["flightStatus"],
         })
+      }
+    }
+
+    // Listen for FlightDataSet events
+    const dataHandler = (
+      updatedFlightNumber: string,
+      arrivalUTC: string,
+      departureUTC: string,
+      arrivalCity: string,
+      departureCity: string,
+      operatingAirline: string,
+      arrivalGate: string,
+      departureGate: string,
+      flightStatus: string,
+      equipmentModel: string,
+    ) => {
+      if (updatedFlightNumber === flightNumber) {
+        const updates = [
+          { field: "arrivalUTC", newValue: arrivalUTC, timestamp: Date.now() },
+          { field: "departureUTC", newValue: departureUTC, timestamp: Date.now() },
+          { field: "arrivalCity", newValue: arrivalCity, timestamp: Date.now() },
+          { field: "departureCity", newValue: departureCity, timestamp: Date.now() },
+          { field: "operatingAirline", newValue: operatingAirline, timestamp: Date.now() },
+          { field: "arrivalGate", newValue: arrivalGate, timestamp: Date.now() },
+          { field: "departureGate", newValue: departureGate, timestamp: Date.now() },
+          { field: "flightStatus", newValue: flightStatus, timestamp: Date.now() },
+          { field: "equipmentModel", newValue: equipmentModel, timestamp: Date.now() },
+        ]
 
         callback({
           flightNumber,
           updates,
         })
+
+        // Save update to local storage
+        storageService.saveTransaction({
+          hash: `update_${Date.now()}`,
+          status: "completed",
+          type: "update",
+          timestamp: Date.now(),
+          flightNumber,
+          updatedFields: Object.keys(updates),
+        })
       }
     }
 
-    // Listen for FlightDataUpdated events
-    this.contract.on("FlightDataUpdated", handler)
+    this.contract.on("FlightStatusUpdated", statusHandler)
+    this.contract.on("FlightDataSet", dataHandler)
 
     return () => {
-      this.contract.off("FlightDataUpdated", handler)
+      this.contract.off("FlightStatusUpdated", statusHandler)
+      this.contract.off("FlightDataSet", dataHandler)
     }
   }
 
@@ -651,5 +650,64 @@ export class FlightContractService {
       throw error
     }
   }
+
+  // Store flight data
+  async storeFlightData(flightNumber: string): Promise<TransactionStatus> {
+    try {
+      // Fetch real data from API
+      const apiData = await fetchFlightData(flightNumber)
+
+
+      // Separate the data into the three required arrays for the contract
+      const flightdata = [
+        flightNumber,
+        apiData.arrivalCity,
+        apiData.departureCity,
+        apiData.operatingAirline,
+        apiData.arrivalGate || "",
+        apiData.departureGate || "",
+        apiData.flightStatus || "",
+        apiData.equipmentModel || ""
+      ];
+
+      const Utctimes = [
+        apiData.actualArrivalUTC || "", // ArrivalUTC
+        apiData.actualDepartureUTC || "", // DepartureUTC
+        apiData.estimatedArrivalUTC || "", // estimatedArrivalUTC
+        apiData.estimatedDepartureUTC || "", // estimatedDepartureUTC
+        apiData.scheduledArrivalUTCDateTime || "", // scheduledArrivalUTC
+        apiData.scheduledDepartureUTCDateTime || "" // scheduledDepartureUTC
+      ];
+
+      const status = [
+        apiData.statusCode || "NDPT", // statusCode
+        apiData.flightStatus || "Not Available", // statusDescription - using flightStatus as fallback
+        apiData.outTimeUTC || "",
+        apiData.offTimeUTC || "",
+        apiData.onTimeUTC || "", // This should be onTimeUTC, not inTimeUTC, based on API structure
+        apiData.inTimeUTC || ""
+      ];
+
+      // Call the contract's setFlightData method with the three arrays
+      const tx = await this.contract.setFlightData(flightdata, Utctimes, status);
+
+      // Wait for the transaction to be mined
+      await tx.wait();
+      storageService.updateTransactionStatus(tx.hash, "completed");
+
+      return {
+        hash: tx.hash,
+        status: "completed",
+        type: "set",
+        timestamp: Date.now(),
+        flightNumber,
+      };
+    } catch (error) {
+      console.error("Error storing flight data:", error);
+      throw error;
+    }
+  }
+
+
 }
 

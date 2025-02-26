@@ -1,0 +1,678 @@
+{
+    "data": {
+        "Flight": {
+            "flightNumber": "2343",
+            "FlightOriginationDate": "2025-02-21"
+        },
+        "flightLegs": [
+            {
+                "OperationalFlightSegments": [
+                    {
+                        "ActualDepartureTime": "2025-02-21T05:56:00",
+                        "ActualDepartureUTCTime": "2025-02-21T11:56:00",
+                        "ArrivalAirport": {
+                            "Address": {
+                                "City": "NEWARK",
+                                "StateProvince": {
+                                    "Name": "NJ"
+                                }
+                            },
+                            "IATACode": "EWR",
+                            "ICAOCode": "KEWR",
+                            "IATACountryCode": {
+                                "CountryCode": "USA"
+                            },
+                            "Name": "New York/Newark, NJ, US (EWR)",
+                            "ShortName": "NEWARK LIBERTY INTL"
+                        },
+                        "ArrivalBagClaimUnit": "Carousel 2",
+                        "ArrivalDateTime": "2025-02-21T09:05:00",
+                        "ArrivalGate": "A21",
+                        "ArrivalTermimal": "Terminal A",
+                        "ArrivalUTCDateTime": "2025-02-21T14:05:00",
+                        "BoardTime": "05:20:00",
+                        "Characteristic": [
+                            {
+                                "Code": "DisplayInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "ActvInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltOutInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltOffInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltOnInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltInInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltCnclInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDcsnInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepXstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrXstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepDvrtInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrDvrtInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrRTBLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepRTBLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrRTFLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepRTFLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepNstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrNstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltOverflyInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltIrropsCnclInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DestOccurNbr",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "OrigOccurNbr",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "StarInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "PriorityFltInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DepZone",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "ArrZone",
+                                "Value": "11"
+                            },
+                            {
+                                "Code": "ArrBagClaimTerminal",
+                                "Value": "Terminal A"
+                            },
+                            {
+                                "Code": "ShipAsgnInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "EquipmentModelCode",
+                                "Value": "B3M"
+                            },
+                            {
+                                "Code": "FltMishapInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DomesticInternationalIndicator",
+                                "Value": "DD"
+                            },
+                            {
+                                "Code": "ShrGateInhbtInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "LocalEstimatedOnTime",
+                                "Value": "2025-02-21T08:52:00"
+                            },
+                            {
+                                "Code": "GmtEstimatedOnTime ",
+                                "Value": "2025-02-21T13:52:00"
+                            },
+                            {
+                                "Code": "LocalEstimatedBoardStartDateTime",
+                                "Value": "2025-02-21T05:20:00"
+                            },
+                            {
+                                "Code": "LocalEstimatedBoardEndDateTime",
+                                "Value": "2025-02-21T05:45:00"
+                            },
+                            {
+                                "Code": "GmtEstimatedBoardStartDateTime",
+                                "Value": "2025-02-21T11:20:00"
+                            },
+                            {
+                                "Code": "GmtEstimatedBoardEndDateTime",
+                                "Value": "2025-02-21T11:45:00"
+                            },
+                            {
+                                "Code": "LocalScheduledBoardStartDateTime",
+                                "Value": "2025-02-21T05:20:00"
+                            },
+                            {
+                                "Code": "LocalScheduledBoardEndDateTime",
+                                "Value": "2025-02-21T05:45:00"
+                            },
+                            {
+                                "Code": "lclGsiTugDateTime",
+                                "Value": "2025-02-21T05:58:00"
+                            },
+                            {
+                                "Code": "gmtGsiTugDateTime",
+                                "Value": "2025-02-21T11:58:00"
+                            },
+                            {
+                                "Code": "lclCrewStartPayDateTime",
+                                "Value": "2025-02-21T05:56:00"
+                            },
+                            {
+                                "Code": "gmtCrewStartPayDateTime",
+                                "Value": "2025-02-21T11:56:00"
+                            },
+                            {
+                                "Code": "lclAllPsgrDoorClsDateTime",
+                                "Value": "2025-02-21T05:54:00"
+                            },
+                            {
+                                "Code": "gmtAllPsgrDoorClsDateTime",
+                                "Value": "2025-02-21T11:54:00"
+                            },
+                            {
+                                "Code": "lclCrgoDoorClsDateTime",
+                                "Value": "2025-02-21T05:46:00"
+                            },
+                            {
+                                "Code": "gmtCrgoDoorClsDateTime",
+                                "Value": "2025-02-21T11:46:00"
+                            },
+                            {
+                                "Code": "lclPsgrDoorClsDateTime",
+                                "Value": "2025-02-21T05:54:00"
+                            },
+                            {
+                                "Code": "gmtPsgrDoorClsDateTime",
+                                "Value": "2025-02-21T11:54:00"
+                            },
+                            {
+                                "Code": "secondLclOutOfBlkDateTime",
+                                "Value": "2025-02-21T05:56:00"
+                            },
+                            {
+                                "Code": "secondGmtOutOfBlkDateTime",
+                                "Value": "2025-02-21T11:56:00"
+                            },
+                            {
+                                "Code": "lclAcarsInitDateTime",
+                                "Value": "2025-02-21T04:56:00"
+                            },
+                            {
+                                "Code": "gmtAcarsInitDateTime",
+                                "Value": "2025-02-21T10:56:00"
+                            },
+                            {
+                                "Code": "lclBrkRlseDateTime",
+                                "Value": "2025-02-21T05:56:00"
+                            },
+                            {
+                                "Code": "gmtBrkRlseDDateTime",
+                                "Value": "2025-02-21T11:56:00"
+                            },
+                            {
+                                "Code": "lclAdcBrlDateTime",
+                                "Value": "2025-02-21T05:56:00"
+                            },
+                            {
+                                "Code": "gmtAdcBrlDateTime",
+                                "Value": "2025-02-21T11:56:00"
+                            },
+                            {
+                                "Code": "MstCalcMinutes",
+                                "Value": "51"
+                            },
+                            {
+                                "Code": "FlightTypeDescription",
+                                "Value": "UA Scheduled Passenger Flying"
+                            }
+                        ],
+                        "DepartureAirport": {
+                            "Address": {
+                                "City": "CHICAGO",
+                                "StateProvince": {
+                                    "Name": "IL"
+                                }
+                            },
+                            "IATACode": "ORD",
+                            "ICAOCode": "KORD",
+                            "IATACountryCode": {
+                                "CountryCode": "USA"
+                            },
+                            "Name": "Chicago, IL, US (ORD)",
+                            "ShortName": "CHICAGO O`HARE INTL"
+                        },
+                        "DepartureDateTime": "2025-02-21T06:00:00",
+                        "DepartureDelayMinutes": "-4",
+                        "DepartureGate": "B4",
+                        "DepartureTerminal": "Terminal 1, Concourse B",
+                        "DepartureUTCDateTime": "2025-02-21T12:00:00",
+                        "Equipment": {
+                            "CabinCount": 2.0,
+                            "Cabins": [
+                                {
+                                    "Name": "J",
+                                    "TotalSeats": 16.0
+                                },
+                                {
+                                    "Name": "Y",
+                                    "TotalSeats": 150.0
+                                },
+                                {
+                                    "Name": "TotalCabinCapacity",
+                                    "TotalSeats": 166.0
+                                }
+                            ],
+                            "Model": {
+                                "Description": "Boeing 737 MAX 8",
+                                "Fleet": "737",
+                                "Genre": "7M8",
+                                "Key": "37E",
+                                "SubFleet": "822",
+                                "VendorName": "B "
+                            },
+                            "NoseNumber": "7313",
+                            "OwnerAirlineCode": "CO",
+                            "ShipNumber": "B737-800",
+                            "TailNumber": "N37313"
+                        },
+                        "EstimatedArrivalDelayMinutes": "-4",
+                        "EstimatedArrivalTime": "2025-02-21T09:01:00",
+                        "EstimatedArrivalUTCTime": "2025-02-21T14:01:00",
+                        "EstimatedDepartureDelayMinutes": "0",
+                        "EstimatedDepartureTime": "2025-02-21T06:00:00",
+                        "EstimatedDepartureUTCTime": "2025-02-21T12:00:00",
+                        "FlightNumber": "2343",
+                        "FlightStatuses": [
+                            {
+                                "Code": "ERL",
+                                "Description": "Early",
+                                "StatusType": "DepartureStatus"
+                            },
+                            {
+                                "Code": "ERL",
+                                "Description": "Early",
+                                "StatusType": "ArrivalStatus"
+                            },
+                            {
+                                "Code": "OFF",
+                                "Description": "In Flight",
+                                "StatusType": "LegStatus"
+                            },
+                            {
+                                "Code": "InFlightEstimatedToArriveEarly",
+                                "Description": "In Flight - Estimated to Arrive 4 Minutes Early",
+                                "StatusType": "FlightStatus"
+                            },
+                            {
+                                "Code": "InFlightEstimatedToArriveEarly",
+                                "Description": "In Flight - Estimated to Arrive 4 Minutes Early",
+                                "StatusType": "ShortFlightStatus"
+                            }
+                        ],
+                        "InboundFlightSegment": {
+                            "ArrivalAirport": "ORD",
+                            "ArrivalAirportName": "Chicago, IL, US (ORD)",
+                            "ArrivalDate": "2025-02-20T22:07:00",
+                            "CarrierCode": "UA",
+                            "DepartureAirport": "MIA",
+                            "DepartureAirportName": "Miami, FL, US (MIA - All Airports)",
+                            "DepartureDate": "2025-02-20T19:34:00",
+                            "FlightNumber": "1639",
+                            "FlightOriginationDate": "2025-02-20"
+                        },
+                        "IsInternational": "False",
+                        "LOFNumber": 0,
+                        "OperatingAirline": {
+                            "IATACode": "UA",
+                            "Name": "United Airlines",
+                            "Telephone": [
+                                {
+                                    "PhoneNumber": "800.241.6522"
+                                }
+                            ],
+                            "WebSite": "http://www.united.com"
+                        },
+                        "OffTime": "2025-02-21T06:12:00",
+                        "OffUTCTime": "2025-02-21T12:12:00",
+                        "OutTime": "2025-02-21T05:56:00",
+                        "OutUTCTime": "2025-02-21T11:56:00",
+                        "PlannedTaxiIn": "PT9M",
+                        "PlannedTaxiOut": "PT18M",
+                        "ReasonStatuses": [],
+                        "SpclTerminalMsgsDetails": [],
+                        "FareComponentSequenceNumber": 0
+                    }
+                ],
+                "ScheduledFlightSegments": [
+                    {
+                        "ArrivalAirport": {
+                            "IATACode": "EWR",
+                            "ICAOCode": "KEWR"
+                        },
+                        "ArrivalDateTime": "2025-02-21T09:05:00",
+                        "ArrivalUTCDateTime": "2025-02-21T14:05:00",
+                        "Characteristic": [
+                            {
+                                "Code": "CacheResponseTime",
+                                "Value": "85"
+                            },
+                            {
+                                "Code": "CacheTransformationExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltRangeCarrierExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "OAUAProviderExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "AirportProviderExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DeriveOaStatusExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "TranslateFlightStatusExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "ApplyOverrideMessageExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "CustDelayReasonExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "ShipExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "CarrierDetailsExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "BagPolicyExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "RecentSearchExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "MarketFlightExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "CodeShareFlightRangeExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "OAUACacheExceutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "RemainingFlightExecutionTime",
+                                "Value": "0"
+                            }
+                        ],
+                        "DepartureAirport": {
+                            "IATACode": "ORD",
+                            "ICAOCode": "KORD"
+                        },
+                        "DepartureDateTime": "2025-02-21T06:00:00",
+                        "DepartureUTCDateTime": "2025-02-21T12:00:00",
+                        "Equipment": {
+                            "Model": {
+                                "Description": "Boeing 737 MAX 8",
+                                "Fleet": "737",
+                                "Genre": "7M8",
+                                "Key": "37E",
+                                "VendorName": "B "
+                            },
+                            "OwnerAirlineCode": "UA",
+                            "ShipNumber": "Boeing 737 MAX 8"
+                        },
+                        "FlightNumber": "2343",
+                        "LOFNumber": 0,
+                        "MarketedFlightSegment": [
+                            {
+                                "FlightNumber": "4459",
+                                "MarketingAirlineCode": "AC"
+                            },
+                            {
+                                "FlightNumber": "2357",
+                                "MarketingAirlineCode": "NZ"
+                            }
+                        ],
+                        "OperatingAirline": {
+                            "IATACode": "UA"
+                        },
+                        "OperatingAirlineCode": "UA",
+                        "SegmentNumber": "1",
+                        "FareComponentSequenceNumber": 0
+                    }
+                ]
+            }
+        ],
+        "currentWeather": [
+            {
+                "AirportCode": "EWR",
+                "Barometer": {
+                    "Inches": 30.16,
+                    "Millibars": 1021.33,
+                    "Trend": "Rising"
+                },
+                "Ceiling": {},
+                "City": {
+                    "CityCode": "",
+                    "ISOAlpha3Code": "",
+                    "Name": "New York/Newark",
+                    "PhoneCityCode": "",
+                    "ShortName": "",
+                    "Status": {}
+                },
+                "Clouds": "FEW",
+                "Country": {
+                    "CountryCode": "USA",
+                    "DefaultCurrency": {},
+                    "DefaultLanguage": {},
+                    "ISOAlpha3Code": "",
+                    "Name": "",
+                    "PhoneCountryCode": "",
+                    "ShortName": "",
+                    "Status": {}
+                },
+                "DayOrNightIndicator": "D",
+                "Description": "",
+                "DewPoint": {
+                    "Celsius": -13.0,
+                    "Farenheit": 8.0
+                },
+                "GMT": {
+                    "Code": "",
+                    "DiscontinueDate": "01/01/0001",
+                    "EffectiveDate": "01/01/0001",
+                    "GMTOffset": "",
+                    "IsDaylightSavings": "False",
+                    "LocationCode": "",
+                    "Time": "02/21/2025"
+                },
+                "HeatIndex": {
+                    "Celsius": -5.0,
+                    "Farenheit": 23.0
+                },
+                "IsUVWarning": "False",
+                "LocalDateTime": "02/21/2025",
+                "RelativeHumidity": 53.0,
+                "SkyDesc": "Partly Cloudy",
+                "Sky": 34.0,
+                "State": {
+                    "CountryCode": {
+                        "CountryCode": "USA"
+                    },
+                    "StateProvinceCode": "NJ"
+                },
+                "Sunrise": "6:42 am",
+                "Sunset": "5:38 pm",
+                "Temperature": {
+                    "Celsius": -5.0,
+                    "Farenheit": 23.0
+                },
+                "UVDescription": "Low",
+                "Visibility": {
+                    "NauticalMiles": 10.0,
+                    "StatuteMiles": 10.0
+                },
+                "WeatherCondition": "Fair",
+                "WindChill": {
+                    "Celsius": -11.0,
+                    "Farenheit": 12.0
+                },
+                "WindDegrees": 310.0,
+                "WindDirection": "NW",
+                "WindGust": {
+                    "KilometersPerHour": 37,
+                    "MilesPerHour": 23
+                },
+                "WindSpeed": {
+                    "KilometersPerHour": 19.0,
+                    "MilesPerHour": 12.0
+                }
+            },
+            {
+                "AirportCode": "ORD",
+                "Barometer": {
+                    "Inches": 30.65,
+                    "Millibars": 1037.93,
+                    "Trend": "Rising"
+                },
+                "Ceiling": {},
+                "City": {
+                    "CityCode": "",
+                    "ISOAlpha3Code": "",
+                    "Name": "Chicago",
+                    "PhoneCityCode": "",
+                    "ShortName": "",
+                    "Status": {}
+                },
+                "Clouds": "CLR",
+                "Country": {
+                    "CountryCode": "USA",
+                    "DefaultCurrency": {},
+                    "DefaultLanguage": {},
+                    "ISOAlpha3Code": "",
+                    "Name": "",
+                    "PhoneCountryCode": "",
+                    "ShortName": "",
+                    "Status": {}
+                },
+                "DayOrNightIndicator": "N",
+                "Description": "",
+                "DewPoint": {
+                    "Celsius": -15.0,
+                    "Farenheit": 5.0
+                },
+                "GMT": {
+                    "Code": "",
+                    "DiscontinueDate": "01/01/0001",
+                    "EffectiveDate": "01/01/0001",
+                    "GMTOffset": "",
+                    "IsDaylightSavings": "False",
+                    "LocationCode": "",
+                    "Time": "02/21/2025"
+                },
+                "HeatIndex": {
+                    "Celsius": -12.0,
+                    "Farenheit": 11.0
+                },
+                "IsUVWarning": "False",
+                "LocalDateTime": "02/21/2025",
+                "RelativeHumidity": 78.0,
+                "SkyDesc": "Clear",
+                "Sky": 31.0,
+                "State": {
+                    "CountryCode": {
+                        "CountryCode": "USA"
+                    },
+                    "StateProvinceCode": "IL"
+                },
+                "Sunrise": "6:38 am",
+                "Sunset": "5:32 pm",
+                "Temperature": {
+                    "Celsius": -12.0,
+                    "Farenheit": 11.0
+                },
+                "UVDescription": "Low",
+                "Visibility": {
+                    "NauticalMiles": 10.0,
+                    "StatuteMiles": 10.0
+                },
+                "WeatherCondition": "Clear",
+                "WindChill": {
+                    "Celsius": -16.0,
+                    "Farenheit": 3.0
+                },
+                "WindDegrees": 260.0,
+                "WindDirection": "W",
+                "WindGust": {},
+                "WindSpeed": {
+                    "KilometersPerHour": 6.0,
+                    "MilesPerHour": 4.0
+                }
+            }
+        ]
+    }
+}

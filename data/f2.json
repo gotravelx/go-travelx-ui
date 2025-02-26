@@ -1,0 +1,506 @@
+{
+    "Flight": {
+        "FlightNumber": "1584",
+        "FlightOriginationDate": "2025-02-21",
+        "Characteristics": [
+            {
+                "Code": "CustomerStatusInMs",
+                "Value": "105"
+            }
+        ]
+    },
+    "FlightLegs": [
+        {
+            "OperationalFlightSegments": [
+                {
+                    "EstimatedArrivalTime": "2025-02-21T13:05:00",
+                    "EstimatedDepartureTime": "2025-02-21T10:35:00",
+                    "PlannedEnrouteTime": "PT5H37M",
+                    "PlannedTaxiOut": "PT25M",
+                    "PlannedTaxiIn": "PT8M",
+                    "DepartureGate": "C19",
+                    "ArrivalGate": "72A",
+                    "DepartureBagSector": "0",
+                    "ArrivalBagClaimUnit": "  2",
+                    "FlightType": "PS",
+                    "DepartureFuelWeight": "NaN",
+                    "ClearedFuelWeight": "NaN",
+                    "ArrivalTermimal": "Terminal 7",
+                    "DepartureTerminal": "Terminal 1, Concourse C",
+                    "EstimatedArrivalUTCTime": "2025-02-21T21:05:00",
+                    "EstimatedDepartureUTCTime": "2025-02-21T16:35:00",
+                    "RemainingMinutesToBoard": 164,
+                    "ReasonStatuses": [
+                        {
+                            "Type": "DepartureDelayReason",
+                            "UnimaticReasonCode": "I1",
+                            "ReasonDescriptions": [
+                                {
+                                    "Key": "ShortOpsDesc"
+                                },
+                                {
+                                    "Key": "LongOpsDesc"
+                                },
+                                {
+                                    "Key": "FIDSDesc"
+                                },
+                                {
+                                    "Key": "ShortPubDesc"
+                                },
+                                {
+                                    "Key": "RavenCnclDesc"
+                                }
+                            ],
+                            "IsDelayEffective": "1",
+                            "LegacyUnimaticReasonCode": "I1"
+                        }
+                    ],
+                    "EstimatedDepartureDelayMinutes": "82",
+                    "EstimatedArrivalDelayMinutes": "63",
+                    "QuickTurnIndicator": "0",
+                    "SpclTerminalMsgsDetails": [],
+                    "DepGatePoIId": "33",
+                    "ArrGatePoIId": "552",
+                    "ArrBagClaimPoIId": "390",
+                    "DepartureAirport": {
+                        "IATACode": "ORD",
+                        "ICAOCode": "KORD",
+                        "Name": "Chicago, IL, US (ORD)",
+                        "ShortName": "CHICAGO O`HARE INTL",
+                        "Address": {
+                            "City": "CHICAGO",
+                            "StateProvince": {
+                                "Name": "IL"
+                            }
+                        },
+                        "IATACountryCode": {
+                            "CountryCode": "USA"
+                        },
+                        "StateProvince": {
+                            "StateProvinceCode": "IL"
+                        }
+                    },
+                    "ArrivalAirport": {
+                        "IATACode": "LAX",
+                        "ICAOCode": "KLAX",
+                        "Name": "Los Angeles, CA, US (LAX - All Airports)",
+                        "ShortName": "LOS ANGELES INTL",
+                        "Address": {
+                            "City": "LOS ANGELES",
+                            "StateProvince": {
+                                "Name": "CA"
+                            }
+                        },
+                        "IATACountryCode": {
+                            "CountryCode": "USA"
+                        },
+                        "StateProvince": {
+                            "StateProvinceCode": "CA"
+                        }
+                    },
+                    "DepartureDateTime": "2025-02-21T09:13:00",
+                    "ArrivalDateTime": "2025-02-21T12:02:00",
+                    "FlightNumber": "1584",
+                    "Equipment": {
+                        "NoseNumber": "3865",
+                        "Model": {
+                            "Genre": "753",
+                            "Description": "Boeing 757-300",
+                            "VendorName": "B ",
+                            "Key": "75E",
+                            "Fleet": "757",
+                            "SubFleet": "33N",
+                            "StndrdFleetDesc": "B757-300"
+                        },
+                        "ShipNumber": "B757-300",
+                        "TailNumber": "N77865",
+                        "Cabins": [
+                            {
+                                "Name": "J",
+                                "TotalSeats": 24
+                            },
+                            {
+                                "Name": "Y",
+                                "TotalSeats": 210
+                            },
+                            {
+                                "Name": "TotalCabinCapacity",
+                                "TotalSeats": 234
+                            }
+                        ],
+                        "OwnerAirlineCode": "CO",
+                        "CabinCount": 2,
+                        "SeatMapConfigurationCode": "17",
+                        "Links": [],
+                        "OversizedBin": "false",
+                        "UaxSpacebinsInd": "false",
+                        "Amenities": {
+                            "WifiPrvdr": "Panasonic",
+                            "PdeInd": "1",
+                            "ScrnTypeJF": "none",
+                            "ScrnTypeY": "none",
+                            "BltJFInd": "0",
+                            "BltOInd": "0",
+                            "BltYInd": "0",
+                            "PwrPlgJFInd": "1",
+                            "PwrPlgOInd": "0",
+                            "PwrPlgYPInd": "1",
+                            "PwrPlgYInd": "1",
+                            "UsbPwrJFInd": "0",
+                            "UsbPwrOInd": "0",
+                            "UsbPwrYInd": "0",
+                            "WrlsChrgJFInd": "0",
+                            "WrlsChrgOInd": "0",
+                            "WrlsChrgYInd": "0",
+                            "BinType": "medium",
+                            "EngCnt": "2",
+                            "EngType": "Rolls-Royce RB211-535",
+                            "SpdMach": "Mach .800",
+                            "SpdMph": "531 mph",
+                            "SpdKmh": "854 km/h",
+                            "ThrstImperial": "42,500 lbf",
+                            "WngspnImperial": "124 ft 10",
+                            "WngspnMetric": "38.0 m"
+                        }
+                    },
+                    "ArrivalUTCDateTime": "2025-02-21T20:02:00",
+                    "DepartureUTCDateTime": "2025-02-21T15:13:00",
+                    "Characteristic": [
+                        {
+                            "Code": "DisplayInd",
+                            "Value": "1"
+                        },
+                        {
+                            "Code": "ActvInd",
+                            "Value": "1"
+                        },
+                        {
+                            "Code": "FltOutInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltOffInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltOnInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltInInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltCnclInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltDcsnInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltDepXstpInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltArrXstpInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltDepDvrtInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltArrDvrtInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltArrRTBLInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltDepRTBLInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltArrRTFLInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltDepRTFLInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltDepNstpInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltArrNstpInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltOverflyInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltIrropsCnclInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "DestOccurNbr",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "OrigOccurNbr",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "StarInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "PriorityFltInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "AtwDiffInd",
+                            "Value": "H"
+                        },
+                        {
+                            "Code": "AtwDiffDrivers",
+                            "Value": "Wheelchair, Basic Economy, Gate bags"
+                        },
+                        {
+                            "Code": "BtwDiffInd",
+                            "Value": "M"
+                        },
+                        {
+                            "Code": "BtwDiffDrivers",
+                            "Value": "Wchr BTW Manual, Cargo pounds, Total Bags"
+                        },
+                        {
+                            "Code": "DepZone",
+                            "Value": "5"
+                        },
+                        {
+                            "Code": "ArrZone",
+                            "Value": "3"
+                        },
+                        {
+                            "Code": "ArrBagClaimTerminal",
+                            "Value": "Terminal 7"
+                        },
+                        {
+                            "Code": "EquipmentModelCode",
+                            "Value": "B5G"
+                        },
+                        {
+                            "Code": "FltMishapInd",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "DomesticInternationalIndicator",
+                            "Value": "DD"
+                        },
+                        {
+                            "Code": "LocalEstimatedBoardStartDateTime",
+                            "Value": "2025-02-21T09:45:00"
+                        },
+                        {
+                            "Code": "LocalEstimatedBoardEndDateTime",
+                            "Value": "2025-02-21T10:20:00"
+                        },
+                        {
+                            "Code": "GmtEstimatedBoardStartDateTime",
+                            "Value": "2025-02-21T15:45:00"
+                        },
+                        {
+                            "Code": "GmtEstimatedBoardEndDateTime",
+                            "Value": "2025-02-21T16:20:00"
+                        },
+                        {
+                            "Code": "LocalScheduledBoardStartDateTime",
+                            "Value": "2025-02-21T08:23:00"
+                        },
+                        {
+                            "Code": "LocalScheduledBoardEndDateTime",
+                            "Value": "2025-02-21T08:58:00"
+                        },
+                        {
+                            "Code": "MstCalcMinutes",
+                            "Value": "66"
+                        },
+                        {
+                            "Code": "FlightTypeDescription",
+                            "Value": "UA Scheduled Passenger Flying"
+                        }
+                    ],
+                    "IsInternational": "False",
+                    "OperatingAirline": {
+                        "IATACode": "UA",
+                        "Name": "United Airlines",
+                        "WebSite": "http://www.united.com",
+                        "Telephone": [
+                            {
+                                "PhoneNumber": "800.241.6522"
+                            }
+                        ]
+                    },
+                    "BoardTime": "08:23:00",
+                    "FlightStatuses": [
+                        {
+                            "StatusType": "DepartureStatus",
+                            "Description": "Delayed",
+                            "Code": "DLY"
+                        },
+                        {
+                            "StatusType": "ArrivalStatus",
+                            "Description": "Delayed",
+                            "Code": "DLY"
+                        },
+                        {
+                            "StatusType": "LegStatus",
+                            "Description": "Not Departed",
+                            "Code": "NDPT"
+                        },
+                        {
+                            "StatusType": "FlightStatus",
+                            "Description": "Estimated Departure 1 Hour 22 Minutes Late",
+                            "Code": "EstimatedDepartureLate"
+                        },
+                        {
+                            "StatusType": "ShortFlightStatus",
+                            "Description": "Estimated Departure 1 Hour 22 Minutes Late",
+                            "Code": "EstimatedDepartureLate"
+                        }
+                    ]
+                }
+            ],
+            "ScheduledFlightSegments": [
+                {
+                    "DepartureAirport": {
+                        "IATACode": "ORD",
+                        "ICAOCode": "KORD"
+                    },
+                    "ArrivalAirport": {
+                        "IATACode": "LAX",
+                        "ICAOCode": "KLAX"
+                    },
+                    "DepartureDateTime": "2025-02-21T09:13:00",
+                    "ArrivalDateTime": "2025-02-21T12:02:00",
+                    "FlightNumber": "1584",
+                    "OperatingAirlineCode": "UA",
+                    "Equipment": {
+                        "Model": {
+                            "Genre": "753",
+                            "Description": "Boeing 757-300W",
+                            "VendorName": "B ",
+                            "Key": "75E",
+                            "Fleet": "757",
+                            "StndrdFleetDesc": "B757-300"
+                        },
+                        "ShipNumber": "Boeing 757-300W",
+                        "OwnerAirlineCode": "UA",
+                        "SeatMapConfigurationCode": "17"
+                    },
+                    "MarketedFlightSegment": [
+                        {
+                            "MarketingAirlineCode": "AC",
+                            "FlightNumber": "5063"
+                        },
+                        {
+                            "MarketingAirlineCode": "NZ",
+                            "FlightNumber": "9680"
+                        },
+                        {
+                            "MarketingAirlineCode": "VA",
+                            "FlightNumber": "8035"
+                        },
+                        {
+                            "MarketingAirlineCode": "CA",
+                            "FlightNumber": "7291"
+                        }
+                    ],
+                    "SegmentNumber": 1,
+                    "ArrivalUTCDateTime": "2025-02-21T20:02:00",
+                    "DepartureUTCDateTime": "2025-02-21T15:13:00",
+                    "Characteristic": [
+                        {
+                            "Code": "CacheResponseTime",
+                            "Value": "104"
+                        },
+                        {
+                            "Code": "CacheTransformationExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "FltRangeCarrierExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "OAUAProviderExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "AirportProviderExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "DeriveOaStatusExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "TranslateFlightStatusExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "ApplyOverrideMessageExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "CustDelayReasonExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "ShipExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "CarrierDetailsExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "BagPolicyExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "RecentSearchExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "MarketFlightExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "CodeShareFlightRangeExecutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "OAUACacheExceutionTime",
+                            "Value": "0"
+                        },
+                        {
+                            "Code": "RemainingFlightExecutionTime",
+                            "Value": "0"
+                        }
+                    ],
+                    "ScheduledFlightDuration": "PT4H16M",
+                    "OperatingAirline": {
+                        "IATACode": "UA"
+                    }
+                }
+            ]
+        }
+    ],
+    "DataSource": "uflifo_cache"
+}
