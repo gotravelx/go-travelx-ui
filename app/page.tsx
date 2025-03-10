@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import FlightSearch from "@/page"
-
+import FlightSearch from "@/page";
 
 export default function SyntheticV0PageForDeployment() {
-  return < FlightSearch />
+  return <FlightSearch />;
 }

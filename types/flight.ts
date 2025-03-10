@@ -1,25 +1,4 @@
-// Types for flight data structure matching the smart contract
-export interface FlightData {
-  estimatedArrivalUTC: string
-  estimatedDepartureUTC: string
-  arrivalCity: string
-  departureCity: string
-  operatingAirline: string
-  flightNumber: string
-  departureGate: string
-  arrivalGate: string
-  flightStatus: string
-  statusCode: string
-  equipmentModel: string
-  exists: boolean
-  phase: FlightPhase
-  // New fields from status data
-  flightStatusDescription?: string
-  outUtc?: string
-  offUtc?: string
-  onUtc?: string
-  inUtc?: string
-}
+
 
 export type FlightPhase =
   | "not_departed"

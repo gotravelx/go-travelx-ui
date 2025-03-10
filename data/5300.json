@@ -1,0 +1,527 @@
+{
+    "info": [
+        {
+            "msg": "Flight status api response received successfully",
+            "cd": "200"
+        }
+    ],
+    "respTime": 226,
+    "flightStatusResp": {
+        "Flight": {
+            "FlightNumber": "5300",
+            "DepartureAirport": "ASE",
+            "ArrivalAirport": "IAH",
+            "DepartureDate": "2025-03-05",
+            "FlightOriginationDate": "2025-03-05",
+            "Characteristics": [
+                {
+                    "Code": "CustomerStatusInMs",
+                    "Value": "33"
+                }
+            ]
+        },
+        "FlightLegs": [
+            {
+                "OperationalFlightSegments": [
+                    {
+                        "EstimatedArrivalTime": "2025-03-05T10:29:00",
+                        "EstimatedDepartureTime": "2025-03-05T07:10:00",
+                        "ActualDepartureTime": "2025-03-05T07:03:00",
+                        "ActualArrivalTime": "2025-03-05T10:35:00",
+                        "OutTime": "2025-03-05T07:03:00",
+                        "OffTime": "2025-03-05T07:31:00",
+                        "OnTime": "2025-03-05T10:22:00",
+                        "InTime": "2025-03-05T10:35:00",
+                        "PlannedEnrouteTime": "PT2H25M",
+                        "ActualEnrouteTime": "PT1H51M",
+                        "PlannedTaxiOut": "PT28M",
+                        "PlannedTaxiIn": "PT9M",
+                        "ArrivalGate": "B4",
+                        "DepartureBagSector": "0",
+                        "ArrivalBagClaimUnit": "C3",
+                        "FlightType": "PS",
+                        "DepartureFuelWeight": "NaN",
+                        "ClearedFuelWeight": "NaN",
+                        "ArrivalTermimal": "Terminal B",
+                        "ActualArrivalUTCTime": "2025-03-05T16:35:00",
+                        "ActualDepartureUTCTime": "2025-03-05T14:03:00",
+                        "EstimatedArrivalUTCTime": "2025-03-05T16:29:00",
+                        "EstimatedDepartureUTCTime": "2025-03-05T14:10:00",
+                        "InUTCTime": "2025-03-05T16:35:00",
+                        "OffUTCTime": "2025-03-05T14:31:00",
+                        "OnUTCTime": "2025-03-05T16:22:00",
+                        "OutUTCTime": "2025-03-05T14:03:00",
+                        "DepartureDelayMinutes": "-7",
+                        "ArrivalDelayMinutes": "-23",
+                        "RemainingMinutesToBoard": 1493,
+                        "ReasonStatuses": [],
+                        "EstimatedDepartureDelayMinutes": "0",
+                        "EstimatedArrivalDelayMinutes": "-29",
+                        "QuickTurnIndicator": "0",
+                        "SpclTerminalMsgsDetails": [],
+                        "ArrGatePoIId": "254",
+                        "ArrBagClaimPoIId": "319",
+                        "DepartureAirport": {
+                            "IATACode": "ASE",
+                            "ICAOCode": "KASE",
+                            "Name": "Aspen, CO, US (ASE)",
+                            "ShortName": "ASPEN-PITKIN CO/SARDY",
+                            "Address": {
+                                "City": "ASPEN",
+                                "StateProvince": {
+                                    "Name": "CO"
+                                }
+                            },
+                            "IATACountryCode": {
+                                "CountryCode": "USA"
+                            },
+                            "StateProvince": {
+                                "StateProvinceCode": "CO"
+                            }
+                        },
+                        "ArrivalAirport": {
+                            "IATACode": "IAH",
+                            "ICAOCode": "KIAH",
+                            "Name": "Houston, TX, US (IAH)",
+                            "ShortName": "GEORGE BUSH INTCNTL/HOUSTON",
+                            "Address": {
+                                "City": "HOUSTON",
+                                "StateProvince": {
+                                    "Name": "TX"
+                                }
+                            },
+                            "IATACountryCode": {
+                                "CountryCode": "USA"
+                            },
+                            "StateProvince": {
+                                "StateProvinceCode": "TX"
+                            }
+                        },
+                        "DepartureDateTime": "2025-03-05T07:10:00",
+                        "ArrivalDateTime": "2025-03-05T10:58:00",
+                        "FlightNumber": "5300",
+                        "Equipment": {
+                            "Model": {
+                                "Genre": "CR7",
+                                "Description": "Bombardier CRJ-700",
+                                "Key": "CR7",
+                                "Fleet": "CR7",
+                                "StndrdFleetDesc": "CRJ-700"
+                            },
+                            "ShipNumber": "CRJ-700",
+                            "TailNumber": "N779SK",
+                            "Cabins": [
+                                {
+                                    "Name": "J",
+                                    "TotalSeats": 6
+                                },
+                                {
+                                    "Name": "Y",
+                                    "TotalSeats": 64
+                                },
+                                {
+                                    "Name": "TotalCabinCapacity",
+                                    "TotalSeats": 70
+                                }
+                            ],
+                            "OwnerAirlineCode": "UAX",
+                            "CabinCount": 2,
+                            "SeatMapConfigurationCode": "3",
+                            "PseudoTailNumber": "7779",
+                            "Links": [],
+                            "OversizedBin": "false",
+                            "UaxSpacebinsInd": "false",
+                            "Amenities": {
+                                "WifiPrvdr": "Intelsat",
+                                "PdeInd": "1",
+                                "ScrnTypeJF": "none",
+                                "ScrnTypeY": "none",
+                                "BltJFInd": "0",
+                                "BltOInd": "0",
+                                "BltYInd": "0",
+                                "PwrPlgJFInd": "0",
+                                "PwrPlgOInd": "0",
+                                "PwrPlgYPInd": "0",
+                                "PwrPlgYInd": "0",
+                                "UsbPwrJFInd": "0",
+                                "UsbPwrOInd": "0",
+                                "UsbPwrYInd": "0",
+                                "WrlsChrgJFInd": "0",
+                                "WrlsChrgOInd": "0",
+                                "WrlsChrgYInd": "0",
+                                "BinType": "small",
+                                "EngCnt": "2",
+                                "EngType": "General Electric CF34-8C",
+                                "SpdMach": "Mach .780",
+                                "SpdMph": "515 mph",
+                                "SpdKmh": "829 km/h",
+                                "ThrstImperial": "13,790 lbf",
+                                "WngspnImperial": "76 ft 3 in",
+                                "WngspnMetric": "23.2 m"
+                            }
+                        },
+                        "ArrivalUTCDateTime": "2025-03-05T16:58:00",
+                        "DepartureUTCDateTime": "2025-03-05T14:10:00",
+                        "Characteristic": [
+                            {
+                                "Code": "DisplayInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "ActvInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltOutInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltOffInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltOnInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltInInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "FltCnclInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDcsnInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepXstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrXstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepDvrtInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrDvrtInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrRTBLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepRTBLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrRTFLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepRTFLInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltDepNstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltArrNstpInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltOverflyInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltIrropsCnclInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DestOccurNbr",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "OrigOccurNbr",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "StarInd",
+                                "Value": "1"
+                            },
+                            {
+                                "Code": "PriorityFltInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "ArrZone",
+                                "Value": "2"
+                            },
+                            {
+                                "Code": "ArrBagClaimTerminal",
+                                "Value": "Terminal C"
+                            },
+                            {
+                                "Code": "EquipmentModelCode",
+                                "Value": "XCA"
+                            },
+                            {
+                                "Code": "FltMishapInd",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DomesticInternationalIndicator",
+                                "Value": "DD"
+                            },
+                            {
+                                "Code": "LocalEstimatedOnTime",
+                                "Value": "2025-03-05T10:22:00"
+                            },
+                            {
+                                "Code": "GmtEstimatedOnTime ",
+                                "Value": "2025-03-05T16:22:00"
+                            },
+                            {
+                                "Code": "LocalEstimatedBoardStartDateTime",
+                                "Value": "2025-03-05T06:45:00"
+                            },
+                            {
+                                "Code": "LocalEstimatedBoardEndDateTime",
+                                "Value": "2025-03-05T06:55:00"
+                            },
+                            {
+                                "Code": "GmtEstimatedBoardStartDateTime",
+                                "Value": "2025-03-05T13:45:00"
+                            },
+                            {
+                                "Code": "GmtEstimatedBoardEndDateTime",
+                                "Value": "2025-03-05T13:55:00"
+                            },
+                            {
+                                "Code": "LocalScheduledBoardStartDateTime",
+                                "Value": "2025-03-05T06:45:00"
+                            },
+                            {
+                                "Code": "LocalScheduledBoardEndDateTime",
+                                "Value": "2025-03-05T06:55:00"
+                            },
+                            {
+                                "Code": "lclGsiTugDateTime",
+                                "Value": "2025-03-05T07:12:01"
+                            },
+                            {
+                                "Code": "gmtGsiTugDateTime",
+                                "Value": "2025-03-05T14:12:01"
+                            },
+                            {
+                                "Code": "lclBrkSetnDateTime",
+                                "Value": "2025-03-05T10:35:09"
+                            },
+                            {
+                                "Code": "gmtBrkSetDateTime",
+                                "Value": "2025-03-05T16:35:09"
+                            },
+                            {
+                                "Code": "lclCrgoDoorClsDateTime",
+                                "Value": "2025-03-05T07:00:10"
+                            },
+                            {
+                                "Code": "gmtCrgoDoorClsDateTime",
+                                "Value": "2025-03-05T14:00:10"
+                            },
+                            {
+                                "Code": "lclPsgrDoorClsDateTime",
+                                "Value": "2025-03-05T07:01:26"
+                            },
+                            {
+                                "Code": "gmtPsgrDoorClsDateTime",
+                                "Value": "2025-03-05T14:01:26"
+                            },
+                            {
+                                "Code": "lclAcarsInitDateTime",
+                                "Value": "2025-03-05T06:28:40"
+                            },
+                            {
+                                "Code": "gmtAcarsInitDateTime",
+                                "Value": "2025-03-05T13:28:40"
+                            },
+                            {
+                                "Code": "lclBrkRlseDateTime",
+                                "Value": "2025-03-05T07:03:28"
+                            },
+                            {
+                                "Code": "gmtBrkRlseDDateTime",
+                                "Value": "2025-03-05T14:03:28"
+                            },
+                            {
+                                "Code": "MstCalcMinutes",
+                                "Value": "34"
+                            },
+                            {
+                                "Code": "FlightTypeDescription",
+                                "Value": "UA Scheduled Passenger Flying"
+                            }
+                        ],
+                        "IsInternational": "False",
+                        "OperatingAirline": {
+                            "IATACode": "OO",
+                            "Name": "SkyWest dba United Express",
+                            "WebSite": "http://www.skywest.com",
+                            "Telephone": [
+                                {
+                                    "PhoneNumber": "800.453.9417"
+                                }
+                            ]
+                        },
+                        "BoardTime": "06:45:00",
+                        "FlightStatuses": [
+                            {
+                                "StatusType": "DepartureStatus",
+                                "Description": "Early",
+                                "Code": "ERL"
+                            },
+                            {
+                                "StatusType": "ArrivalStatus",
+                                "Description": "Early",
+                                "Code": "ERL"
+                            },
+                            {
+                                "StatusType": "LegStatus",
+                                "Description": "Arrived at Gate",
+                                "Code": "IN"
+                            },
+                            {
+                                "StatusType": "FlightStatus",
+                                "Description": "Arrived Gate 23 Minutes Early",
+                                "Code": "ArrivedGateEarly"
+                            },
+                            {
+                                "StatusType": "ShortFlightStatus",
+                                "Description": "Arrived Gate 23 Minutes Early",
+                                "Code": "ArrivedGateEarly"
+                            }
+                        ]
+                    }
+                ],
+                "ScheduledFlightSegments": [
+                    {
+                        "DepartureAirport": {
+                            "IATACode": "ASE",
+                            "ICAOCode": "KASE"
+                        },
+                        "ArrivalAirport": {
+                            "IATACode": "IAH",
+                            "ICAOCode": "KIAH"
+                        },
+                        "DepartureDateTime": "2025-03-05T07:10:00",
+                        "ArrivalDateTime": "2025-03-05T10:58:00",
+                        "FlightNumber": "5300",
+                        "OperatingAirlineCode": "OO",
+                        "Equipment": {
+                            "Model": {
+                                "Genre": "CR7",
+                                "Description": "Canadair CRJ-700",
+                                "Key": "CR7",
+                                "Fleet": "CR7",
+                                "StndrdFleetDesc": "CRJ-700"
+                            },
+                            "ShipNumber": "Canadair CRJ-700",
+                            "OwnerAirlineCode": "OO",
+                            "SeatMapConfigurationCode": "3"
+                        },
+                        "SegmentNumber": 1,
+                        "ArrivalUTCDateTime": "2025-03-05T16:58:00",
+                        "DepartureUTCDateTime": "2025-03-05T14:10:00",
+                        "Characteristic": [
+                            {
+                                "Code": "CacheResponseTime",
+                                "Value": "32"
+                            },
+                            {
+                                "Code": "CacheTransformationExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "FltRangeCarrierExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "OAUAProviderExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "AirportProviderExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "DeriveOaStatusExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "TranslateFlightStatusExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "ApplyOverrideMessageExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "CustDelayReasonExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "ShipExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "CarrierDetailsExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "BagPolicyExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "RecentSearchExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "MarketFlightExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "CodeShareFlightRangeExecutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "OAUACacheExceutionTime",
+                                "Value": "0"
+                            },
+                            {
+                                "Code": "RemainingFlightExecutionTime",
+                                "Value": "0"
+                            }
+                        ],
+                        "ScheduledFlightDuration": "PT2H11M",
+                        "OperatingAirline": {
+                            "IATACode": "OO"
+                        }
+                    }
+                ]
+            }
+        ],
+        "DataSource": "uflifo_cache"
+    },
+    "flightStatusReq": {
+        "fltNbr": "5300",
+        "fltLegSchedDepDt": "2025-03-05",
+        "departure": "ASE",
+        "arrival": "IAH"
+    }
+}
