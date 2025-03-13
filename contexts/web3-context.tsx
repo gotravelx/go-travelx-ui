@@ -10,8 +10,7 @@ import {
   useCallback,
 } from "react";
 import { ethers } from "ethers";
-import { FlightData } from "@/services/api";
-import { storageService, type StoredTransaction } from "@/services/storage";
+import { MetaMaskPopup } from "@/components/metamask-popup";
 
 interface Web3ContextType {
   isConnected: boolean;
@@ -20,6 +19,9 @@ interface Web3ContextType {
   walletAddress: string;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
+  isMetaMaskInstalled: boolean;
+  showMetaMaskPopup: boolean;
+  closeMetaMaskPopup: () => void;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -34,6 +36,19 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     null
   );
 
+  const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
+  const [showMetaMaskPopup, setShowMetaMaskPopup] = useState(false);
+
+  useEffect(() => {
+    const checkMetaMask = () => {
+      const isInstalled =
+        typeof window !== "undefined" && window.ethereum !== undefined;
+      setIsMetaMaskInstalled(isInstalled);
+    };
+
+    checkMetaMask();
+  }, []);
+
   // Connect wallet and initialize contract service
   const connectWallet = async () => {
     setIsLoading(true);
@@ -41,6 +56,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
     try {
       if (!window.ethereum) {
+        setShowMetaMaskPopup(true);
         throw new Error("MetaMask not installed");
       }
 
@@ -52,6 +68,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setWalletAddress(address);
       setIsConnected(true);
     } catch (err) {
+      if (!window.ethereum) {
+        setShowMetaMaskPopup(true);
+      }
       setError(err instanceof Error ? err.message : "Failed to connect wallet");
     } finally {
       setIsLoading(false);
@@ -63,6 +82,10 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setWalletAddress("");
     setCurrentFlightNumber(null);
   }, []);
+
+  const closeMetaMaskPopup = () => {
+    setShowMetaMaskPopup(false);
+  };
 
   // Listen for account changes
   useEffect(() => {
@@ -85,8 +108,16 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         walletAddress,
         connectWallet,
         disconnectWallet,
+        isMetaMaskInstalled,
+        showMetaMaskPopup,
+        closeMetaMaskPopup,
       }}
     >
+      <MetaMaskPopup
+        isOpen={showMetaMaskPopup}
+        onClose={closeMetaMaskPopup}
+        isMetaMaskInstalled={isMetaMaskInstalled}
+      />
       {children}
     </Web3Context.Provider>
   );

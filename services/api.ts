@@ -1,9 +1,5 @@
-/**
- * Unified API service for flight data operations
- * This is the single source of truth for all API interactions
- */
 
-import { format } from "date-fns"
+import { FlightDetailsResponse, addFlightSubscriptionApi, viewSubscribedFlight } from "./flight-api"
 
 // Types for flight data matching the contract structure
 export interface FlightData {
@@ -66,63 +62,52 @@ export function convertUTCToLocal(utcTimeString: string, timezone = "America/New
   }
 }
 
-const mockFlightData: FlightData = {
-  flightNumber: "2339",
-  departureDate: "2025-03-05",
-  carrierCode: "UA",
-  operatingAirline:"OO-SkyWest Airlines",
-  estimatedArrivalUTC: "2025-03-06T04:13:00",
-  estimatedDepartureUTC: "2025-03-06T00:27:00",
-  actualDepartureUTC: "2025-03-06T00:27:00",
-  actualArrivalUTC: "2025-03-06T04:11:00",
-  scheduledArrivalUTCDateTime: "2025-03-06T04:03:00",
-  scheduledDepartureUTCDateTime: "2025-03-06T00:27:00",
-  arrivalAirport: "LAS",
-  departureAirport: "IAH",
-  arrivalCity: "Las Vegas",
-  departureCity: "Houston",
-  departureGate: "C12",
-  arrivalGate: "B8",
-  flightStatus: "Arrived at Gate",
-  statusCode: "IN",
-  equipmentModel: "Boeing 737",
-  phase: "in",
-  departureTerminal: "C",
-  arrivalTerminal: "Concourse D",
-  outTimeUTC: "2025-03-05T18:27:00",
-  offTimeUTC: "2025-03-06T00:58:00",
-  onTimeUTC: "2025-03-06T04:05:00",
-  inTimeUTC: "2025-03-06T04:11:00",
-  baggageClaim: "5",
-  departureDelayMinutes: 0,
-  arrivalDelayMinutes: 8,
-  boardingTime: "17:47:00",
-  isCanceled: false,
-  
-};
-
 
 // API service for flight data
 export const flightService = {
   searchFlight: async (
-    carrier: string,
+    carrierCode: string,
     flightNumber: string,
-    date: Date
+    departureStation:string,
+    departureDate: Date
   ): Promise<FlightData> => {
-    console.log(
-      `Searching flight: ${carrier}${flightNumber} on ${format(date, "yyyy-MM-dd")}`
-    );
-    return mockFlightData ;
+    try {
+      console.log(`Fetching flight details for ${carrierCode} ${flightNumber}  ${departureStation} on ${departureDate.toISOString()}`);
+
+      // Calling the API to fetch flight details
+    const flightData = await addFlightSubscriptionApi({
+        flightNumber,
+        scheduledDepartureDate : departureDate.toISOString().split('T')[0],
+        departureStation,
+        carrierCode
+      });
+
+      return flightData;
+    } catch (error) {
+      console.error('Error fetching flight details:', error);
+      throw error;
+    }
   },
 
   viewFlightDetails: async (
-    carrier: string,
+    carrierCode: string,
     flightNumber: string,
-    date: Date
+    departureDate: Date
   ): Promise<FlightData> => {
-    console.log(
-      `Viewing flight details: ${carrier}${flightNumber} on ${format(date, "yyyy-MM-dd")}`
-    );
-    return mockFlightData;
-  },
+    try {
+      console.log(`Fetching flight details for ${carrierCode} ${flightNumber} on ${departureDate.toISOString()}`);
+
+      // Calling the API to fetch flight details
+    const flightData = await viewSubscribedFlight({
+        flightNumber,
+        scheduledDepartureDate: departureDate.toISOString().split('T')[0],
+        carrierCode
+      });
+
+      return flightData;
+    } catch (error) {
+      console.error('Error fetching flight details:', error);
+      throw error;
+    }
+  }
 };
