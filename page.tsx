@@ -135,11 +135,7 @@ export default function FlightSearch() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <WalletConnectionCard
-              error={error}
-              isLoading={isLoading}
-              onConnect={connectWallet}
-            />
+            <WalletConnectPage />
           </motion.div>
         </div>
       </div>
