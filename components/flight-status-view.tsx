@@ -43,6 +43,7 @@ type TimeFormat = "utc" | "local";
 export default function FlightStatusView({
   flightData,
 }: FlightStatusViewProps) {
+  const [currentPhase, setCurrentPhase] = useState<FlightPhase>("not_departed");
   const [activeTab, setActiveTab] = useState<FlightPhase>("not_departed");
   const [currentStatus, setCurrentStatus] = useState("");
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("utc");
@@ -96,8 +97,8 @@ export default function FlightStatusView({
   useEffect(() => {
     // Set initial phase based on flight status
     const phase = getFlightPhase(flightData.statusCode, flightData.isCanceled);
+    setCurrentPhase(phase);
     setActiveTab(phase);
-    //setActiveTab("off");
     setCurrentStatus(getStatusDescription(phase));
   }, [
     flightData.statusCode,
@@ -158,6 +159,29 @@ export default function FlightStatusView({
       console.error("Error calculating time remaining:", error);
       return "Time not available";
     }
+  };
+
+  // Get all regular phases in order
+  const getPhaseOrder = (): FlightPhase[] => {
+    return ["not_departed", "out", "off", "on", "in", "canceled"];
+  };
+
+  // Get accessible tabs based on current phase
+  const getAccessibleTabs = (currentPhase: FlightPhase): FlightPhase[] => {
+    if (currentPhase === "canceled") {
+      return ["canceled"];
+    }
+
+    const allPhases = getPhaseOrder().filter((phase) => phase !== "canceled");
+    const currentIndex = allPhases.indexOf(currentPhase);
+
+    // Return all phases up to and including the current phase
+    return allPhases.slice(0, currentIndex + 1);
+  };
+
+  // Handle tab change
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as FlightPhase);
   };
 
   const getStatusBadgeColor = (phase: FlightPhase) => {
@@ -238,7 +262,7 @@ export default function FlightStatusView({
     </div>
   );
 
-  if (activeTab === "canceled") {
+  if (currentPhase === "canceled") {
     return (
       <Card className="glass-card">
         <CardHeader>
@@ -293,8 +317,6 @@ export default function FlightStatusView({
               />
             </div>
 
-            {/* <FlightTimingDetails /> */}
-
             <div className="text-sm text-muted-foreground text-center">
               This flight has been canceled. Please contact{" "}
               {flightData.carrierCode} for more information.
@@ -329,7 +351,7 @@ export default function FlightStatusView({
             </Select>
             <Badge
               variant="outline"
-              className={`${getStatusBadgeColor(activeTab)} text-lg`}
+              className={`${getStatusBadgeColor(currentPhase)} text-lg`}
             >
               {currentStatus}
             </Badge>
@@ -338,8 +360,6 @@ export default function FlightStatusView({
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Time Format Selector */}
-
           {/* City and Time Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CityInfo
@@ -362,52 +382,55 @@ export default function FlightStatusView({
             />
           </div>
 
-          {/* Detailed Flight Timing Information */}
-          {/* <FlightTimingDetails /> */}
-
           {/* Flight Progress */}
-          <Tabs value={activeTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger
-                value="not_departed"
-                disabled={activeTab !== "not_departed"}
-                className="flex items-center gap-2"
-              >
-                <Timer className="h-4 w-4" />
-                Not Departed
-              </TabsTrigger>
-              <TabsTrigger
-                value="out"
-                disabled={activeTab !== "out"}
-                className="flex items-center gap-2"
-              >
-                <ArrowRight className="h-4 w-4" />
-                OUT
-              </TabsTrigger>
-              <TabsTrigger
-                value="off"
-                disabled={activeTab !== "off"}
-                className="flex items-center gap-2"
-              >
-                <ArrowUp className="h-4 w-4" />
-                OFF
-              </TabsTrigger>
-              <TabsTrigger
-                value="on"
-                disabled={activeTab !== "on"}
-                className="flex items-center gap-2"
-              >
-                <ArrowDown className="h-4 w-4" />
-                ON
-              </TabsTrigger>
-              <TabsTrigger
-                value="in"
-                disabled={activeTab !== "in"}
-                className="flex items-center gap-2"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                IN
-              </TabsTrigger>
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
+            <TabsList
+              className={`grid w-full ${
+                currentPhase === "canceled"
+                  ? "grid-cols-1"
+                  : getAccessibleTabs(currentPhase).length === 1
+                  ? "grid-cols-1"
+                  : getAccessibleTabs(currentPhase).length === 2
+                  ? "grid-cols-2"
+                  : getAccessibleTabs(currentPhase).length === 3
+                  ? "grid-cols-3"
+                  : getAccessibleTabs(currentPhase).length === 4
+                  ? "grid-cols-4"
+                  : "grid-cols-5"
+              }`}
+            >
+              {currentPhase !== "canceled" &&
+                getAccessibleTabs(currentPhase).map((phase) => (
+                  <TabsTrigger
+                    key={phase}
+                    value={phase}
+                    className="flex items-center gap-2"
+                  >
+                    {phase === "not_departed" && <Timer className="h-4 w-4" />}
+                    {phase === "out" && <ArrowRight className="h-4 w-4" />}
+                    {phase === "off" && <ArrowUp className="h-4 w-4" />}
+                    {phase === "on" && <ArrowDown className="h-4 w-4" />}
+                    {phase === "in" && <CheckCircle2 className="h-4 w-4" />}
+                    {phase === "not_departed" && "Not Departed"}
+                    {phase === "out" && "OUT"}
+                    {phase === "off" && "OFF"}
+                    {phase === "on" && "ON"}
+                    {phase === "in" && "IN"}
+                  </TabsTrigger>
+                ))}
+              {currentPhase === "canceled" && (
+                <TabsTrigger
+                  value="canceled"
+                  className="flex items-center gap-2"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  Canceled
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <AnimatePresence mode="wait">
@@ -446,7 +469,6 @@ export default function FlightStatusView({
                                 flightData.scheduledDepartureUTCDateTime
                               )}
                             </span>
-                            {/* <span className="font-mono font-bold">{formatTime(flightData.scheduledDepartureUTCDateTime)}</span> */}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

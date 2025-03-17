@@ -16,6 +16,7 @@ import ViewFlight from "./pages/view-flight/page";
 import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
 import { Footer } from "@/components/footer";
 import WalletConnectionCard from "./pages/wallet-connect-card/page";
+import SubscribeFlightStatusView from "./components/subscribtion-flight-status-view";
 
 export default function FlightSearch() {
   const { isConnected, isLoading, error, connectWallet } = useWeb3();
@@ -25,10 +26,15 @@ export default function FlightSearch() {
     new Date()
   );
 
-  const [flightData, setFlightData] = useState<FlightData | null>(null);
+  // Separate states for different views
+  const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
+  const [subscribeFlightData, setSubscribeFlightData] =
+    useState<FlightData | null>(null);
+
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
-  const [departureStation, setDepartureStation] = useState("IAS");
+  const [departureStation, setDepartureStation] = useState("JFK");
+  const [activeTab, setActiveTab] = useState("view");
 
   const [lastInteractionTime, setLastInteractionTime] = useState<
     number | undefined
@@ -36,10 +42,25 @@ export default function FlightSearch() {
   const [contractCallCount, setContractCallCount] = useState(0);
 
   useEffect(() => {
-    if (flightData) {
-      console.log("main------>", flightData);
+    if (viewFlightData) {
+      console.log("view flight data ------>", viewFlightData);
     }
-  }, [flightData]);
+    if (subscribeFlightData) {
+      console.log("subscribe flight data ------>", subscribeFlightData);
+    }
+  }, [viewFlightData, subscribeFlightData]);
+
+  // Clear data when switching tabs
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+    setFlightNumber("");
+    setSearchError("");
+    setSelectedDate(new Date());
+    setCarrier("UA");
+    setDepartureStation("JFK");
+    setViewFlightData(null);
+    setSubscribeFlightData(null);
+  }, []);
 
   const handleSearch = useCallback(async () => {
     if (!flightNumber || !carrier) {
@@ -51,20 +72,44 @@ export default function FlightSearch() {
       const data = await flightService.searchFlight(
         carrier,
         flightNumber,
+        departureStation,
         selectedDate
       );
-      setFlightData(data);
+      setSubscribeFlightData(data);
       setSearchError(""); // Clear any previous errors
     } catch (error) {
       setSearchError("Error fetching flight data");
     }
+  }, [carrier, flightNumber, departureStation, selectedDate]);
+
+  const handleView = useCallback(async () => {
+    if (!flightNumber || !carrier) {
+      setSearchError("Please enter a flight number and select a carrier");
+      return;
+    }
+
+    try {
+      const data = await flightService.viewFlightDetails(
+        carrier,
+        flightNumber,
+        selectedDate
+      );
+
+      setViewFlightData(data);
+      setSearchError("");
+    } catch (error) {
+      setSearchError("Flight is not found");
+      setViewFlightData(null);
+    }
   }, [carrier, flightNumber, selectedDate]);
 
   const handleRefresh = useCallback(async () => {
-    if (flightData) {
+    if (viewFlightData) {
+      await handleView();
+    } else if (subscribeFlightData) {
       await handleSearch();
     }
-  }, [flightData, handleSearch]);
+  }, [viewFlightData, subscribeFlightData, handleSearch, handleView]);
 
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value);
@@ -90,11 +135,7 @@ export default function FlightSearch() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <WalletConnectionCard
-              error={error}
-              isLoading={isLoading}
-              onConnect={connectWallet}
-            />
+            <WalletConnectPage />
           </motion.div>
         </div>
       </div>
@@ -113,6 +154,8 @@ export default function FlightSearch() {
         <Tabs
           defaultValue="view"
           className="container max-w-5xl mx-auto px-4 py-8 pt-24"
+          onValueChange={handleTabChange}
+          value={activeTab}
         >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="view">View Flight Subscriptions</TabsTrigger>
@@ -140,7 +183,7 @@ export default function FlightSearch() {
                   <ViewFlight
                     flightNumber={flightNumber}
                     onFlightNumberChange={handleFlightNumberChange}
-                    onSearch={handleSearch}
+                    onSearch={handleView}
                     isLoading={isLoading}
                     searchError={searchError}
                     selectedDate={selectedDate}
@@ -149,14 +192,14 @@ export default function FlightSearch() {
                     onCarrierChange={handleCarrierChange} // Pass handler
                   />
 
-                  {flightData && (
+                  {viewFlightData && (
                     <motion.div
                       className="mt-6 space-y-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <FlightStatusView flightData={flightData} />
+                      <FlightStatusView flightData={viewFlightData} />
                     </motion.div>
                   )}
                 </CardContent>
@@ -192,14 +235,16 @@ export default function FlightSearch() {
                     onCarrierChange={handleCarrierChange} // Pass handler
                   />
 
-                  {flightData && (
+                  {subscribeFlightData && (
                     <motion.div
                       className="mt-6 space-y-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <FlightStatusView flightData={flightData} />
+                      <SubscribeFlightStatusView
+                        flightData={subscribeFlightData}
+                      />
                     </motion.div>
                   )}
                 </CardContent>

@@ -103,7 +103,11 @@ const SubscribeFlight = memo(
                 <SelectValue placeholder="Departure Station" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="IAS">IAS</SelectItem>
+                <SelectItem value="LAX">LAX</SelectItem>
+                <SelectItem value="SFO">SFO</SelectItem>
+                <SelectItem value="DEN">DEN</SelectItem>
+                <SelectItem value="MIA">MIA</SelectItem>
+                <SelectItem value="JFK">JFK</SelectItem>
               </SelectContent>
             </Select>
           </div>
