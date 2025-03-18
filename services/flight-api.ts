@@ -1,6 +1,6 @@
 import axios from "axios"
-import { FlightData } from "next/dist/server/app-render/types"
 import { toast } from "sonner"
+import { FlightData } from "./api"
 
 // Define the interface for the request parameters
 interface FlightDetailsRequest {
@@ -65,9 +65,9 @@ export const addFlightSubscriptionApi = async (data: FlightSubscriptionRequest):
         carrierCode: data.carrierCode,
       },
     )
-    toast.success(response.data.message || "Flight subscription added successfully")
+    toast.success(response.data.message)
 
-     return { ...response.data.data, message: response.data.message };
+     return { ...response.data.data };
   } catch (error) {
     if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.response?.data || error.message)
@@ -94,10 +94,13 @@ export const viewSubscribedFlight = async (data: FlightDetailsRequest): Promise<
         carrierCode: data.carrierCode,
       },
     )
-     toast.info(response.data.message || "Flight details retrieved")
+    
+    toast.info(response.data.message)
 
-      return { ...response.data.response,
-};
+    
+
+    return { ...response.data.response};
+  
   } catch (error) {
     if (axios.isAxiosError(error)) {
         console.error("Axios error:", error.response?.data || error.message)

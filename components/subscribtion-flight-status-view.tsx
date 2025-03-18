@@ -43,6 +43,32 @@ type TimeFormat = "utc" | "local";
 export default function SubscribeFlightStatusView({
   flightData,
 }: FlightStatusViewProps) {
+  // Check if flightData is empty or all strings are empty
+  const isFlightDataEmpty = Object.values(flightData).every(
+    (value) => typeof value === "string" && value.trim() === ""
+  );
+
+  if (isFlightDataEmpty) {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Flight Not Found
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground">
+            The flight information could not be found. Please check the flight
+            number and try again.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [currentPhase, setCurrentPhase] = useState<FlightPhase>("not_departed");
   const [activeTab, setActiveTab] = useState<FlightPhase>("not_departed");
   const [currentStatus, setCurrentStatus] = useState("");

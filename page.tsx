@@ -63,8 +63,8 @@ export default function FlightSearch() {
   }, []);
 
   const handleSearch = useCallback(async () => {
-    if (!flightNumber || !carrier) {
-      setSearchError("Please enter a flight number and select a carrier");
+    if (!flightNumber) {
+      setSearchError("Please enter a flight number");
       return;
     }
 
@@ -83,8 +83,8 @@ export default function FlightSearch() {
   }, [carrier, flightNumber, departureStation, selectedDate]);
 
   const handleView = useCallback(async () => {
-    if (!flightNumber || !carrier) {
-      setSearchError("Please enter a flight number and select a carrier");
+    if (!flightNumber) {
+      setSearchError("Please enter a flight number");
       return;
     }
 
@@ -123,24 +123,24 @@ export default function FlightSearch() {
     setDepartureStation(value);
   }, []);
 
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
-        <div className="container mx-auto px-4 py-8 max-w-md pt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <WalletConnectPage />
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
+  // if (!isConnected) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
+  //       <div className="absolute top-4 right-4">
+  //         <ThemeToggle />
+  //       </div>
+  //       <div className="container mx-auto px-4 py-8 max-w-md pt-20">
+  //         <motion.div
+  //           initial={{ opacity: 0, y: 20 }}
+  //           animate={{ opacity: 1, y: 0 }}
+  //           transition={{ duration: 0.5 }}
+  //         >
+  //           <WalletConnectPage />
+  //         </motion.div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">

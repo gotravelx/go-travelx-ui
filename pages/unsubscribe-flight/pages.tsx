@@ -43,9 +43,5 @@ const UnsubscribeFlightClient = dynamic(
 
 // Server-side safe component
 export default function UnsubscribeFlightPage() {
-  return (
-    <Web3Provider>
-      <UnsubscribeFlightClient />
-    </Web3Provider>
-  );
+  return <UnsubscribeFlightClient />;
 }
