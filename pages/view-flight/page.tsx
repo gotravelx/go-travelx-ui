@@ -107,7 +107,14 @@ const ViewFlight = memo(
                   selected={selectedDate}
                   onSelect={(selectedDate) => {
                     if (selectedDate) {
-                      onDateChange(selectedDate);
+                      const normalizedDate = new Date(
+                        Date.UTC(
+                          selectedDate.getFullYear(),
+                          selectedDate.getMonth(),
+                          selectedDate.getDate()
+                        )
+                      );
+                      onDateChange(normalizedDate);
                     }
                     setIsCalendarOpen(false);
                   }}
@@ -124,7 +131,7 @@ const ViewFlight = memo(
               className="gradient-border w-full md:w-auto h-10"
               disabled={isLoading}
             >
-              {isLoading ? "Searching..." : "Submit"}
+              {isLoading ? "Searching..." : "Search"}
             </Button>
           </div>
         </div>

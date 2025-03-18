@@ -108,6 +108,9 @@ const SubscribeFlight = memo(
                 <SelectItem value="DEN">DEN</SelectItem>
                 <SelectItem value="MIA">MIA</SelectItem>
                 <SelectItem value="JFK">JFK</SelectItem>
+                <SelectItem value="ORD">ORD</SelectItem>
+                <SelectItem value="PHX">PHX</SelectItem>
+                <SelectItem value="SAN">SAN</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -134,7 +137,14 @@ const SubscribeFlight = memo(
                   selected={selectedDate}
                   onSelect={(selectedDate) => {
                     if (selectedDate) {
-                      onDateChange(selectedDate); // ✅ Update date from parent
+                      const normalizedDate = new Date(
+                        Date.UTC(
+                          selectedDate.getFullYear(),
+                          selectedDate.getMonth(),
+                          selectedDate.getDate()
+                        )
+                      );
+                      onDateChange(normalizedDate); // ✅ Update date from parent
                     }
                     setIsCalendarOpen(false);
                   }}
@@ -150,7 +160,7 @@ const SubscribeFlight = memo(
               className="gradient-border w-full md:w-auto h-10"
               disabled={isLoading}
             >
-              {isLoading ? "Searching..." : "Submit"}
+              {isLoading ? "Searching..." : "Search"}
             </Button>
           </div>
         </div>

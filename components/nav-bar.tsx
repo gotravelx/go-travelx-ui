@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { WalletInfo } from "./wallet-info";
 import { useWeb3 } from "@/contexts/web3-context";
+import { ThemeToggle } from "./theme-switcher";
 
 interface NavBarProps {
   lastInteractionTime?: number;
@@ -106,6 +107,7 @@ export function NavBar({
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
               GoTravelX
             </span>
+            <span>Dev</span>
           </motion.div>
 
           {/* UTC Time and Contract Interaction Stats */}
@@ -155,6 +157,7 @@ export function NavBar({
                 <WalletInfo address={walletAddress} />
               </Tooltip>
             </TooltipProvider>
+            <ThemeToggle />
           </motion.div>
         </div>
       </div>
