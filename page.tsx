@@ -123,27 +123,8 @@ export default function FlightSearch() {
     setDepartureStation(value);
   }, []);
 
-  // if (!isConnected) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
-  //       <div className="absolute top-4 right-4">
-  //         <ThemeToggle />
-  //       </div>
-  //       <div className="container mx-auto px-4 py-8 max-w-md pt-20">
-  //         <motion.div
-  //           initial={{ opacity: 0, y: 20 }}
-  //           animate={{ opacity: 1, y: 0 }}
-  //           transition={{ duration: 0.5 }}
-  //         >
-  //           <WalletConnectPage />
-  //         </motion.div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
+    <div className=" bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
       <NavBar
         lastInteractionTime={lastInteractionTime}
         onRefresh={handleRefresh}
@@ -153,7 +134,7 @@ export default function FlightSearch() {
       <main className="flex-grow">
         <Tabs
           defaultValue="view"
-          className="container max-w-5xl mx-auto px-4 py-8 pt-24"
+          className="container  mx-auto px-4 py-8 pt-24"
           onValueChange={handleTabChange}
           value={activeTab}
         >
@@ -170,7 +151,7 @@ export default function FlightSearch() {
           {/* view flight ui start --------------------  */}
           <TabsContent value="view" className="min-h-screen max-h-max">
             <motion.div
-              className="max-w-5xl mx-auto"
+              className=" mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -191,17 +172,6 @@ export default function FlightSearch() {
                     carrier={carrier} // Pass carrier state
                     onCarrierChange={handleCarrierChange} // Pass handler
                   />
-
-                  {viewFlightData && (
-                    <motion.div
-                      className="mt-6 space-y-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <FlightStatusView flightData={viewFlightData} />
-                    </motion.div>
-                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -211,7 +181,7 @@ export default function FlightSearch() {
           {/* subscribe flight ui start --------------------  */}
           <TabsContent value="subscribe-flight">
             <motion.div
-              className="max-w-5xl mx-auto"
+              className=" mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
