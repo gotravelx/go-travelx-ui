@@ -19,6 +19,7 @@ import {
 import { format } from "date-fns";
 import { AlertCircle, CalendarIcon } from "lucide-react";
 import { memo, useState } from "react";
+import FlightDataTable from "@/components/flight-data-table";
 
 const ViewFlight = memo(
   ({
@@ -45,7 +46,7 @@ const ViewFlight = memo(
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     return (
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="w-full  mx-auto">
         <style jsx global>{`
           .form-input-enhanced ::placeholder {
             color: rgba(115, 115, 115, 0.8);
@@ -70,7 +71,7 @@ const ViewFlight = memo(
             </Select>
           </div>
 
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col flex-3 ">
             <label htmlFor="flight-number" className="text-sm font-medium mb-1">
               Flight Number
             </label>
@@ -81,11 +82,11 @@ const ViewFlight = memo(
               onChange={(e) => onFlightNumberChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSearch()}
               disabled={isLoading}
-              className="w-full border-2 border-primary/50 focus-visible:border-primary bg-background/90 shadow-sm"
+              className="w-48  border-2 border-primary/50 focus-visible:border-primary bg-background/90 shadow-sm"
             />
           </div>
 
-          <div className="flex flex-col w-full md:w-auto">
+          <div className="flex flex-col w-full md:w-auto ">
             <label className="text-sm font-medium mb-1">
               Scheduled Departure Date
             </label>
@@ -107,14 +108,7 @@ const ViewFlight = memo(
                   selected={selectedDate}
                   onSelect={(selectedDate) => {
                     if (selectedDate) {
-                      const normalizedDate = new Date(
-                        Date.UTC(
-                          selectedDate.getFullYear(),
-                          selectedDate.getMonth(),
-                          selectedDate.getDate()
-                        )
-                      );
-                      onDateChange(normalizedDate);
+                      onDateChange(selectedDate);
                     }
                     setIsCalendarOpen(false);
                   }}
@@ -125,13 +119,13 @@ const ViewFlight = memo(
             </Popover>
           </div>
 
-          <div className="flex flex-col justify-end mt-auto">
+          <div className="flex flex-col justify-end mt-auto ">
             <Button
               onClick={onSearch}
               className="gradient-border w-full md:w-auto h-10"
               disabled={isLoading}
             >
-              {isLoading ? "Searching..." : "Search"}
+              {isLoading ? "Searching..." : "Submit"}
             </Button>
           </div>
         </div>
@@ -142,6 +136,12 @@ const ViewFlight = memo(
             <AlertDescription>{searchError}</AlertDescription>
           </Alert>
         )}
+
+        {/* Add the flight data table */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Flight Data</h2>
+          <FlightDataTable isLoading={isLoading} />
+        </div>
       </div>
     );
   }
