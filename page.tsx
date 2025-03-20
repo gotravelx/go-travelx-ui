@@ -34,6 +34,7 @@ export default function FlightSearch() {
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
   const [departureStation, setDepartureStation] = useState("JFK");
+  const [arrivalStation, setArrivalStation] = useState("ORD");
   const [activeTab, setActiveTab] = useState("view");
 
   const [lastInteractionTime, setLastInteractionTime] = useState<
@@ -124,7 +125,7 @@ export default function FlightSearch() {
   }, []);
 
   return (
-    <div className=" bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
+    <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
       <NavBar
         lastInteractionTime={lastInteractionTime}
         onRefresh={handleRefresh}
@@ -134,11 +135,11 @@ export default function FlightSearch() {
       <main className="flex-grow">
         <Tabs
           defaultValue="view"
-          className="container  mx-auto px-4 py-8 pt-24"
+          className="container mx-auto pt-24 px-4 py-8"
           onValueChange={handleTabChange}
           value={activeTab}
         >
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="view">View Flight Subscriptions</TabsTrigger>
             <TabsTrigger value="subscribe-flight">
               Add Flight Subscription
@@ -149,9 +150,9 @@ export default function FlightSearch() {
           </TabsList>
 
           {/* view flight ui start --------------------  */}
-          <TabsContent value="view" className="min-h-screen max-h-max">
+          <TabsContent value="view" className="max-h-max min-h-screen">
             <motion.div
-              className=" mx-auto"
+              className="mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -181,7 +182,7 @@ export default function FlightSearch() {
           {/* subscribe flight ui start --------------------  */}
           <TabsContent value="subscribe-flight">
             <motion.div
-              className=" mx-auto"
+              className="mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -201,6 +202,7 @@ export default function FlightSearch() {
                     onDateChange={setSelectedDate}
                     carrier={carrier} // Pass carrier state
                     departureStation={departureStation}
+                    arrivalStation={arrivalStation}
                     onDepartureStationChange={handleDepartureStationChang}
                     onCarrierChange={handleCarrierChange} // Pass handler
                   />
@@ -230,7 +232,7 @@ export default function FlightSearch() {
           {/* un-subscribe-flight ui end --------------------  */}
         </Tabs>
       </main>
-      <div className="mt-auto  text-center p-4">
+      <div className="p-4 text-center mt-auto">
         <Footer />
       </div>
     </div>

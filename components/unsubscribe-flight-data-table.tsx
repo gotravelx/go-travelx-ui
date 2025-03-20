@@ -26,9 +26,10 @@ import {
 } from "@/components/ui/dialog";
 import FlightStatusView from "@/components/flight-status-view";
 import type { FlightData } from "@/services/api";
+import { toast } from "sonner";
 
 // Dummy flight data for initial display
-const dummyFlights: FlightData[] = [
+const SubscribedFlight: FlightData[] = [
   {
     flightNumber: "5300",
     departureDate: "2025-03-06",
@@ -164,17 +165,33 @@ const dummyFlights: FlightData[] = [
 ];
 
 interface FlightDataTableProps {
-  flights?: FlightData[];
+  flights: FlightData[];
   isLoading?: boolean;
+  // Make pagination props required
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
 }
 
-export default function FlightDataTable({
-  flights = dummyFlights,
+export default function UnSubscribeDataTable({
+  flights = [],
   isLoading = false,
+  currentPage = 1,
+  itemsPerPage = 5,
+  totalItems = 0,
 }: FlightDataTableProps) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Add a new state for the unsubscribe confirmation dialog
+  const [isUnsubscribeDialogOpen, setIsUnsubscribeDialogOpen] = useState(false);
+  const [flightToUnsubscribe, setFlightToUnsubscribe] =
+    useState<FlightData | null>(null);
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
+
+  // The flights array is already paginated by the parent component
+  const paginatedFlights = flights;
 
   const toggleRow = (flightNumber: string) => {
     setExpandedRow(expandedRow === flightNumber ? null : flightNumber);
@@ -183,6 +200,37 @@ export default function FlightDataTable({
   const openFlightDetails = (flight: FlightData) => {
     setSelectedFlight(flight);
     setIsDialogOpen(true);
+  };
+
+  // Add a function to handle the unsubscribe action
+  const handleUnsubscribe = (flight: FlightData) => {
+    setFlightToUnsubscribe(flight);
+    setIsUnsubscribeDialogOpen(true);
+  };
+
+  // Add a function to confirm unsubscription
+  const confirmUnsubscribe = () => {
+    if (flightToUnsubscribe) {
+      setIsUnsubscribing(true);
+
+      // Simulate API call with timeout
+      setTimeout(() => {
+        // Here you would call your API to unsubscribe from the flight
+        console.log(
+          `Unsubscribed from flight ${flightToUnsubscribe.carrierCode} ${flightToUnsubscribe.flightNumber}`
+        );
+
+        // Show success message
+        toast.success(
+          `Successfully unsubscribed from flight ${flightToUnsubscribe.carrierCode} ${flightToUnsubscribe.flightNumber}`
+        );
+
+        // Close the dialog and reset state
+        setIsUnsubscribeDialogOpen(false);
+        setFlightToUnsubscribe(null);
+        setIsUnsubscribing(false);
+      }, 1000);
+    }
   };
 
   const getStatusBadgeColor = (flight: FlightData) => {
@@ -255,19 +303,18 @@ export default function FlightDataTable({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex justify-center p-8 items-center">
+        <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"></div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="w-full overflow-hidden rounded-lg border border-border bg-card">
+      <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="w-[50px]"></TableHead>
               <TableHead>Flight</TableHead>
               <TableHead className="hidden md:table-cell">Date</TableHead>
               <TableHead>Route</TableHead>
@@ -275,20 +322,77 @@ export default function FlightDataTable({
               <TableHead className="hidden lg:table-cell">Arrival</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {flights.map((flight) => (
+            {paginatedFlights.map((flight) => (
               <>
                 <TableRow
                   key={flight.flightNumber}
                   className="hover:bg-muted/50"
                 >
+                  <TableCell className="font-medium">
+                    <div className="flex gap-2 items-center">
+                      <Plane className="h-4 text-primary w-4" />
+                      {flight.carrierCode} {flight.flightNumber}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="flex gap-2 items-center">
+                      <Calendar className="h-4 text-muted-foreground w-4" />
+                      {formatDate(flight.departureDate)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1 items-center">
+                      <span className="font-medium">
+                        {flight.departureAirport}
+                      </span>
+                      <ChevronRight className="h-4 text-muted-foreground w-4" />
+                      <span className="font-medium">
+                        {flight.arrivalAirport}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="flex gap-2 items-center">
+                      <Clock className="h-4 text-muted-foreground w-4" />
+                      {formatTime(flight.estimatedDepartureUTC)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="flex gap-2 items-center">
+                      <Clock className="h-4 text-muted-foreground w-4" />
+                      {formatTime(flight.estimatedArrivalUTC)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={`${getStatusBadgeColor(
+                        flight
+                      )} p-2 px-4 text-md`}
+                    >
+                      {getStatusText(flight)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleUnsubscribe(flight)}
+                      >
+                        Unsubscribe
+                      </Button>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 p-0"
+                      className="h-8 p-0 w-8"
                       onClick={() => toggleRow(flight.flightNumber)}
                     >
                       {expandedRow === flight.flightNumber ? (
@@ -298,67 +402,15 @@ export default function FlightDataTable({
                       )}
                     </Button>
                   </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Plane className="h-4 w-4 text-primary" />
-                      {flight.carrierCode} {flight.flightNumber}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {formatDate(flight.departureDate)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">
-                        {flight.departureAirport}
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
-                        {flight.arrivalAirport}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      {formatTime(flight.estimatedDepartureUTC)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      {formatTime(flight.estimatedArrivalUTC)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`${getStatusBadgeColor(flight)}`}
-                    >
-                      {getStatusText(flight)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openFlightDetails(flight)}
-                    >
-                      Details
-                    </Button>
-                  </TableCell>
                 </TableRow>
                 {expandedRow === flight.flightNumber && (
                   <TableRow key={`${flight.flightNumber}-expanded`}>
-                    <TableCell colSpan={8} className="p-0 bg-muted/20">
+                    <TableCell colSpan={8} className="bg-muted/20 p-0">
                       <div className="p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                           <div className="space-y-2">
                             <h4 className="text-sm font-semibold">Departure</h4>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="grid grid-cols-2 text-sm gap-2">
                               <div className="text-muted-foreground">
                                 Airport:
                               </div>
@@ -384,7 +436,7 @@ export default function FlightDataTable({
 
                           <div className="space-y-2">
                             <h4 className="text-sm font-semibold">Arrival</h4>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="grid grid-cols-2 text-sm gap-2">
                               <div className="text-muted-foreground">
                                 Airport:
                               </div>
@@ -410,7 +462,7 @@ export default function FlightDataTable({
                             <h4 className="text-sm font-semibold">
                               Flight Details
                             </h4>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="grid grid-cols-2 text-sm gap-2">
                               <div className="text-muted-foreground">
                                 Carrier:
                               </div>
@@ -425,7 +477,9 @@ export default function FlightDataTable({
                               <div>
                                 <Badge
                                   variant="outline"
-                                  className={`${getStatusBadgeColor(flight)}`}
+                                  className={`${getStatusBadgeColor(
+                                    flight
+                                  )} p-2 px-4 text-md`}
                                 >
                                   {getStatusText(flight)}
                                 </Badge>
@@ -442,7 +496,7 @@ export default function FlightDataTable({
                           </div>
                         </div>
 
-                        <div className="mt-4 flex justify-end">
+                        <div className="flex justify-end mt-4">
                           <Button
                             onClick={() => openFlightDetails(flight)}
                             className="gradient-border"
@@ -456,21 +510,68 @@ export default function FlightDataTable({
                 )}
               </>
             ))}
+            {paginatedFlights.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  No flights found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
 
       {/* Flight Status Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex gap-2 items-center">
               <Plane className="h-5 w-5" />
               Flight {selectedFlight?.carrierCode}{" "}
               {selectedFlight?.flightNumber} Status
             </DialogTitle>
           </DialogHeader>
           {selectedFlight && <FlightStatusView flightData={selectedFlight} />}
+        </DialogContent>
+      </Dialog>
+
+      {/* Unsubscribe Confirmation Dialog */}
+      <Dialog
+        open={isUnsubscribeDialogOpen}
+        onOpenChange={setIsUnsubscribeDialogOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Unsubscription</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>
+              Are you sure you want to unsubscribe from flight{" "}
+              {flightToUnsubscribe?.carrierCode}{" "}
+              {flightToUnsubscribe?.flightNumber}?
+            </p>
+            <p className="text-muted-foreground mt-2">
+              {flightToUnsubscribe?.departureAirport} →{" "}
+              {flightToUnsubscribe?.arrivalAirport} on{" "}
+              {formatDate(flightToUnsubscribe?.departureDate || "")}
+            </p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsUnsubscribeDialogOpen(false)}
+              disabled={isUnsubscribing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmUnsubscribe}
+              disabled={isUnsubscribing}
+            >
+              {isUnsubscribing ? "Unsubscribing..." : "Unsubscribe"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

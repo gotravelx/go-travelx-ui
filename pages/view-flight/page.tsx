@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { AlertCircle, CalendarIcon } from "lucide-react";
-import { memo, useState } from "react";
-import FlightDataTable from "@/components/flight-data-table";
+import { memo, useEffect, useState } from "react";
+import ViewFlightDatTable from "@/components/view-flight-data-table";
 
 const ViewFlight = memo(
   ({
@@ -44,16 +44,41 @@ const ViewFlight = memo(
     onCarrierChange: (value: string) => void;
   }) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [departureStation, setDepartureStation] = useState("JFK");
+    const [arrivalStation, setArrivalStation] = useState("ORD");
+
+    // Add pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [totalItems, setTotalItems] = useState(0);
+
+    // Handle pagination changes
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+      // You might want to trigger a new search here with the updated page
+    };
+
+    const handleItemsPerPageChange = (itemsPerPage: number) => {
+      setItemsPerPage(itemsPerPage);
+      setCurrentPage(1); // Reset to first page when changing items per page
+      // You might want to trigger a new search here with the updated items per page
+    };
+
+    // Update total items when data changes
+    useEffect(() => {
+      // This is a placeholder - in a real app, you would get this from your API response
+      setTotalItems(20); // Example: 20 total flights
+    }, []);
 
     return (
-      <div className="w-full  mx-auto">
+      <div className="w-full mx-auto">
         <style jsx global>{`
           .form-input-enhanced ::placeholder {
             color: rgba(115, 115, 115, 0.8);
             font-weight: 500;
           }
         `}</style>
-        <div className="flex flex-col md:flex-row gap-4 w-full form-input-enhanced">
+        <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
           <div className="flex flex-col w-full md:w-auto">
             <label
               htmlFor="carrier-select"
@@ -62,7 +87,7 @@ const ViewFlight = memo(
               Carrier
             </label>
             <Select value={carrier} onValueChange={onCarrierChange}>
-              <SelectTrigger className="w-full md:w-[120px] border-2 border-primary/50 focus:border-primary bg-background/90 shadow-sm">
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
                 <SelectValue placeholder="Carrier" />
               </SelectTrigger>
               <SelectContent>
@@ -71,7 +96,7 @@ const ViewFlight = memo(
             </Select>
           </div>
 
-          <div className="flex flex-col flex-3 ">
+          <div className="flex flex-3 flex-col">
             <label htmlFor="flight-number" className="text-sm font-medium mb-1">
               Flight Number
             </label>
@@ -82,11 +107,65 @@ const ViewFlight = memo(
               onChange={(e) => onFlightNumberChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSearch()}
               disabled={isLoading}
-              className="w-48  border-2 border-primary/50 focus-visible:border-primary bg-background/90 shadow-sm"
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-48 focus-visible:border-primary"
             />
           </div>
-
-          <div className="flex flex-col w-full md:w-auto ">
+          {/*  */}
+          <div className="flex flex-5 flex-col justify-center items-center">
+            <div className="pt-4">and/or </div>
+          </div>
+          {/*  */}
+          <div className="flex flex-col w-full md:w-auto">
+            <label
+              htmlFor="carrier-select"
+              className="text-sm font-medium mb-1"
+            >
+              Departure Station
+            </label>
+            <Select value={departureStation}>
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
+                <SelectValue placeholder="Departure Station" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LAX">LAX</SelectItem>
+                <SelectItem value="SFO">SFO</SelectItem>
+                <SelectItem value="DEN">DEN</SelectItem>
+                <SelectItem value="MIA">MIA</SelectItem>
+                <SelectItem value="JFK">JFK</SelectItem>
+                <SelectItem value="ORD">ORD</SelectItem>
+                <SelectItem value="PHX">PHX</SelectItem>
+                <SelectItem value="SAN">SAN</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/*  */}
+          {/*  */}
+          <div className="flex flex-col w-full md:w-auto">
+            <label
+              htmlFor="carrier-select"
+              className="text-sm font-medium mb-1"
+            >
+              Arrival Station
+            </label>
+            <Select value={arrivalStation}>
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
+                <SelectValue placeholder="Arrival Station" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LAX">LAX</SelectItem>
+                <SelectItem value="SFO">SFO</SelectItem>
+                <SelectItem value="DEN">DEN</SelectItem>
+                <SelectItem value="MIA">MIA</SelectItem>
+                <SelectItem value="JFK">JFK</SelectItem>
+                <SelectItem value="ORD">ORD</SelectItem>
+                <SelectItem value="PHX">PHX</SelectItem>
+                <SelectItem value="SAN">SAN</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/*  */}
+          {/*  */}
+          <div className="flex flex-col w-full md:w-auto">
             <label className="text-sm font-medium mb-1">
               Scheduled Departure Date
             </label>
@@ -94,15 +173,15 @@ const ViewFlight = memo(
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full md:w-auto justify-start border-2 border-primary/50 hover:border-primary bg-background/90 shadow-sm"
+                  className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4 mr-2" />
                   {selectedDate
                     ? format(selectedDate, "PPP")
                     : format(new Date(), "PPP")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="p-0 w-auto" align="start">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -119,13 +198,13 @@ const ViewFlight = memo(
             </Popover>
           </div>
 
-          <div className="flex flex-col justify-end mt-auto ">
+          <div className="flex flex-col justify-end mt-auto">
             <Button
               onClick={onSearch}
-              className="gradient-border w-full md:w-auto h-10"
+              className="h-10 w-full gradient-border md:w-auto"
               disabled={isLoading}
             >
-              {isLoading ? "Searching..." : "Submit"}
+              {isLoading ? "Searching..." : "Search"}
             </Button>
           </div>
         </div>
@@ -139,8 +218,14 @@ const ViewFlight = memo(
 
         {/* Add the flight data table */}
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Flight Data</h2>
-          <FlightDataTable isLoading={isLoading} />
+          <ViewFlightDatTable
+            isLoading={isLoading}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItems={totalItems}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
         </div>
       </div>
     );

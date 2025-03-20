@@ -29,6 +29,7 @@ const SubscribeFlight = memo(
     onDateChange,
     carrier,
     departureStation,
+    arrivalStation,
     onDepartureStationChange,
     onCarrierChange,
   }: {
@@ -41,20 +42,21 @@ const SubscribeFlight = memo(
     onDateChange: (value: Date) => void;
     carrier: string;
     departureStation: string;
+    arrivalStation: string;
     onDepartureStationChange: (value: string) => void;
     onCarrierChange: (value: string) => void;
   }) => {
     let [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     return (
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="w-full mx-auto">
         <style jsx global>{`
           .form-input-enhanced ::placeholder {
             color: rgba(115, 115, 115, 0.8);
             font-weight: 500;
           }
         `}</style>
-        <div className="flex flex-col md:flex-row gap-4 w-full form-input-enhanced">
+        <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
           <div className="flex flex-col w-full md:w-auto">
             <label
               htmlFor="carrier-select"
@@ -63,7 +65,7 @@ const SubscribeFlight = memo(
               Carrier
             </label>
             <Select value={carrier} onValueChange={onCarrierChange}>
-              <SelectTrigger className="w-full md:w-[120px] border-2 border-primary/50 focus:border-primary bg-background/90 shadow-sm">
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
                 <SelectValue placeholder="Carrier" />
               </SelectTrigger>
               <SelectContent>
@@ -71,7 +73,7 @@ const SubscribeFlight = memo(
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-3 flex-col">
             <label htmlFor="flight-number" className="text-sm font-medium mb-1">
               Flight Number
             </label>
@@ -82,10 +84,13 @@ const SubscribeFlight = memo(
               onChange={(e) => onFlightNumberChange(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && onSearch()}
               disabled={isLoading}
-              className="w-full border-2 border-primary/50 focus-visible:border-primary bg-background/90 shadow-sm"
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
             />
           </div>
 
+          <div className="flex flex-5 flex-col justify-center items-center">
+            <div className="pt-4">and/or </div>
+          </div>
           {/* departure station*/}
 
           <div className="flex flex-col w-full md:w-auto">
@@ -99,7 +104,7 @@ const SubscribeFlight = memo(
               value={departureStation}
               onValueChange={onDepartureStationChange}
             >
-              <SelectTrigger className="w-full md:w-[120px] border-2 border-primary/50 focus:border-primary bg-background/90 shadow-sm">
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
                 <SelectValue placeholder="Departure Station" />
               </SelectTrigger>
               <SelectContent>
@@ -114,7 +119,35 @@ const SubscribeFlight = memo(
               </SelectContent>
             </Select>
           </div>
+
           {/* {departure station } */}
+
+          {/*  */}
+          <div className="flex flex-col w-full md:w-auto">
+            <label
+              htmlFor="carrier-select"
+              className="text-sm font-medium mb-1"
+            >
+              Arrival Station
+            </label>
+            <Select value={arrivalStation}>
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
+                <SelectValue placeholder="Arrival Station" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LAX">LAX</SelectItem>
+                <SelectItem value="SFO">SFO</SelectItem>
+                <SelectItem value="DEN">DEN</SelectItem>
+                <SelectItem value="MIA">MIA</SelectItem>
+                <SelectItem value="JFK">JFK</SelectItem>
+                <SelectItem value="ORD">ORD</SelectItem>
+                <SelectItem value="PHX">PHX</SelectItem>
+                <SelectItem value="SAN">SAN</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/*  */}
+
           <div className="flex flex-col w-full md:w-auto">
             <label className="text-sm font-medium mb-1">
               Scheduled Departure Date
@@ -123,15 +156,15 @@ const SubscribeFlight = memo(
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full md:w-auto justify-start border-2 border-primary/50 hover:border-primary bg-background/90 shadow-sm"
+                  className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4 mr-2" />
                   {selectedDate
                     ? format(selectedDate, "PPP")
                     : format(new Date(), "PPP")}{" "}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="p-0 w-auto" align="start">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -157,7 +190,7 @@ const SubscribeFlight = memo(
           <div className="flex flex-col justify-end mt-auto">
             <Button
               onClick={onSearch}
-              className="gradient-border w-full md:w-auto h-10"
+              className="h-10 w-full gradient-border md:w-auto"
               disabled={isLoading}
             >
               {isLoading ? "Searching..." : "Search"}

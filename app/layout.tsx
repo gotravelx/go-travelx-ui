@@ -14,14 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Web3Provider>{children}</Web3Provider>
-        </ThemeProvider>
+        <Web3Provider>{children}</Web3Provider>
       </body>
     </html>
   );
