@@ -1,5 +1,5 @@
 
-import { FlightDetailsResponse, addFlightSubscriptionApi, viewSubscribedFlight } from "./flight-api"
+import {  addFlightSubscriptionApi, viewSubscribedFlight } from "./flight-api"
 
 // Types for flight data matching the contract structure
 export interface FlightData {

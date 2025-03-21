@@ -27,158 +27,30 @@ import {
 import FlightStatusView from "@/components/flight-status-view";
 import type { FlightData } from "@/services/api";
 import { toast } from "sonner";
-
-// Dummy flight data for initial display
-const SubscribedFlight: FlightData[] = [
-  {
-    flightNumber: "5300",
-    departureDate: "2025-03-06",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-06T15:30:00Z",
-    estimatedDepartureUTC: "2025-03-06T12:00:00Z",
-    arrivalAirport: "LAS",
-    departureAirport: "IAH",
-    arrivalCity: "Las Vegas",
-    departureCity: "Houston",
-    departureGate: "C12",
-    arrivalGate: "B8",
-    flightStatus: "On Time",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-800",
-    phase: "not_departed",
-    departureTerminal: "C",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "4",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-06T11:30:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-06T15:30:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-06T12:00:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "2339",
-    departureDate: "2025-03-07",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-07T22:15:00Z",
-    estimatedDepartureUTC: "2025-03-07T19:45:00Z",
-    arrivalAirport: "ORD",
-    departureAirport: "LAS",
-    arrivalCity: "Chicago",
-    departureCity: "Las Vegas",
-    departureGate: "B10",
-    arrivalGate: "C22",
-    flightStatus: "Delayed",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-900",
-    phase: "not_departed",
-    departureTerminal: "1",
-    arrivalTerminal: "2",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "7",
-    departureDelayMinutes: 25,
-    arrivalDelayMinutes: 25,
-    boardingTime: "2025-03-07T19:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-07T21:50:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-07T19:20:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "1422",
-    departureDate: "2025-03-08",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-08T14:00:00Z",
-    estimatedDepartureUTC: "2025-03-08T12:30:00Z",
-    arrivalAirport: "DEN",
-    departureAirport: "ORD",
-    arrivalCity: "Denver",
-    departureCity: "Chicago",
-    departureGate: "C15",
-    arrivalGate: "A12",
-    flightStatus: "Canceled",
-    statusCode: "CNCL",
-    equipmentModel: "Airbus A320",
-    phase: "not_departed",
-    departureTerminal: "2",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-08T12:00:00Z",
-    isCanceled: true,
-    scheduledArrivalUTCDateTime: "2025-03-08T14:00:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-08T12:30:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "7891",
-    departureDate: "2025-03-09",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-09T10:15:00Z",
-    estimatedDepartureUTC: "2025-03-09T07:45:00Z",
-    arrivalAirport: "JFK",
-    departureAirport: "DEN",
-    arrivalCity: "New York",
-    departureCity: "Denver",
-    departureGate: "A18",
-    arrivalGate: "D5",
-    flightStatus: "Arrived At Gate",
-    statusCode: "ARRV",
-    equipmentModel: "Boeing 787-9",
-    phase: "arrived",
-    departureTerminal: "1",
-    arrivalTerminal: "4",
-    actualDepartureUTC: "2025-03-09T07:50:00Z",
-    actualArrivalUTC: "2025-03-09T10:10:00Z",
-    baggageClaim: "12",
-    departureDelayMinutes: 5,
-    arrivalDelayMinutes: -5,
-    boardingTime: "2025-03-09T07:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-09T10:15:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-09T07:45:00Z",
-    outTimeUTC: "2025-03-09T07:40:00Z",
-    offTimeUTC: "2025-03-09T07:50:00Z",
-    onTimeUTC: "2025-03-09T10:05:00Z",
-    inTimeUTC: "2025-03-09T10:10:00Z",
-  },
-];
+import { Checkbox } from "./ui/checkbox";
 
 interface FlightDataTableProps {
   flights: FlightData[];
-  isLoading?: boolean;
-  // Make pagination props required
+  isLoading: boolean;
   currentPage: number;
   itemsPerPage: number;
   totalItems: number;
+  selectedFlights: Set<string>;
+  onFlightSelect: (flightId: string) => void;
+  selectAll: boolean;
+  onSelectAll: (checked: boolean) => void;
 }
 
 export default function UnSubscribeDataTable({
-  flights = [],
-  isLoading = false,
-  currentPage = 1,
-  itemsPerPage = 5,
-  totalItems = 0,
+  flights,
+  isLoading,
+  currentPage,
+  itemsPerPage,
+  totalItems,
+  selectedFlights,
+  onFlightSelect,
+  selectAll,
+  onSelectAll,
 }: FlightDataTableProps) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null);
@@ -235,7 +107,7 @@ export default function UnSubscribeDataTable({
 
   const getStatusBadgeColor = (flight: FlightData) => {
     if (flight.isCanceled) return "bg-red-500/20 text-red-500";
-    if (flight.departureDelayMinutes > 0)
+    if (flight?.departureDelayMinutes ?? 0 > 0)
       return "bg-yellow-500/20 text-yellow-500";
 
     switch (flight.statusCode) {
@@ -256,7 +128,7 @@ export default function UnSubscribeDataTable({
 
   const getStatusText = (flight: FlightData) => {
     if (flight.isCanceled) return "Canceled";
-    if (flight.departureDelayMinutes > 0)
+    if (flight.departureDelayMinutes ?? 0 > 0)
       return `Delayed ${flight.departureDelayMinutes} min`;
 
     switch (flight.statusCode) {
@@ -315,12 +187,24 @@ export default function UnSubscribeDataTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>Flight</TableHead>
-              <TableHead className="hidden md:table-cell">Date</TableHead>
-              <TableHead>Route</TableHead>
-              <TableHead className="hidden md:table-cell">Departure</TableHead>
-              <TableHead className="hidden lg:table-cell">Arrival</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="w-[50px]">
+                <Checkbox
+                  checked={selectAll}
+                  onCheckedChange={(checked) => onSelectAll(checked as boolean)}
+                  aria-label="Select all flights"
+                />
+              </TableHead>
+              <TableHead>Flt</TableHead>
+              <TableHead className="hidden md:table-cell">Sch Dep Dt</TableHead>
+              <TableHead>Dep Stn</TableHead>
+              <TableHead>Arr Stn</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Est Dep DTM
+              </TableHead>
+              <TableHead className="hidden lg:table-cell">
+                Est Arr DTM
+              </TableHead>
+              <TableHead>Sts</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
               <TableHead className="w-[100px]"></TableHead>
             </TableRow>
@@ -332,6 +216,15 @@ export default function UnSubscribeDataTable({
                   key={flight.flightNumber}
                   className="hover:bg-muted/50"
                 >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedFlights.has(flight.flightNumber)}
+                      onCheckedChange={() =>
+                        onFlightSelect(flight.flightNumber)
+                      }
+                      aria-label={`Select flight ${flight.flightNumber}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex gap-2 items-center">
                       <Plane className="h-4 text-primary w-4" />
@@ -341,7 +234,7 @@ export default function UnSubscribeDataTable({
                   <TableCell className="hidden md:table-cell">
                     <div className="flex gap-2 items-center">
                       <Calendar className="h-4 text-muted-foreground w-4" />
-                      {formatDate(flight.departureDate)}
+                      {flight.departureDate}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -349,7 +242,10 @@ export default function UnSubscribeDataTable({
                       <span className="font-medium">
                         {flight.departureAirport}
                       </span>
-                      <ChevronRight className="h-4 text-muted-foreground w-4" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1 items-center">
                       <span className="font-medium">
                         {flight.arrivalAirport}
                       </span>
@@ -358,13 +254,13 @@ export default function UnSubscribeDataTable({
                   <TableCell className="hidden md:table-cell">
                     <div className="flex gap-2 items-center">
                       <Clock className="h-4 text-muted-foreground w-4" />
-                      {formatTime(flight.estimatedDepartureUTC)}
+                      {flight.estimatedDepartureUTC}
                     </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex gap-2 items-center">
                       <Clock className="h-4 text-muted-foreground w-4" />
-                      {formatTime(flight.estimatedArrivalUTC)}
+                      {flight.estimatedArrivalUTC}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -380,7 +276,7 @@ export default function UnSubscribeDataTable({
                   <TableCell>
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <Button
-                        variant="destructive"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleUnsubscribe(flight)}
                       >
@@ -488,7 +384,7 @@ export default function UnSubscribeDataTable({
                                 Delay:
                               </div>
                               <div>
-                                {flight.departureDelayMinutes > 0
+                                {flight?.departureDelayMinutes ?? 0 > 0
                                   ? `${flight.departureDelayMinutes} minutes`
                                   : "None"}
                               </div>

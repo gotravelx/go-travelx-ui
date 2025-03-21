@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CalendarIcon, AlertCircle } from "lucide-react";
+import { CalendarIcon, AlertCircle, Plane } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWeb3 } from "@/contexts/web3-context";
@@ -40,301 +38,68 @@ import UnSubscribeDataTable from "./unsubscribe-flight-data-table";
 
 // Import from the second file
 import type { FlightData } from "@/services/api";
+import flights from "@/utils/data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+
+const airports = [
+  { code: "JFK", name: "John F. Kennedy International Airport" },
+  { code: "ORD", name: "O'Hare International Airport" },
+  { code: "LAX", name: "Los Angeles International Airport" },
+  { code: "SFO", name: "San Francisco International Airport" },
+  { code: "DEN", name: "Denver International Airport" },
+  { code: "MIA", name: "Miami International Airport" },
+  { code: "PHX", name: "Phoenix Sky Harbor International Airport" },
+  { code: "SAN", name: "San Diego International Airport" },
+];
 
 // Dummy flight data from the second file
-const SubscribedFlights: FlightData[] = [
-  {
-    flightNumber: "5300",
-    departureDate: "2025-03-06",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-06T15:30:00Z",
-    estimatedDepartureUTC: "2025-03-06T12:00:00Z",
-    arrivalAirport: "LAS",
-    departureAirport: "IAH",
-    arrivalCity: "Las Vegas",
-    departureCity: "Houston",
-    departureGate: "C12",
-    arrivalGate: "B8",
-    flightStatus: "On Time",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-800",
-    phase: "not_departed",
-    departureTerminal: "C",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "4",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-06T11:30:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-06T15:30:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-06T12:00:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "2339",
-    departureDate: "2025-03-07",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-07T22:15:00Z",
-    estimatedDepartureUTC: "2025-03-07T19:45:00Z",
-    arrivalAirport: "ORD",
-    departureAirport: "LAS",
-    arrivalCity: "Chicago",
-    departureCity: "Las Vegas",
-    departureGate: "B10",
-    arrivalGate: "C22",
-    flightStatus: "Delayed",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-900",
-    phase: "not_departed",
-    departureTerminal: "1",
-    arrivalTerminal: "2",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "7",
-    departureDelayMinutes: 25,
-    arrivalDelayMinutes: 25,
-    boardingTime: "2025-03-07T19:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-07T21:50:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-07T19:20:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "1422",
-    departureDate: "2025-03-08",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-08T14:00:00Z",
-    estimatedDepartureUTC: "2025-03-08T12:30:00Z",
-    arrivalAirport: "DEN",
-    departureAirport: "ORD",
-    arrivalCity: "Denver",
-    departureCity: "Chicago",
-    departureGate: "C15",
-    arrivalGate: "A12",
-    flightStatus: "Canceled",
-    statusCode: "CNCL",
-    equipmentModel: "Airbus A320",
-    phase: "not_departed",
-    departureTerminal: "2",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-08T12:00:00Z",
-    isCanceled: true,
-    scheduledArrivalUTCDateTime: "2025-03-08T14:00:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-08T12:30:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "7891",
-    departureDate: "2025-03-09",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-09T10:15:00Z",
-    estimatedDepartureUTC: "2025-03-09T07:45:00Z",
-    arrivalAirport: "JFK",
-    departureAirport: "DEN",
-    arrivalCity: "New York",
-    departureCity: "Denver",
-    departureGate: "A18",
-    arrivalGate: "D5",
-    flightStatus: "Arrived At Gate",
-    statusCode: "ARRV",
-    equipmentModel: "Boeing 787-9",
-    phase: "arrived",
-    departureTerminal: "1",
-    arrivalTerminal: "4",
-    actualDepartureUTC: "2025-03-09T07:50:00Z",
-    actualArrivalUTC: "2025-03-09T10:10:00Z",
-    baggageClaim: "12",
-    departureDelayMinutes: 5,
-    arrivalDelayMinutes: -5,
-    boardingTime: "2025-03-09T07:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-09T10:15:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-09T07:45:00Z",
-    outTimeUTC: "2025-03-09T07:40:00Z",
-    offTimeUTC: "2025-03-09T07:50:00Z",
-    onTimeUTC: "2025-03-09T10:05:00Z",
-    inTimeUTC: "2025-03-09T10:10:00Z",
-  },
-  {
-    flightNumber: "5301",
-    departureDate: "2025-03-06",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-06T15:30:00Z",
-    estimatedDepartureUTC: "2025-03-06T12:00:00Z",
-    arrivalAirport: "LAS",
-    departureAirport: "IAH",
-    arrivalCity: "Las Vegas",
-    departureCity: "Houston",
-    departureGate: "C12",
-    arrivalGate: "B8",
-    flightStatus: "On Time",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-800",
-    phase: "not_departed",
-    departureTerminal: "C",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "4",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-06T11:30:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-06T15:30:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-06T12:00:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "2340",
-    departureDate: "2025-03-07",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-07T22:15:00Z",
-    estimatedDepartureUTC: "2025-03-07T19:45:00Z",
-    arrivalAirport: "ORD",
-    departureAirport: "LAS",
-    arrivalCity: "Chicago",
-    departureCity: "Las Vegas",
-    departureGate: "B10",
-    arrivalGate: "C22",
-    flightStatus: "Delayed",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-900",
-    phase: "not_departed",
-    departureTerminal: "1",
-    arrivalTerminal: "2",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "7",
-    departureDelayMinutes: 25,
-    arrivalDelayMinutes: 25,
-    boardingTime: "2025-03-07T19:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-07T21:50:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-07T19:20:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "1423",
-    departureDate: "2025-03-08",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-08T14:00:00Z",
-    estimatedDepartureUTC: "2025-03-08T12:30:00Z",
-    arrivalAirport: "DEN",
-    departureAirport: "ORD",
-    arrivalCity: "Denver",
-    departureCity: "Chicago",
-    departureGate: "C15",
-    arrivalGate: "A12",
-    flightStatus: "Canceled",
-    statusCode: "CNCL",
-    equipmentModel: "Airbus A320",
-    phase: "not_departed",
-    departureTerminal: "2",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-08T12:00:00Z",
-    isCanceled: true,
-    scheduledArrivalUTCDateTime: "2025-03-08T14:00:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-08T12:30:00Z",
-    outTimeUTC: "",
-    offTimeUTC: "",
-    onTimeUTC: "",
-    inTimeUTC: "",
-  },
-  {
-    flightNumber: "7892",
-    departureDate: "2025-03-09",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-09T10:15:00Z",
-    estimatedDepartureUTC: "2025-03-09T07:45:00Z",
-    arrivalAirport: "JFK",
-    departureAirport: "DEN",
-    arrivalCity: "New York",
-    departureCity: "Denver",
-    departureGate: "A18",
-    arrivalGate: "D5",
-    flightStatus: "Arrived At Gate",
-    statusCode: "ARRV",
-    equipmentModel: "Boeing 787-9",
-    phase: "arrived",
-    departureTerminal: "1",
-    arrivalTerminal: "4",
-    actualDepartureUTC: "2025-03-09T07:50:00Z",
-    actualArrivalUTC: "2025-03-09T10:10:00Z",
-    baggageClaim: "12",
-    departureDelayMinutes: 5,
-    arrivalDelayMinutes: -5,
-    boardingTime: "2025-03-09T07:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-09T10:15:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-09T07:45:00Z",
-    outTimeUTC: "2025-03-09T07:40:00Z",
-    offTimeUTC: "2025-03-09T07:50:00Z",
-    onTimeUTC: "2025-03-09T10:05:00Z",
-    inTimeUTC: "2025-03-09T10:10:00Z",
-  },
-];
+const SubscribedFlights = flights;
 
 export default function UnsubscribeFlightClient() {
   const { isLoading } = useWeb3();
-
-  // State for flights and filtering
+  const [isUnsubscribeDialogOpen, setIsUnsubscribeDialogOpen] = useState(false);
   const [subscribedFlights, setSubscribedFlights] =
     useState<FlightData[]>(SubscribedFlights);
   const [filteredFlights, setFilteredFlights] =
     useState<FlightData[]>(SubscribedFlights);
-  const [isUnsubscribing, setIsUnsubscribing] = useState<
-    Record<string, boolean>
-  >({});
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false); // Simplified loading state
   const [error, setError] = useState<string | null>(null);
-
-  // Pagination state
+  const [selectedFlights, setSelectedFlights] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [flightsPerPage, setFlightsPerPage] = useState(5);
-
-  // Search filters state
   const [flightNumber, setFlightNumber] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
-  const [departureStation, setDepartureStation] = useState("JFK");
-  const [arrivalStation, setArrivalStation] = useState("ORD");
+  const [departureStation, setDepartureStation] = useState("");
+  const [arrivalStation, setArrivalStation] = useState("");
+  const [departureResults, setDepartureResults] = useState(airports);
+  const [arrivalResults, setArrivalResults] = useState(airports);
+  const [showDepartureResults, setShowDepartureResults] = useState(false);
+  const [showArrivalResults, setShowArrivalResults] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  // Handle checkbox selection
+  const handleFlightSelect = useCallback((flightId: string) => {
+    setSelectedFlights((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(flightId)) {
+        newSelected.delete(flightId);
+      } else {
+        newSelected.add(flightId);
+      }
+      return newSelected;
+    });
+  }, []);
+
+  // Reset selections when filters change
+  useEffect(() => {
+    setSelectedFlights(new Set());
+    setSelectAll(false);
+  }, [filteredFlights]);
 
   // Handlers for filter changes
   const handleFlightNumberChange = useCallback((value: string) => {
@@ -357,11 +122,72 @@ export default function UnsubscribeFlightClient() {
     setFlightNumber(value);
   }, []);
 
+  const onCarrierChange = useCallback((value: string) => {
+    setCarrier(value);
+  }, []);
+
   const onDateChange = useCallback((date: Date) => {
     setSelectedDate(date);
   }, []);
 
-  // Search function
+  // Search function for departure station
+  const handleDepartureSearch = useCallback((query: string) => {
+    setDepartureStation(query);
+    if (query.trim() === "") {
+      setDepartureResults(airports);
+    } else {
+      const filteredResults = airports.filter(
+        (airport) =>
+          airport.code.toLowerCase().includes(query.toLowerCase()) ||
+          airport.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setDepartureResults(filteredResults);
+    }
+    setShowDepartureResults(true);
+  }, []);
+
+  // Search function for arrival station
+  const handleArrivalSearch = useCallback((query: string) => {
+    setArrivalStation(query);
+    if (query.trim() === "") {
+      setArrivalResults(airports);
+    } else {
+      const filteredResults = airports.filter(
+        (airport) =>
+          airport.code.toLowerCase().includes(query.toLowerCase()) ||
+          airport.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setArrivalResults(filteredResults);
+    }
+    setShowArrivalResults(true);
+  }, []);
+
+  // Select departure station
+  const handleDepartureSelect = useCallback((code: string) => {
+    setDepartureStation(code);
+    setShowDepartureResults(false);
+  }, []);
+
+  // Select arrival station
+  const handleArrivalSelect = useCallback((code: string) => {
+    setArrivalStation(code);
+    setShowArrivalResults(false);
+  }, []);
+
+  // Add a reset filters function
+  const resetFilters = useCallback(() => {
+    setFlightNumber("");
+    setCarrier("UA");
+    setDepartureStation("JFK");
+    setArrivalStation("ORD");
+    setSelectedDate(new Date());
+    setFilteredFlights(subscribedFlights);
+    setSearchError("");
+    setSelectedFlights(new Set());
+    setSelectAll(false);
+  }, [subscribedFlights]);
+
+  // Enhance the onSearch function
   const onSearch = useCallback(() => {
     setIsSearching(true);
     setSearchError("");
@@ -395,18 +221,17 @@ export default function UnsubscribeFlightClient() {
         return false;
       }
 
-      // Match date if selected (only check if it's the same day)
+      // Match date if selected - fix timezone issues
       if (selectedDate) {
         const flightDate = new Date(flight.departureDate);
         const searchDate = new Date(selectedDate);
 
-        if (
-          flightDate.getFullYear() !== searchDate.getFullYear() ||
-          flightDate.getMonth() !== searchDate.getMonth() ||
-          flightDate.getDate() !== searchDate.getDate()
-        ) {
-          return false;
-        }
+        // Compare only year, month, and day
+        return (
+          flightDate.getFullYear() === searchDate.getFullYear() &&
+          flightDate.getMonth() === searchDate.getMonth() &&
+          flightDate.getDate() === searchDate.getDate()
+        );
       }
 
       return true;
@@ -414,9 +239,15 @@ export default function UnsubscribeFlightClient() {
 
     setFilteredFlights(results);
     setCurrentPage(1); // Reset to first page after search
+    setSelectedFlights(new Set()); // Clear selections
+    setSelectAll(false);
 
-    // Show success toast
-    toast.success("Search completed successfully");
+    if (results.length === 0) {
+      toast.info("No flights match your search criteria");
+    } else {
+      toast.success(`Found ${results.length} matching flights`);
+    }
+
     setIsSearching(false);
   }, [
     flightNumber,
@@ -425,7 +256,7 @@ export default function UnsubscribeFlightClient() {
     arrivalStation,
     selectedDate,
     subscribedFlights,
-  ]);
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset to first page when rows per page changes
   useEffect(() => {
@@ -440,6 +271,76 @@ export default function UnsubscribeFlightClient() {
     indexOfLastFlight
   );
   const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
+
+  // Computed filtered airports
+  const filteredDepartureAirports = departureResults;
+  const filteredArrivalAirports = arrivalResults;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowDepartureResults(false);
+      setShowArrivalResults(false);
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  // Handle select all checkbox
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      setSelectAll(checked);
+      if (checked) {
+        const allFlightIds = currentFlights.map(
+          (flight) => flight.flightNumber
+        );
+        setSelectedFlights(new Set(allFlightIds));
+      } else {
+        setSelectedFlights(new Set());
+      }
+    },
+    [currentFlights]
+  );
+
+  // Handle bulk unsubscribe
+  const handleBulkUnsubscribe = useCallback(async () => {
+    if (selectedFlights.size === 0) {
+      toast.error("Please select at least one flight to unsubscribe");
+      return;
+    }
+
+    setIsUnsubscribing(true); // Start loading
+
+    try {
+      // Simulate an API call or actual unsubscribe logic
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
+      toast.success(`Unsubscribed from ${selectedFlights.size} flights`);
+      setSelectedFlights(new Set());
+      setSelectAll(false);
+    } catch (error) {
+      toast.error("Failed to unsubscribe from flights");
+    } finally {
+      setIsUnsubscribing(false); // End loading
+      setIsUnsubscribeDialogOpen(false); // Close the dialog
+    }
+  }, [selectedFlights]);
+
+  const handleUnsubscribe = () => {
+    if (selectedFlights.size === 0) {
+      toast.error("Please select at least one flight to unsubscribe");
+      return;
+    }
+    setIsUnsubscribeDialogOpen(true); // Open the dialog
+  };
+
+  // Reset selections when filters change
+  useEffect(() => {
+    setSelectedFlights(new Set());
+    setSelectAll(false);
+  }, [filteredFlights]);
 
   return (
     <>
@@ -456,7 +357,14 @@ export default function UnsubscribeFlightClient() {
           {/* search functionality start*/}
           <Card>
             <CardHeader>
-              <CardTitle>UnSubscription Flight</CardTitle>
+              {selectedFlights.size > 0 && (
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    {selectedFlights.size} flight
+                    {selectedFlights.size > 1 ? "s" : ""} selected
+                  </div>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="w-full mx-auto">
@@ -474,31 +382,33 @@ export default function UnsubscribeFlightClient() {
                     >
                       Carrier
                     </label>
-                    <Select value={carrier} onValueChange={handleCarrierChange}>
+                    <Select value={carrier} onValueChange={onCarrierChange}>
                       <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
                         <SelectValue placeholder="Carrier" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="UA">UA</SelectItem>
+                        <SelectItem value="AA">AA</SelectItem>
+                        <SelectItem value="DL">DL</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="flex flex-3 flex-col">
+                  <div className="flex flex-col">
                     <label
                       htmlFor="flight-number"
                       className="text-sm font-medium mb-1"
                     >
-                      Flight Number
+                      Flt
                     </label>
                     <Input
                       id="flight-number"
-                      placeholder="Enter flight number..."
+                      placeholder="Enter Flt no."
                       value={flightNumber}
                       onChange={(e) => onFlightNumberChange(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && onSearch()}
-                      disabled={isSearching}
-                      className="bg-background/90 border-2 border-primary/50 shadow-sm w-48 focus-visible:border-primary"
+                      // onKeyDown={(e) => e.key === "Enter" && onSearch()}
+                      disabled={isLoading}
+                      className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
                     />
                   </div>
 
@@ -506,65 +416,84 @@ export default function UnsubscribeFlightClient() {
                     <div className="pt-4">and/or </div>
                   </div>
 
-                  <div className="flex flex-col w-full md:w-auto">
+                  {/* Departure Station */}
+                  <div className="flex  flex-col w-full md:w-auto relative">
                     <label
                       htmlFor="departure-station"
                       className="text-sm font-medium mb-1"
                     >
-                      Departure Station
+                      Dep Stn
                     </label>
-                    <Select
-                      value={departureStation}
-                      onValueChange={handleDepartureStationChange}
-                    >
-                      <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
-                        <SelectValue placeholder="Departure Station" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="LAX">LAX</SelectItem>
-                        <SelectItem value="SFO">SFO</SelectItem>
-                        <SelectItem value="DEN">DEN</SelectItem>
-                        <SelectItem value="MIA">MIA</SelectItem>
-                        <SelectItem value="JFK">JFK</SelectItem>
-                        <SelectItem value="ORD">ORD</SelectItem>
-                        <SelectItem value="PHX">PHX</SelectItem>
-                        <SelectItem value="SAN">SAN</SelectItem>
-                        <SelectItem value="IAH">IAH</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                      <Input
+                        id="departure-station"
+                        placeholder="From"
+                        value={departureStation}
+                        onChange={(e) => handleDepartureSearch(e.target.value)}
+                        onFocus={() => setShowDepartureResults(true)}
+                        className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+                      />
+                      {showDepartureResults && (
+                        <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredDepartureAirports.map((airport) => (
+                            <div
+                              key={airport.code}
+                              className="p-2 hover:bg-accent cursor-pointer"
+                              onClick={() =>
+                                handleDepartureSelect(airport.code)
+                              }
+                            >
+                              <div className="font-bold">{airport.code}</div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {airport.name}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex flex-col w-full md:w-auto">
+                  {/* Arrival Station */}
+                  <div className="flex flex-col w-full md:w-auto relative">
                     <label
                       htmlFor="arrival-station"
                       className="text-sm font-medium mb-1"
                     >
-                      Arrival Station
+                      Arr Stn
                     </label>
-                    <Select
-                      value={arrivalStation}
-                      onValueChange={handleArrivalStationChange}
-                    >
-                      <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
-                        <SelectValue placeholder="Arrival Station" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="LAX">LAX</SelectItem>
-                        <SelectItem value="SFO">SFO</SelectItem>
-                        <SelectItem value="DEN">DEN</SelectItem>
-                        <SelectItem value="MIA">MIA</SelectItem>
-                        <SelectItem value="JFK">JFK</SelectItem>
-                        <SelectItem value="ORD">ORD</SelectItem>
-                        <SelectItem value="PHX">PHX</SelectItem>
-                        <SelectItem value="SAN">SAN</SelectItem>
-                        <SelectItem value="LAS">LAS</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                      <Input
+                        id="arrival-station"
+                        placeholder="To"
+                        value={arrivalStation}
+                        onChange={(e) => handleArrivalSearch(e.target.value)}
+                        onFocus={() => setShowArrivalResults(true)}
+                        className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+                      />
+                      {showArrivalResults && (
+                        <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-auto ">
+                          {filteredArrivalAirports.map((airport) => (
+                            <div
+                              key={airport.code}
+                              className="p-2 hover:bg-accent cursor-pointer"
+                              onClick={() => handleArrivalSelect(airport.code)}
+                            >
+                              <div className="font-bold">{airport.code}</div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {airport.name}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
+                  {/* Date Picker */}
                   <div className="flex flex-col w-full md:w-auto">
                     <label className="text-sm font-medium mb-1">
-                      Scheduled Departure Date
+                      Sch Dpt Dt
                     </label>
                     <Popover
                       open={isCalendarOpen}
@@ -587,7 +516,14 @@ export default function UnsubscribeFlightClient() {
                           selected={selectedDate}
                           onSelect={(selectedDate) => {
                             if (selectedDate) {
-                              onDateChange(selectedDate);
+                              const normalizedDate = new Date(
+                                Date.UTC(
+                                  selectedDate.getFullYear(),
+                                  selectedDate.getMonth(),
+                                  selectedDate.getDate()
+                                )
+                              );
+                              onDateChange(normalizedDate);
                             }
                             setIsCalendarOpen(false);
                           }}
@@ -600,14 +536,34 @@ export default function UnsubscribeFlightClient() {
                     </Popover>
                   </div>
 
-                  <div className="flex flex-col justify-end mt-auto">
+                  {/* Search Button Group */}
+                  <div className="flex justify-end mt-auto gap-2">
                     <Button
                       onClick={onSearch}
                       className="h-10 w-full gradient-border md:w-auto"
-                      disabled={isSearching}
+                      disabled={isSearching || isLoading}
                     >
                       {isSearching ? "Searching..." : "Search"}
                     </Button>
+                    <Button
+                      onClick={resetFilters}
+                      variant="outline"
+                      className="h-10 w-full md:w-auto"
+                      disabled={isSearching || isLoading}
+                    >
+                      Clear Filters
+                    </Button>
+                    {selectedFlights.size > 0 && (
+                      <div className="flex justify-between items-center">
+                        <Button
+                          onClick={handleUnsubscribe}
+                          variant="outline"
+                          className="h-9"
+                        >
+                          Unsubscribe Selected
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -619,16 +575,35 @@ export default function UnsubscribeFlightClient() {
                 )}
               </div>
               <div className="mt-8">
-                {/* Pass pagination props to the data table */}
-                <UnSubscribeDataTable
-                  flights={currentFlights}
-                  isLoading={isLoading}
-                  currentPage={currentPage}
-                  itemsPerPage={flightsPerPage}
-                  totalItems={filteredFlights.length}
-                />
+                {filteredFlights.length === 0 && !isSearching ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No flights match your search criteria. Try different filters
+                    or
+                    <Button
+                      variant="link"
+                      onClick={resetFilters}
+                      className="px-1 text-primary"
+                    >
+                      clear all filters
+                    </Button>
+                  </div>
+                ) : (
+                  <UnSubscribeDataTable
+                    flights={currentFlights}
+                    isLoading={isLoading}
+                    currentPage={currentPage}
+                    itemsPerPage={flightsPerPage}
+                    totalItems={filteredFlights.length}
+                    selectedFlights={selectedFlights}
+                    onFlightSelect={handleFlightSelect}
+                    selectAll={selectAll}
+                    onSelectAll={handleSelectAll}
+                  />
+                )}
               </div>
             </CardContent>
+
+            {/* pagination start */}
             <CardFooter>
               {/* Pagination controls */}
               <div className="flex justify-between w-full items-center">
@@ -739,9 +714,42 @@ export default function UnsubscribeFlightClient() {
                 </div>
               </div>
             </CardFooter>
+            {/* pagination end */}
           </Card>
         </div>
       )}
+
+      {/* Unsubscribe Confirmation Dialog */}
+      <Dialog
+        open={isUnsubscribeDialogOpen}
+        onOpenChange={setIsUnsubscribeDialogOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Unsubscription</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to unsubscribe from {selectedFlights.size}{" "}
+            selected flight{selectedFlights.size > 1 ? "s" : ""}?
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsUnsubscribeDialogOpen(false)}
+              disabled={isUnsubscribing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleBulkUnsubscribe}
+              disabled={isUnsubscribing}
+            >
+              {isUnsubscribing ? "Unsubscribing..." : "Unsubscribe"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

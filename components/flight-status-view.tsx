@@ -43,13 +43,37 @@ type TimeFormat = "utc" | "local";
 export default function FlightStatusView({
   flightData,
 }: FlightStatusViewProps) {
+  // Check if flightData is empty or all strings are empty
+  const isFlightDataEmpty = Object.values(flightData).every(
+    (value) => typeof value === "string" && value.trim() === ""
+  );
+
+  if (isFlightDataEmpty) {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Flight Not Found
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground">
+            The flight information could not be found. Please check the flight
+            number and try again.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [currentPhase, setCurrentPhase] = useState<FlightPhase>("not_departed");
   const [activeTab, setActiveTab] = useState<FlightPhase>("not_departed");
   const [currentStatus, setCurrentStatus] = useState("");
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("utc");
   const [timezone, setTimezone] = useState("America/New_York");
-
-  // Check if flightData is empty or all strings are empty
 
   // Map API status code to flight phase
   const getFlightPhase = useCallback(
@@ -98,7 +122,6 @@ export default function FlightStatusView({
 
   useEffect(() => {
     // Set initial phase based on flight status
-
     const phase = getFlightPhase(flightData.statusCode, flightData.isCanceled);
     setCurrentPhase(phase);
     setActiveTab(phase);
@@ -205,31 +228,6 @@ export default function FlightStatusView({
         return "bg-muted/20 text-muted-foreground";
     }
   };
-
-  const isFlightDataEmpty = Object.values(flightData).every(
-    (value) => typeof value === "string" && value.trim() === ""
-  );
-
-  if (isFlightDataEmpty) {
-    return (
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              Flight Not Found
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center text-muted-foreground">
-            The flight information could not be found. Please check the flight
-            number and try again.
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   // City Information Component
   const CityInfo = ({
@@ -443,7 +441,7 @@ export default function FlightStatusView({
                     {phase === "off" && <ArrowUp className="h-4 w-4" />}
                     {phase === "on" && <ArrowDown className="h-4 w-4" />}
                     {phase === "in" && <CheckCircle2 className="h-4 w-4" />}
-                    {phase === "not_departed" && "NDPT"}
+                    {phase === "not_departed" && "Not Departed"}
                     {phase === "out" && "OUT"}
                     {phase === "off" && "OFF"}
                     {phase === "on" && "ON"}

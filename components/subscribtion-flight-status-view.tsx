@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface FlightStatusViewProps {
+export interface FlightStatusViewProps {
   flightData: FlightData;
   isLoading?: boolean;
 }

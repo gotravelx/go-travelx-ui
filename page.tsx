@@ -15,16 +15,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ViewFlight from "./pages/view-flight/page";
 import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
 import { Footer } from "@/components/footer";
-import WalletConnectionCard from "./pages/wallet-connect-card/page";
 import SubscribeFlightStatusView from "./components/subscribtion-flight-status-view";
+import SubscribeFlightCard from "./components/subscribe-card";
 
 export default function FlightSearch() {
-  const { isConnected, isLoading, error, connectWallet } = useWeb3();
+  const { isLoading } = useWeb3();
 
   const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  );
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // Separate states for different views
   const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
@@ -33,8 +31,10 @@ export default function FlightSearch() {
 
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
-  const [departureStation, setDepartureStation] = useState("JFK");
-  const [arrivalStation, setArrivalStation] = useState("ORD");
+  // stations
+
+  const [departureStation, setDepartureStation] = useState("");
+  const [arrivalStation, setArrivalStation] = useState("");
   const [activeTab, setActiveTab] = useState("view");
 
   const [lastInteractionTime, setLastInteractionTime] = useState<
@@ -63,6 +63,14 @@ export default function FlightSearch() {
     setSubscribeFlightData(null);
   }, []);
 
+  const handleDepartureStationChange = (value: string) => {
+    setDepartureStation(value);
+  };
+
+  const handleArrivalStationChange = (value: string) => {
+    setArrivalStation(value);
+  };
+
   const handleSearch = useCallback(async () => {
     if (!flightNumber) {
       setSearchError("Please enter a flight number");
@@ -74,7 +82,7 @@ export default function FlightSearch() {
         carrier,
         flightNumber,
         departureStation,
-        selectedDate
+        selectedDate // passing the Date object directly
       );
       setSubscribeFlightData(data);
       setSearchError(""); // Clear any previous errors
@@ -158,9 +166,7 @@ export default function FlightSearch() {
               transition={{ duration: 0.5 }}
             >
               <Card>
-                <CardHeader>
-                  <CardTitle>View Flight Subscription</CardTitle>
-                </CardHeader>
+                <CardHeader></CardHeader>
                 <CardContent>
                   <ViewFlight
                     flightNumber={flightNumber}
@@ -188,9 +194,7 @@ export default function FlightSearch() {
               transition={{ duration: 0.5 }}
             >
               <Card>
-                <CardHeader>
-                  <CardTitle>Add Flight Subscription </CardTitle>
-                </CardHeader>
+                <CardHeader></CardHeader>
                 <CardContent>
                   <SubscribeFlight
                     flightNumber={flightNumber}
@@ -200,11 +204,14 @@ export default function FlightSearch() {
                     searchError={searchError}
                     selectedDate={selectedDate}
                     onDateChange={setSelectedDate}
-                    carrier={carrier} // Pass carrier state
+                    carrier={carrier}
                     departureStation={departureStation}
+                    setDepartureStation={setDepartureStation}
                     arrivalStation={arrivalStation}
-                    onDepartureStationChange={handleDepartureStationChang}
-                    onCarrierChange={handleCarrierChange} // Pass handler
+                    setArrivalStation={setArrivalStation}
+                    onDepartureStationChange={handleDepartureStationChange}
+                    onArrivalStationChange={handleArrivalStationChange}
+                    onCarrierChange={handleCarrierChange}
                   />
 
                   {subscribeFlightData && (
@@ -214,9 +221,12 @@ export default function FlightSearch() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <SubscribeFlightStatusView
+                      {/* <SubscribeFlightStatusView
                         flightData={subscribeFlightData}
-                      />
+                      /> */}
+                      <div className="w-full flex items-start justify-start">
+                        <SubscribeFlightCard flightData={subscribeFlightData} />
+                      </div>
                     </motion.div>
                   )}
                 </CardContent>
