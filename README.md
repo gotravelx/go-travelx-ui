@@ -1,66 +1,81 @@
-# GoTravelX - Flight Tracking System for Vendors
+# GoTravelX - Flight Tracking System (Frontend)
 
-## Overview
+GoTravelX is a **flight tracking system** for vendors, built using **Next.js** and **shadcn/ui**. This frontend application provides real-time flight updates, intuitive UI components, and seamless API integration.
 
-GoTravelX is a **Flight Tracking System** designed for vendors and cleaners to efficiently track flights and provide timely services. This system ensures that vendors can access real-time flight information and manage their tasks effectively.
+## 🚀 Features
 
-## Tech Stack
+- Flight search and tracking
+- Real-time updates using WebSockets
+- Modern UI with **shadcn/ui**
+- Vendor authentication and dashboard
+- Responsive design with Tailwind CSS
+- Secure API communication using Axios
 
-- **Backend**: Node.js (Express.js)
-- **Database**: MongoDB
-- **Environment**: Docker (Optional)
-- **Port**: `3000`
+## 🏗 Tech Stack
 
-## Features
+- **Framework:** Next.js
+- **UI Library:** shadcn/ui, Tailwind CSS
+- **State Management:** React Context API / Zustand (if used)
+- **API Handling:** Axios
+- **Date Formatting:** date-fns
 
-- Real-time flight information tracking
-- Vendor and cleaner service management
-- RESTful API for seamless integration
-- Secure authentication and authorization
-- Scalable and efficient database management
+## 📂 Project Structure
 
-## Installation & Setup
+```
+📦 go-travelx-frontend
+├── 📁 components         # Reusable UI components
+├── 📁 pages              # Next.js pages
+├── 📁 hooks              # Custom hooks
+├── 📁 lib                # Utility functions
+├── 📁 styles             # Global styles (Tailwind CSS)
+├── 📁 public             # Static assets
+├── .env.local            # Environment variables
+├── next.config.js        # Next.js configuration
+└── README.md             # Project documentation
+```
 
-### Prerequisites
+## 🛠 Installation & Setup
 
-Make sure you have the following installed:
+### 1️⃣ Clone the Repository
 
-- [Node.js](https://nodejs.org/)
-- [MongoDB](https://www.mongodb.com/)
+```sh
+git clone https://github.com/yourusername/go-travelx-frontend.git
+cd go-travelx-frontend
+```
 
-### Steps to Run Locally
+### 2️⃣ Install Dependencies
 
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/gotravelx/go-travelx-backend
-   cd go-travelx-backend
-   ```
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-3. Set up environment variables: Create a `.env` file and add the following:
-   ```env
-   PORT=3000
-   MONGO_URI=your_mongodb_connection_string
-   ```
-4. Start the server:
-   ```sh
-   npm start
-   ```
-5. Open your browser or use Postman to test the APIs at:
-   ```
-   http://localhost:3000
-   ```
+```sh
+npm install
+```
 
-## Contributing
+### 3️⃣ Set Up Environment Variables
 
-Feel free to submit issues or pull requests to improve GoTravelX. Contributions are welcome!
+Create a `.env.local` file and configure your API URL:
 
-## License
+```env
+NEXT_PUBLIC_API_BASE_URL=https://api.gotravelx.com
+```
 
-This project is licensed under the MIT License.
+### 4️⃣ Run the Development Server
+
+```sh
+npm run dev
+```
+
+Open [http://localhost:3001](http://localhost:3001) in your browser.
+
+## 🔧 Available Scripts
+
+- `npm run dev` → Start the development server
+- `npm run build` → Build for production
+- `npm run start` → Start production server
+- `npm run lint` → Check for linting issues
+
+## 📞 Support
+
+For any issues, contact []() or open an issue in the repository.
 
 ---
 
-Developed by **GoTravelx** 🚀
+Happy coding! ✈️🚀
