@@ -15,16 +15,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ViewFlight from "./pages/view-flight/page";
 import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
 import { Footer } from "@/components/footer";
-import WalletConnectionCard from "./pages/wallet-connect-card/page";
 import SubscribeFlightStatusView from "./components/subscribtion-flight-status-view";
+import SubscribeFlightCard from "./components/subscribe-card";
 
 export default function FlightSearch() {
-  const { isConnected, isLoading, error, connectWallet } = useWeb3();
+  const { isLoading } = useWeb3();
 
   const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  );
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // Separate states for different views
   const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
@@ -33,7 +31,10 @@ export default function FlightSearch() {
 
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
-  const [departureStation, setDepartureStation] = useState("JFK");
+  // stations
+
+  const [departureStation, setDepartureStation] = useState("");
+  const [arrivalStation, setArrivalStation] = useState("");
   const [activeTab, setActiveTab] = useState("view");
 
   const [lastInteractionTime, setLastInteractionTime] = useState<
@@ -62,6 +63,14 @@ export default function FlightSearch() {
     setSubscribeFlightData(null);
   }, []);
 
+  const handleDepartureStationChange = (value: string) => {
+    setDepartureStation(value);
+  };
+
+  const handleArrivalStationChange = (value: string) => {
+    setArrivalStation(value);
+  };
+
   const handleSearch = useCallback(async () => {
     if (!flightNumber) {
       setSearchError("Please enter a flight number");
@@ -73,7 +82,7 @@ export default function FlightSearch() {
         carrier,
         flightNumber,
         departureStation,
-        selectedDate
+        selectedDate // passing the Date object directly
       );
       setSubscribeFlightData(data);
       setSearchError(""); // Clear any previous errors
@@ -123,27 +132,8 @@ export default function FlightSearch() {
     setDepartureStation(value);
   }, []);
 
-  // if (!isConnected) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
-  //       <div className="absolute top-4 right-4">
-  //         <ThemeToggle />
-  //       </div>
-  //       <div className="container mx-auto px-4 py-8 max-w-md pt-20">
-  //         <motion.div
-  //           initial={{ opacity: 0, y: 20 }}
-  //           animate={{ opacity: 1, y: 0 }}
-  //           transition={{ duration: 0.5 }}
-  //         >
-  //           <WalletConnectPage />
-  //         </motion.div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 dark:from-background dark:to-secondary/10">
+    <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
       <NavBar
         lastInteractionTime={lastInteractionTime}
         onRefresh={handleRefresh}
@@ -153,11 +143,11 @@ export default function FlightSearch() {
       <main className="flex-grow">
         <Tabs
           defaultValue="view"
-          className="container max-w-5xl mx-auto px-4 py-8 pt-24"
+          className="container mx-auto pt-24 px-4 py-8"
           onValueChange={handleTabChange}
           value={activeTab}
         >
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="view">View Flight Subscriptions</TabsTrigger>
             <TabsTrigger value="subscribe-flight">
               Add Flight Subscription
@@ -168,17 +158,15 @@ export default function FlightSearch() {
           </TabsList>
 
           {/* view flight ui start --------------------  */}
-          <TabsContent value="view" className="min-h-screen max-h-max">
+          <TabsContent value="view" className="max-h-max min-h-screen">
             <motion.div
-              className="max-w-5xl mx-auto"
+              className="mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
               <Card>
-                <CardHeader>
-                  <CardTitle>View Flight Subscription</CardTitle>
-                </CardHeader>
+                <CardHeader></CardHeader>
                 <CardContent>
                   <ViewFlight
                     flightNumber={flightNumber}
@@ -191,17 +179,6 @@ export default function FlightSearch() {
                     carrier={carrier} // Pass carrier state
                     onCarrierChange={handleCarrierChange} // Pass handler
                   />
-
-                  {viewFlightData && (
-                    <motion.div
-                      className="mt-6 space-y-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <FlightStatusView flightData={viewFlightData} />
-                    </motion.div>
-                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -211,15 +188,13 @@ export default function FlightSearch() {
           {/* subscribe flight ui start --------------------  */}
           <TabsContent value="subscribe-flight">
             <motion.div
-              className="max-w-5xl mx-auto"
+              className="mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
               <Card>
-                <CardHeader>
-                  <CardTitle>Add Flight Subscription </CardTitle>
-                </CardHeader>
+                <CardHeader></CardHeader>
                 <CardContent>
                   <SubscribeFlight
                     flightNumber={flightNumber}
@@ -229,10 +204,14 @@ export default function FlightSearch() {
                     searchError={searchError}
                     selectedDate={selectedDate}
                     onDateChange={setSelectedDate}
-                    carrier={carrier} // Pass carrier state
+                    carrier={carrier}
                     departureStation={departureStation}
-                    onDepartureStationChange={handleDepartureStationChang}
-                    onCarrierChange={handleCarrierChange} // Pass handler
+                    setDepartureStation={setDepartureStation}
+                    arrivalStation={arrivalStation}
+                    setArrivalStation={setArrivalStation}
+                    onDepartureStationChange={handleDepartureStationChange}
+                    onArrivalStationChange={handleArrivalStationChange}
+                    onCarrierChange={handleCarrierChange}
                   />
 
                   {subscribeFlightData && (
@@ -242,9 +221,12 @@ export default function FlightSearch() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <SubscribeFlightStatusView
+                      {/* <SubscribeFlightStatusView
                         flightData={subscribeFlightData}
-                      />
+                      /> */}
+                      <div className="w-full flex items-start justify-start">
+                        <SubscribeFlightCard flightData={subscribeFlightData} />
+                      </div>
                     </motion.div>
                   )}
                 </CardContent>
@@ -260,7 +242,7 @@ export default function FlightSearch() {
           {/* un-subscribe-flight ui end --------------------  */}
         </Tabs>
       </main>
-      <div className="mt-auto  text-center p-4">
+      <div className="p-4 text-center mt-auto">
         <Footer />
       </div>
     </div>

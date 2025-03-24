@@ -1,5 +1,5 @@
 
-import { FlightDetailsResponse, addFlightSubscriptionApi, viewSubscribedFlight } from "./flight-api"
+import {  addFlightSubscriptionApi, viewSubscribedFlight } from "./flight-api"
 
 // Types for flight data matching the contract structure
 export interface FlightData {
@@ -16,7 +16,7 @@ export interface FlightData {
   departureGate: string
   arrivalGate: string
   flightStatus: string
-  statusCode: string
+  currentFlightStatus: string
   equipmentModel: string
   phase: FlightPhase
   departureTerminal?: string
@@ -81,7 +81,8 @@ export const flightService = {
         departureStation,
         carrierCode
       });
-
+      console.log("subtribe flight data ------>",flightData);
+      
       return flightData;
     } catch (error) {
       console.error('Error fetching flight details:', error);

@@ -60,8 +60,8 @@ export const addFlightSubscriptionApi = async (data: FlightSubscriptionRequest):
     const response = await axios.post(`${DEV_SERVER}/v1/flights/add-flight-subscription`, 
       {
         flightNumber: data.flightNumber,
-          departureAirport: data.scheduledDepartureDate,
-        scheduledDepartureDate: data.departureStation,
+          departureAirport: data.departureStation,
+        scheduledDepartureDate: data.scheduledDepartureDate,
         carrierCode: data.carrierCode,
       },
     )

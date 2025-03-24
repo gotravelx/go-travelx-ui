@@ -63,12 +63,8 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState("");
-  const [currentFlightNumber, setCurrentFlightNumber] = useState<string | null>(
-    null
-  );
   const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
-  // Add a new state for wallet detection loading
   const [isDetectingWallet, setIsDetectingWallet] = useState(true);
 
   // Check if MetaMask is installed
@@ -221,13 +217,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   // MetaMask connection UI
   const MetaMaskConnectionUI = () => (
     <>
-      <div className="flex relative justify-center p-4">
-        <div className="absolute top-4 right-4 z-50">
+      <div className="flex justify-center p-4 w-full max-w-5xl relative">
+        <div className="absolute right-4 top-4 z-50">
           <ThemeToggle />
         </div>
 
         {isDetectingWallet ? (
-          <Card className="glass-card max-w-md w-full">
+          <Card className="w-[80%] glass-card sm:w-[500px]">
             <CardHeader>
               <CardTitle>Detecting Wallet</CardTitle>
               <CardDescription>
@@ -236,15 +232,15 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"></div>
               </div>
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-muted-foreground text-sm">
                 Please wait while we detect your wallet connection
               </p>
             </CardContent>
           </Card>
         ) : (
-          <Card className="glass-card max-w-md w-full">
+          <Card className="glass-card max-w-5xl">
             <CardHeader>
               <CardTitle>Connect Wallet</CardTitle>
               <CardDescription>
@@ -264,12 +260,12 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                 onClick={connectWallet}
                 disabled={isLoading}
               >
-                <Wallet className="mr-2 h-4 w-4" />
+                <Wallet className="h-4 w-4 mr-2" />
                 {isLoading ? "Connecting..." : "Connect MetaMask"}
               </Button>
 
               {!isMetaMaskInstalled && (
-                <Alert className="bg-amber-50 text-amber-800 border-amber-200">
+                <Alert className="bg-amber-50 border-amber-200 text-amber-800">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     MetaMask is not installed. Please install it to use
@@ -281,9 +277,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
               <div className="text-center">
                 <button
                   onClick={showMetaMaskInfo}
-                  className="inline-flex items-center text-sm text-primary hover:underline"
+                  className="text-primary text-sm hover:underline inline-flex items-center"
                 >
-                  <HelpCircle className="mr-1 h-3 w-3" />
+                  <HelpCircle className="h-3 w-3 mr-1" />
                   What is MetaMask and why do I need it?
                 </button>
               </div>
@@ -306,24 +302,24 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
             </DialogHeader>
 
             <div className="space-y-4">
-              <div className="rounded-lg border p-4 bg-muted/50">
-                <h3 className="font-medium mb-2 flex items-center">
+              <div className="bg-muted/50 border p-4 rounded-lg">
+                <h3 className="flex font-medium items-center mb-2">
                   <Info className="h-4 w-4 mr-2" />
                   What is MetaMask?
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   MetaMask is a digital wallet that allows you to interact with
                   blockchain applications. It's secure, easy to use, and gives
                   you control over your digital assets.
                 </p>
               </div>
 
-              <div className="rounded-lg border p-4 bg-muted/50">
-                <h3 className="font-medium mb-2 flex items-center">
+              <div className="bg-muted/50 border p-4 rounded-lg">
+                <h3 className="flex font-medium items-center mb-2">
                   <Info className="h-4 w-4 mr-2" />
                   Why do I need it for GoTravelX?
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   GoTravelX uses blockchain technology to provide secure and
                   transparent flight subscriptions. MetaMask allows you to
                   connect to this system and manage your subscriptions.
@@ -333,17 +329,17 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
               {!isMetaMaskInstalled && (
                 <div className="space-y-3">
                   <h3 className="font-medium">Install MetaMask:</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <a
                       href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 p-3 border rounded-md hover:bg-muted transition-colors"
+                      className="flex border p-3 rounded-md gap-2 hover:bg-muted items-center transition-colors"
                     >
-                      <Chrome className="h-5 w-5 text-blue-500" />
+                      <Chrome className="h-5 text-blue-500 w-5" />
                       <div>
                         <p className="font-medium">Chrome</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           Google Chrome
                         </p>
                       </div>
@@ -353,12 +349,12 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                       href="https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 p-3 border rounded-md hover:bg-muted transition-colors"
+                      className="flex border p-3 rounded-md gap-2 hover:bg-muted items-center transition-colors"
                     >
-                      <ExternalLink className="h-5 w-5 text-orange-500" />
+                      <ExternalLink className="h-5 text-orange-500 w-5" />
                       <div>
                         <p className="font-medium">Firefox</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           Firefox Add-ons
                         </p>
                       </div>
@@ -368,12 +364,12 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                       href="https://metamask.io/download/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 p-3 border rounded-md hover:bg-muted transition-colors"
+                      className="flex border p-3 rounded-md gap-2 hover:bg-muted items-center transition-colors"
                     >
-                      <Globe className="h-5 w-5 text-green-500" />
+                      <Globe className="h-5 text-green-500 w-5" />
                       <div>
                         <p className="font-medium">Other</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           All Browsers
                         </p>
                       </div>
