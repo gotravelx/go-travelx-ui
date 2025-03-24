@@ -399,11 +399,11 @@ export default function UnsubscribeFlightClient() {
                       htmlFor="flight-number"
                       className="text-sm font-medium mb-1"
                     >
-                      Flt
+                      Flight
                     </label>
                     <Input
                       id="flight-number"
-                      placeholder="Enter Flt no."
+                      placeholder="Enter Flight no."
                       value={flightNumber}
                       onChange={(e) => onFlightNumberChange(e.target.value)}
                       // onKeyDown={(e) => e.key === "Enter" && onSearch()}
