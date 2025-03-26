@@ -1,4 +1,5 @@
-import type { FlightData } from "@/services/api";
+import { FlightData } from "@/types/flight";
+
 const flights: FlightData[] = [
   {
     flightNumber: "5300",
@@ -16,7 +17,7 @@ const flights: FlightData[] = [
     flightStatus: "On Time",
     statusCode: "NDPT",
     equipmentModel: "Boeing 737-800",
-    phase: "not_departed",
+    phase: "ndpt",
     departureTerminal: "C",
     arrivalTerminal: "1",
     actualDepartureUTC: "",
@@ -49,7 +50,7 @@ const flights: FlightData[] = [
     flightStatus: "Delayed",
     statusCode: "NDPT",
     equipmentModel: "Boeing 737-900",
-    phase: "not_departed",
+    phase: "ndpt",
     departureTerminal: "1",
     arrivalTerminal: "2",
     actualDepartureUTC: "",
@@ -82,7 +83,6 @@ const flights: FlightData[] = [
     flightStatus: "Canceled",
     statusCode: "CNCL",
     equipmentModel: "Airbus A320",
-    phase: "cancelled",
     departureTerminal: "2",
     arrivalTerminal: "1",
     actualDepartureUTC: "",
@@ -115,7 +115,6 @@ const flights: FlightData[] = [
     flightStatus: "Arrived At Gate",
     statusCode: "IN",
     equipmentModel: "Boeing 787-9",
-    phase: "in",
     departureTerminal: "1",
     arrivalTerminal: "4",
     actualDepartureUTC: "2025-03-09T07:50:00Z",
@@ -148,7 +147,6 @@ const flights: FlightData[] = [
     flightStatus: "On Time",
     statusCode: "NDPT",
     equipmentModel: "Boeing 737-800",
-    phase: "not_departed",
     departureTerminal: "C",
     arrivalTerminal: "1",
     actualDepartureUTC: "",
@@ -181,7 +179,6 @@ const flights: FlightData[] = [
     flightStatus: "Delayed",
     statusCode: "NDPT",
     equipmentModel: "Boeing 737-900",
-    phase: "not_departed",
     departureTerminal: "1",
     arrivalTerminal: "2",
     actualDepartureUTC: "",
@@ -214,7 +211,6 @@ const flights: FlightData[] = [
     flightStatus: "Canceled",
     statusCode: "CNCL",
     equipmentModel: "Airbus A320",
-    phase: "not_departed",
     departureTerminal: "2",
     arrivalTerminal: "1",
     actualDepartureUTC: "",
@@ -247,7 +243,6 @@ const flights: FlightData[] = [
     flightStatus: "Arrived At Gate",
     statusCode: "IN",
     equipmentModel: "Boeing 787-9",
-    phase: "in",
     departureTerminal: "1",
     arrivalTerminal: "4",
     actualDepartureUTC: "2025-03-09T07:50:00Z",

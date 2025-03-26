@@ -5,9 +5,8 @@ GoTravelX is a **flight tracking system** for vendors, built using **Next.js** a
 ## 🚀 Features
 
 - Flight search and tracking
-- Real-time updates using WebSockets
+- Real-time updates using
 - Modern UI with **shadcn/ui**
-- Vendor authentication and dashboard
 - Responsive design with Tailwind CSS
 - Secure API communication using Axios
 
@@ -15,7 +14,7 @@ GoTravelX is a **flight tracking system** for vendors, built using **Next.js** a
 
 - **Framework:** Next.js
 - **UI Library:** shadcn/ui, Tailwind CSS
-- **State Management:** React Context API / Zustand (if used)
+- **State Management:** React Context API
 - **API Handling:** Axios
 - **Date Formatting:** date-fns
 
@@ -46,7 +45,7 @@ cd go-travelx-frontend
 ### 2️⃣ Install Dependencies
 
 ```sh
-npm install
+npm install --force
 ```
 
 ### 3️⃣ Set Up Environment Variables
@@ -54,7 +53,7 @@ npm install
 Create a `.env.local` file and configure your API URL:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.gotravelx.com
+NEXT_PUBLIC_API_BASE_URL=https://dev.gotravelx.com/Chain4Travel/flifo/api
 ```
 
 ### 4️⃣ Run the Development Server

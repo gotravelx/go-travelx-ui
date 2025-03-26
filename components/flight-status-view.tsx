@@ -22,8 +22,7 @@ import {
   SettingsIcon,
 } from "lucide-react";
 import { format } from "date-fns-tz";
-import type { FlightData } from "@/services/api";
-import { convertUTCToLocal } from "@/services/api";
+
 import {
   Select,
   SelectContent,
@@ -31,13 +30,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FlightData, FlightPhase } from "@/types/flight";
+import { convertUTCToLocal } from "@/utils/common";
 
 interface FlightStatusViewProps {
   flightData: FlightData;
   isLoading?: boolean;
 }
 
-type FlightPhase = "not_departed" | "out" | "off" | "on" | "in" | "canceled";
 type TimeFormat = "utc" | "local";
 
 export default function FlightStatusView({
@@ -69,8 +69,8 @@ export default function FlightStatusView({
     );
   }
 
-  const [currentPhase, setCurrentPhase] = useState<FlightPhase>("not_departed");
-  const [activeTab, setActiveTab] = useState<FlightPhase>("not_departed");
+  const [currentPhase, setCurrentPhase] = useState<FlightPhase>("ndpt");
+  const [activeTab, setActiveTab] = useState<FlightPhase>("ndpt");
   const [currentStatus, setCurrentStatus] = useState("");
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("utc");
   const [timezone, setTimezone] = useState("America/New_York");
@@ -78,11 +78,11 @@ export default function FlightStatusView({
   // Map API status code to flight phase
   const getFlightPhase = useCallback(
     (statusCode: string, isCanceled: boolean): FlightPhase => {
-      if (isCanceled) return "canceled";
+      if (isCanceled) return "cncl";
 
       switch (statusCode) {
         case "NDPT":
-          return "not_departed";
+          return "ndpt";
         case "OUT":
           return "out";
         case "OFF":
@@ -92,9 +92,9 @@ export default function FlightStatusView({
         case "IN":
           return "in";
         case "CNCL":
-          return "canceled";
+          return "cncl";
         default:
-          return "not_departed";
+          return "ndpt";
       }
     },
     []
@@ -103,7 +103,7 @@ export default function FlightStatusView({
   // Get status description
   const getStatusDescription = useCallback((phase: FlightPhase): string => {
     switch (phase) {
-      case "not_departed":
+      case "ndpt":
         return "Not Departed";
       case "out":
         return "Departed";
@@ -113,7 +113,7 @@ export default function FlightStatusView({
         return "Landing";
       case "in":
         return "Arrived";
-      case "canceled":
+      case "cncl":
         return "Canceled";
       default:
         return "Unknown";
@@ -189,16 +189,16 @@ export default function FlightStatusView({
 
   // Get all regular phases in order
   const getPhaseOrder = (): FlightPhase[] => {
-    return ["not_departed", "out", "off", "on", "in", "canceled"];
+    return ["ndpt", "out", "off", "on", "in", "cncl"];
   };
 
   // Get accessible tabs based on current phase
   const getAccessibleTabs = (currentPhase: FlightPhase): FlightPhase[] => {
-    if (currentPhase === "canceled") {
+    if (currentPhase === "cncl") {
       return ["canceled"];
     }
 
-    const allPhases = getPhaseOrder().filter((phase) => phase !== "canceled");
+    const allPhases = getPhaseOrder().filter((phase) => phase !== "cncl");
     const currentIndex = allPhases.indexOf(currentPhase);
 
     // Return all phases up to and including the current phase
@@ -212,7 +212,7 @@ export default function FlightStatusView({
 
   const getStatusBadgeColor = (phase: FlightPhase) => {
     switch (phase) {
-      case "not_departed":
+      case "ndpt":
         return "bg-blue-500/20 text-blue-500";
       case "out":
         return "bg-yellow-500/20 text-yellow-500";
@@ -416,7 +416,7 @@ export default function FlightStatusView({
           >
             <TabsList
               className={`grid w-full ${
-                currentPhase === "canceled"
+                currentPhase === "cncl"
                   ? "grid-cols-1"
                   : getAccessibleTabs(currentPhase).length === 1
                   ? "grid-cols-1"
@@ -429,26 +429,26 @@ export default function FlightStatusView({
                   : "grid-cols-5"
               }`}
             >
-              {currentPhase !== "canceled" &&
+              {currentPhase !== "cncl" &&
                 getAccessibleTabs(currentPhase).map((phase) => (
                   <TabsTrigger
                     key={phase}
                     value={phase}
                     className="flex items-center gap-2"
                   >
-                    {phase === "not_departed" && <Timer className="h-4 w-4" />}
+                    {phase === "ndpt" && <Timer className="h-4 w-4" />}
                     {phase === "out" && <ArrowRight className="h-4 w-4" />}
                     {phase === "off" && <ArrowUp className="h-4 w-4" />}
                     {phase === "on" && <ArrowDown className="h-4 w-4" />}
                     {phase === "in" && <CheckCircle2 className="h-4 w-4" />}
-                    {phase === "not_departed" && "Not Departed"}
+                    {phase === "ndpt" && "Not Departed"}
                     {phase === "out" && "OUT"}
                     {phase === "off" && "OFF"}
                     {phase === "on" && "ON"}
                     {phase === "in" && "IN"}
                   </TabsTrigger>
                 ))}
-              {currentPhase === "canceled" && (
+              {currentPhase === "cncl" && (
                 <TabsTrigger
                   value="canceled"
                   className="flex items-center gap-2"
@@ -469,7 +469,7 @@ export default function FlightStatusView({
                 className="mt-4"
               >
                 {/* Not Departed Tab */}
-                <TabsContent value="not_departed" className="mt-0">
+                <TabsContent value="ndpt" className="mt-0">
                   <Card>
                     <CardContent className="pt-6">
                       <div className="flex flex-col gap-4">
@@ -561,13 +561,13 @@ export default function FlightStatusView({
                           {flightData.departureDelayMinutes !== 0 && (
                             <Badge
                               variant={
-                                flightData.departureDelayMinutes > 0
+                                flightData.departureDelayMinutes ?? 0 > 0
                                   ? "destructive"
                                   : "outline"
                               }
                               className="text-lg"
                             >
-                              {flightData.departureDelayMinutes > 0
+                              {flightData.departureDelayMinutes ?? 0 > 0
                                 ? `Delayed ${flightData.departureDelayMinutes} min`
                                 : `Early ${Math.abs(
                                     flightData.departureDelayMinutes

@@ -17,6 +17,7 @@ import {
   Plane,
   Calendar,
   Clock,
+  Copy,
 } from "lucide-react";
 import {
   Dialog,
@@ -42,6 +43,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import flights from "@/utils/data";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { CardContent } from "./ui/card";
+import { toast } from "sonner";
 
 // Dummy flight data for initial display
 const dummyFlights: FlightData[] = flights;
@@ -152,17 +161,15 @@ export default function ViewFlightDatTable({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(date);
-    } catch (error) {
-      return "Invalid date";
-    }
+  const copyAddress = async () => {
+    await navigator.clipboard.writeText(
+      "0x70c8a24de705c1d62601376974669863bb21cd6a35ef7127a5d130f44a10a469"
+    );
+    toast.success("transactions copied to clipboard");
+  };
+
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   const formatTime = (dateString: string) => {
@@ -192,6 +199,7 @@ export default function ViewFlightDatTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
+              <TableHead>Transaction Id</TableHead>
               <TableHead>Flt</TableHead>
               <TableHead className="hidden md:table-cell">Sch Dep Dt</TableHead>
               <TableHead>Dep Stn</TableHead>
@@ -214,6 +222,33 @@ export default function ViewFlightDatTable({
                   key={flight.flightNumber}
                   className="hover:bg-muted/50"
                 >
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CardContent className="flex items-center justify-between p-4 cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                            <span className="text-sm font-medium">
+                              {formatAddress(
+                                "0x70c8a24de705c1d62601376974669863bb21cd6a35ef7127a5d130f44a10a469"
+                              )}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={copyAddress}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Camino Transaction Hash</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <TableCell className="font-medium">
                     <div className="flex gap-2 items-center">
                       <Plane className="h-4 text-primary w-4" />

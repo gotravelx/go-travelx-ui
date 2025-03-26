@@ -1,12 +1,10 @@
-
-
 export type FlightPhase =
-  | "not_departed"
+  | "ndpt"
   | "out"
   | "off"
   | "on"
   | "in"
-  | "canceled"
+  | "cncl"
   | "return_to_gate"
   | "return_to_airport"
   | "diverted"
@@ -16,6 +14,8 @@ export type FlightPhase =
 export type TransactionStatusType = "pending" | "completed" | "failed"
 export type TransactionType = "set" | "update"
 
+// Types for flight data matching the contract structure
+
 export interface TransactionStatus {
   hash: string
   status: TransactionStatusType
@@ -23,6 +23,41 @@ export interface TransactionStatus {
   timestamp: number
   flightNumber: string
   updatedFields?: string[]
+}
+
+export interface FlightData {
+  flightNumber: string  // key  Flight Number :   5300
+  departureDate: string // key  exa : 2025-03-06
+  carrierCode: string   // key  ex : UA
+  operatingAirline:string
+  estimatedArrivalUTC: string
+  estimatedDepartureUTC: string
+  arrivalAirport: string    // ex : LAS
+  departureAirport:string   // ex : IAH
+  arrivalCity: string
+  departureCity: string
+  departureGate: string
+  arrivalGate: string
+  statusCode: FlightPhase
+  flightStatus: string
+  equipmentModel: string
+  departureTerminal?: string
+  arrivalTerminal?: string
+  actualDepartureUTC: string
+  actualArrivalUTC: string
+  outTimeUTC?: string
+  offTimeUTC?: string
+  onTimeUTC?: string
+  inTimeUTC?: string
+  baggageClaim?: string
+  departureDelayMinutes?: number
+  arrivalDelayMinutes?: number
+  boardingTime?: string
+  isCanceled: boolean
+  scheduledArrivalUTCDateTime: string,
+  scheduledDepartureUTCDateTime: string,
+  
+
 }
 
 

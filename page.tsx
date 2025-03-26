@@ -148,7 +148,7 @@ export default function FlightSearch() {
           value={activeTab}
         >
           <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="view">View Flight Subscriptions</TabsTrigger>
+            <TabsTrigger value="view">View Flight Subscription</TabsTrigger>
             <TabsTrigger value="subscribe-flight">
               Add Flight Subscription
             </TabsTrigger>
