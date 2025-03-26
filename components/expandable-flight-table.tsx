@@ -20,98 +20,11 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import type { FlightData } from "@/services/api";
+import { FlightData } from "@/types/flight";
+import flights from "@/utils/data";
 
 // Dummy flight data for initial display
-const dummyFlights: FlightData[] = [
-  {
-    flightNumber: "5300",
-    departureDate: "2025-03-06",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-06T15:30:00Z",
-    estimatedDepartureUTC: "2025-03-06T12:00:00Z",
-    arrivalAirport: "LAS",
-    departureAirport: "IAH",
-    arrivalCity: "Las Vegas",
-    departureCity: "Houston",
-    departureGate: "C12",
-    arrivalGate: "B8",
-    flightStatus: "On Time",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-800",
-    phase: "not_departed",
-    departureTerminal: "C",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "4",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-06T11:30:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-06T15:30:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-06T12:00:00Z",
-  },
-  {
-    flightNumber: "2339",
-    departureDate: "2025-03-07",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-07T22:15:00Z",
-    estimatedDepartureUTC: "2025-03-07T19:45:00Z",
-    arrivalAirport: "ORD",
-    departureAirport: "LAS",
-    arrivalCity: "Chicago",
-    departureCity: "Las Vegas",
-    departureGate: "B10",
-    arrivalGate: "C22",
-    flightStatus: "Delayed",
-    statusCode: "NDPT",
-    equipmentModel: "Boeing 737-900",
-    phase: "not_departed",
-    departureTerminal: "1",
-    arrivalTerminal: "2",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "7",
-    departureDelayMinutes: 25,
-    arrivalDelayMinutes: 25,
-    boardingTime: "2025-03-07T19:15:00Z",
-    isCanceled: false,
-    scheduledArrivalUTCDateTime: "2025-03-07T21:50:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-07T19:20:00Z",
-  },
-  {
-    flightNumber: "1422",
-    departureDate: "2025-03-08",
-    carrierCode: "UA",
-    operatingAirline: "United Airlines",
-    estimatedArrivalUTC: "2025-03-08T14:00:00Z",
-    estimatedDepartureUTC: "2025-03-08T12:30:00Z",
-    arrivalAirport: "DEN",
-    departureAirport: "ORD",
-    arrivalCity: "Denver",
-    departureCity: "Chicago",
-    departureGate: "C15",
-    arrivalGate: "A12",
-    flightStatus: "Canceled",
-    statusCode: "CNCL",
-    equipmentModel: "Airbus A320",
-    phase: "not_departed",
-    departureTerminal: "2",
-    arrivalTerminal: "1",
-    actualDepartureUTC: "",
-    actualArrivalUTC: "",
-    baggageClaim: "",
-    departureDelayMinutes: 0,
-    arrivalDelayMinutes: 0,
-    boardingTime: "2025-03-08T12:00:00Z",
-    isCanceled: true,
-    scheduledArrivalUTCDateTime: "2025-03-08T14:00:00Z",
-    scheduledDepartureUTCDateTime: "2025-03-08T12:30:00Z",
-  },
-];
+const dummyFlights = flights;
 
 interface ExpandableFlightTableProps {
   flights?: FlightData[];
@@ -133,7 +46,7 @@ export default function ExpandableFlightTable({
 
   const getStatusBadgeColor = (flight: FlightData) => {
     if (flight.isCanceled) return "bg-red-500/20 text-red-500";
-    if (flight.departureDelayMinutes > 0)
+    if (flight.departureDelayMinutes ?? 0 > 0)
       return "bg-yellow-500/20 text-yellow-500";
 
     switch (flight.statusCode) {
@@ -154,7 +67,7 @@ export default function ExpandableFlightTable({
 
   const getStatusText = (flight: FlightData) => {
     if (flight.isCanceled) return "Canceled";
-    if (flight.departureDelayMinutes > 0)
+    if (flight.departureDelayMinutes ?? 0 > 0)
       return `Delayed ${flight.departureDelayMinutes} min`;
 
     switch (flight.statusCode) {
