@@ -23,7 +23,7 @@ export function WalletInfo({ address }: WalletInfoProps) {
   };
 
   const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    return `${addr?.slice(0, 6)}...${addr?.slice(-4)}`;
   };
 
   const formatTimeRemaining = (expiryDate: Date) => {

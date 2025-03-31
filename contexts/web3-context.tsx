@@ -1,22 +1,10 @@
-"use client";
+"use client"
 
-import type React from "react";
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { ethers } from "ethers";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import type React from "react"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
+import { ethers } from "ethers"
+import { usePathname, useRouter } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -24,195 +12,186 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  AlertCircle,
-  HelpCircle,
-  Wallet,
-  Chrome,
-  ExternalLink,
-  Globe,
-  Info,
-} from "lucide-react";
-import MetaMaskGuidePage from "@/app/metamask-guide/page";
-import { ThemeToggle } from "@/components/theme-switcher";
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle, HelpCircle, Wallet, Chrome, ExternalLink, Globe, Info } from "lucide-react"
+import MetaMaskGuidePage from "@/app/metamask-guide/page"
+import { ThemeToggle } from "@/components/theme-switcher"
 
 interface Web3ContextType {
-  isConnected: boolean;
-  isLoading: boolean;
-  error: string | null;
-  walletAddress: string;
-  connectWallet: () => Promise<void>;
-  disconnectWallet: () => void;
-  isMetaMaskInstalled: boolean;
-  showMetaMaskInfo: () => void;
+  isConnected: boolean
+  isLoading: boolean
+  error: string | null
+  walletAddress: string
+  connectWallet: () => Promise<void>
+  disconnectWallet: () => void
+  isMetaMaskInstalled: boolean
+  showMetaMaskInfo: () => void
 }
 
-const Web3Context = createContext<Web3ContextType | undefined>(undefined);
+const Web3Context = createContext<Web3ContextType | undefined>(undefined)
 
 // Local storage keys
-const STORAGE_KEY_WALLET_CONNECTED = "walletConnected";
-const STORAGE_KEY_WALLET_ADDRESS = "walletAddress";
+const STORAGE_KEY_WALLET_CONNECTED = "walletConnected"
+const STORAGE_KEY_WALLET_ADDRESS = "walletAddress"
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState("");
-  const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
-  const [showInfoDialog, setShowInfoDialog] = useState(false);
-  const [isDetectingWallet, setIsDetectingWallet] = useState(true);
+  const router = useRouter()
+  const pathname = usePathname()
+  const [isConnected, setIsConnected] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [walletAddress, setWalletAddress] = useState("")
+  const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false)
+  const [showInfoDialog, setShowInfoDialog] = useState(false)
+  const [isDetectingWallet, setIsDetectingWallet] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Set isMounted to true when component mounts
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Check if MetaMask is installed
   useEffect(() => {
-    const checkMetaMask = () => {
-      const hasEthereum =
-        typeof window !== "undefined" && window.ethereum !== undefined;
-      const isMetaMask = hasEthereum && window.ethereum.isMetaMask;
-      setIsMetaMaskInstalled(isMetaMask);
-    };
+    if (!isMounted) return
 
-    checkMetaMask();
-  }, []);
+    const checkMetaMask = () => {
+      const hasEthereum = typeof window !== "undefined" && window.ethereum !== undefined
+      const isMetaMask = hasEthereum && window.ethereum.isMetaMask
+      setIsMetaMaskInstalled(isMetaMask)
+    }
+
+    checkMetaMask()
+  }, [isMounted])
 
   // Restore wallet connection from localStorage on mount
   useEffect(() => {
-    const restoreConnection = async () => {
-      if (typeof window === "undefined") return;
+    if (!isMounted) return
 
-      setIsDetectingWallet(true); // Start detection loading
+    const restoreConnection = async () => {
+      if (typeof window === "undefined") return
+
+      setIsDetectingWallet(true) // Start detection loading
 
       try {
-        const savedIsConnected = localStorage.getItem(
-          STORAGE_KEY_WALLET_CONNECTED
-        );
-        const savedWalletAddress = localStorage.getItem(
-          STORAGE_KEY_WALLET_ADDRESS
-        );
+        const savedIsConnected = localStorage.getItem(STORAGE_KEY_WALLET_CONNECTED)
+        const savedWalletAddress = localStorage.getItem(STORAGE_KEY_WALLET_ADDRESS)
 
-        if (
-          savedIsConnected === "true" &&
-          savedWalletAddress &&
-          window.ethereum
-        ) {
+        if (savedIsConnected === "true" && savedWalletAddress && window.ethereum) {
           // Verify the wallet is still connected by checking accounts
           const accounts = await window.ethereum.request({
             method: "eth_accounts",
-          });
+          })
 
           if (accounts && accounts.length > 0) {
             // Wallet is still connected
-            setIsConnected(true);
-            setWalletAddress(savedWalletAddress);
+            setIsConnected(true)
+            setWalletAddress(savedWalletAddress)
           } else {
             // Wallet was disconnected from MetaMask side
-            clearConnectionData();
+            clearConnectionData()
           }
         }
       } catch (err) {
-        console.error("Error restoring wallet connection:", err);
-        clearConnectionData();
+        console.error("Error restoring wallet connection:", err)
+        clearConnectionData()
       } finally {
-        setIsDetectingWallet(false); // End detection loading
+        setIsDetectingWallet(false) // End detection loading
       }
-    };
+    }
 
-    restoreConnection();
-  }, []);
+    restoreConnection()
+  }, [isMounted])
 
   // Save connection data to localStorage
   const saveConnectionData = (address: string) => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return
 
-    localStorage.setItem(STORAGE_KEY_WALLET_CONNECTED, "true");
-    localStorage.setItem(STORAGE_KEY_WALLET_ADDRESS, address);
-  };
+    localStorage.setItem(STORAGE_KEY_WALLET_CONNECTED, "true")
+    localStorage.setItem(STORAGE_KEY_WALLET_ADDRESS, address)
+  }
 
   // Clear connection data from localStorage
   const clearConnectionData = () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return
 
-    localStorage.removeItem(STORAGE_KEY_WALLET_CONNECTED);
-    localStorage.removeItem(STORAGE_KEY_WALLET_ADDRESS);
-  };
+    localStorage.removeItem(STORAGE_KEY_WALLET_CONNECTED)
+    localStorage.removeItem(STORAGE_KEY_WALLET_ADDRESS)
+  }
 
   // Connect wallet and initialize contract service
   const connectWallet = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       if (typeof window === "undefined" || !window.ethereum) {
-        setShowInfoDialog(true);
-        throw new Error("MetaMask not installed");
+        setShowInfoDialog(true)
+        throw new Error("MetaMask not installed")
       }
 
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
+      await window.ethereum.request({ method: "eth_requestAccounts" })
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      const address = await signer.getAddress()
 
-      setWalletAddress(address);
-      setIsConnected(true);
+      setWalletAddress(address)
+      setIsConnected(true)
 
       // Save connection state to localStorage
-      saveConnectionData(address);
+      saveConnectionData(address)
     } catch (err) {
       if (typeof window !== "undefined" && !window.ethereum) {
-        setShowInfoDialog(true);
+        setShowInfoDialog(true)
       }
-      setError(err instanceof Error ? err.message : "Failed to connect wallet");
+      setError(err instanceof Error ? err.message : "Failed to connect wallet")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const disconnectWallet = useCallback(() => {
-    setIsConnected(false);
-    setWalletAddress("");
-    setCurrentFlightNumber(null);
+    setIsConnected(false)
+    setWalletAddress("")
 
     // Clear connection data from localStorage
-    clearConnectionData();
-  }, []);
+    clearConnectionData()
+  }, [])
 
   const showMetaMaskInfo = () => {
-    setShowInfoDialog(true);
-  };
+    setShowInfoDialog(true)
+  }
 
   const navigateToGuide = () => {
-    setShowInfoDialog(false);
-    router.push("/metamask-guide");
-  };
+    setShowInfoDialog(false)
+    router.push("/metamask-guide")
+  }
 
   // Listen for account changes
   useEffect(() => {
+    if (!isMounted) return
+
     if (typeof window !== "undefined" && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length === 0) {
           // User disconnected their wallet from the MetaMask extension
-          disconnectWallet();
+          disconnectWallet()
         } else if (accounts[0] !== walletAddress) {
           // User switched to a different account
-          setWalletAddress(accounts[0]);
-          saveConnectionData(accounts[0]);
+          setWalletAddress(accounts[0])
+          saveConnectionData(accounts[0])
         }
-      };
+      }
 
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("accountsChanged", handleAccountsChanged)
 
       return () => {
-        window.ethereum.removeListener(
-          "accountsChanged",
-          handleAccountsChanged
-        );
-      };
+        window.ethereum.removeListener("accountsChanged", handleAccountsChanged)
+      }
     }
-  }, [disconnectWallet, walletAddress]);
+  }, [disconnectWallet, walletAddress, isMounted])
 
   // MetaMask connection UI
   const MetaMaskConnectionUI = () => (
@@ -226,9 +205,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           <Card className="w-[80%] glass-card sm:w-[500px]">
             <CardHeader>
               <CardTitle>Detecting Wallet</CardTitle>
-              <CardDescription>
-                Checking for connected wallet...
-              </CardDescription>
+              <CardDescription>Checking for connected wallet...</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-center py-4">
@@ -243,9 +220,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           <Card className="glass-card max-w-5xl">
             <CardHeader>
               <CardTitle>Connect Wallet</CardTitle>
-              <CardDescription>
-                Connect your MetaMask wallet to access GoTravelX
-              </CardDescription>
+              <CardDescription>Connect your MetaMask wallet to access GoTravelX</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
@@ -255,11 +230,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                 </Alert>
               )}
 
-              <Button
-                className="w-full gradient-border"
-                onClick={connectWallet}
-                disabled={isLoading}
-              >
+              <Button className="w-full gradient-border" onClick={connectWallet} disabled={isLoading}>
                 <Wallet className="h-4 w-4 mr-2" />
                 {isLoading ? "Connecting..." : "Connect MetaMask"}
               </Button>
@@ -267,10 +238,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
               {!isMetaMaskInstalled && (
                 <Alert className="bg-amber-50 border-amber-200 text-amber-800">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    MetaMask is not installed. Please install it to use
-                    GoTravelX.
-                  </AlertDescription>
+                  <AlertDescription>MetaMask is not installed. Please install it to use GoTravelX.</AlertDescription>
                 </Alert>
               )}
 
@@ -291,9 +259,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         <Dialog open={showInfoDialog} onOpenChange={setShowInfoDialog}>
           <DialogContent className="sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle>
-                {isMetaMaskInstalled ? "About MetaMask" : "MetaMask Required"}
-              </DialogTitle>
+              <DialogTitle>{isMetaMaskInstalled ? "About MetaMask" : "MetaMask Required"}</DialogTitle>
               <DialogDescription>
                 {isMetaMaskInstalled
                   ? "MetaMask is a secure wallet for blockchain applications."
@@ -308,9 +274,8 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                   What is MetaMask?
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  MetaMask is a digital wallet that allows you to interact with
-                  blockchain applications. It's secure, easy to use, and gives
-                  you control over your digital assets.
+                  MetaMask is a digital wallet that allows you to interact with blockchain applications. It's secure,
+                  easy to use, and gives you control over your digital assets.
                 </p>
               </div>
 
@@ -320,9 +285,8 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                   Why do I need it for GoTravelX?
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  GoTravelX uses blockchain technology to provide secure and
-                  transparent flight subscriptions. MetaMask allows you to
-                  connect to this system and manage your subscriptions.
+                  GoTravelX uses blockchain technology to provide secure and transparent flight subscriptions. MetaMask
+                  allows you to connect to this system and manage your subscriptions.
                 </p>
               </div>
 
@@ -339,9 +303,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                       <Chrome className="h-5 text-blue-500 w-5" />
                       <div>
                         <p className="font-medium">Chrome</p>
-                        <p className="text-muted-foreground text-xs">
-                          Google Chrome
-                        </p>
+                        <p className="text-muted-foreground text-xs">Google Chrome</p>
                       </div>
                     </a>
 
@@ -354,9 +316,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                       <ExternalLink className="h-5 text-orange-500 w-5" />
                       <div>
                         <p className="font-medium">Firefox</p>
-                        <p className="text-muted-foreground text-xs">
-                          Firefox Add-ons
-                        </p>
+                        <p className="text-muted-foreground text-xs">Firefox Add-ons</p>
                       </div>
                     </a>
 
@@ -369,9 +329,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
                       <Globe className="h-5 text-green-500 w-5" />
                       <div>
                         <p className="font-medium">Other</p>
-                        <p className="text-muted-foreground text-xs">
-                          All Browsers
-                        </p>
+                        <p className="text-muted-foreground text-xs">All Browsers</p>
                       </div>
                     </a>
                   </div>
@@ -385,23 +343,23 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
               </Button>
 
               <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowInfoDialog(false)}
-                >
+                <Button variant="outline" onClick={() => setShowInfoDialog(false)}>
                   Close
                 </Button>
 
-                {isMetaMaskInstalled && (
-                  <Button onClick={connectWallet}>Connect Now</Button>
-                )}
+                {isMetaMaskInstalled && <Button onClick={connectWallet}>Connect Now</Button>}
               </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
     </>
-  );
+  )
+
+  // Only render children when mounted to prevent hydration errors
+  if (!isMounted) {
+    return null
+  }
 
   // Update the provider return to handle the detecting state
   return (
@@ -417,21 +375,16 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         showMetaMaskInfo,
       }}
     >
-      {isConnected ? (
-        children
-      ) : pathname === "/metamask-guide" ? (
-        <MetaMaskGuidePage />
-      ) : (
-        <MetaMaskConnectionUI />
-      )}
+      {isConnected ? children : pathname === "/metamask-guide" ? <MetaMaskGuidePage /> : <MetaMaskConnectionUI />}
     </Web3Context.Provider>
-  );
+  )
 }
 
 export function useWeb3() {
-  const context = useContext(Web3Context);
+  const context = useContext(Web3Context)
   if (context === undefined) {
-    throw new Error("useWeb3 must be used within a Web3Provider");
+    throw new Error("useWeb3 must be used within a Web3Provider")
   }
-  return context;
+  return context
 }
+

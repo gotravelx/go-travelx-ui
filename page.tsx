@@ -1,37 +1,37 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useWeb3 } from "@/contexts/web3-context";
-import { ThemeToggle } from "@/components/theme-switcher";
 import { motion } from "framer-motion";
-import { FlightData, flightService } from "@/services/api";
+import { type FlightData, flightService } from "@/services/api";
 import { Toaster } from "sonner";
 import { NavBar } from "@/components/nav-bar";
-import FlightStatusView from "@/components/flight-status-view";
 import SubscribeFlight from "./pages/subscribe-flight/page";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ViewFlight from "./pages/view-flight/page";
 import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
 import { Footer } from "@/components/footer";
-import SubscribeFlightStatusView from "./components/subscribtion-flight-status-view";
 import SubscribeFlightCard from "./components/subscribe-card";
+import { format } from "date-fns";
 
 export default function FlightSearch() {
-  const { isLoading } = useWeb3();
+  const { isLoading: web3IsLoading, walletAddress } = useWeb3();
 
   const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   // Separate states for different views
   const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
+  const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>([]);
   const [subscribeFlightData, setSubscribeFlightData] =
     useState<FlightData | null>(null);
 
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
   // stations
+  const [isLoading, setIsLoading] = useState(false);
 
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
@@ -52,16 +52,36 @@ export default function FlightSearch() {
   }, [viewFlightData, subscribeFlightData]);
 
   // Clear data when switching tabs
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-    setFlightNumber("");
-    setSearchError("");
-    setSelectedDate(new Date());
-    setCarrier("UA");
-    setDepartureStation("JFK");
-    setViewFlightData(null);
-    setSubscribeFlightData(null);
-  }, []);
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+
+      // Reset filters for each tab independently
+      if (value === "view") {
+        // Don't reset view tab filters when coming from other tabs
+        if (activeTab !== "view") {
+          setFlightNumber("");
+          setSearchError("");
+          setSelectedDate(undefined);
+          setCarrier("UA");
+          setDepartureStation("");
+          setViewFlightData(null);
+        }
+      } else if (value === "subscribe-flight") {
+        // Reset subscribe tab filters
+        setFlightNumber("");
+        setSearchError("");
+        setSelectedDate(undefined);
+        setCarrier("UA");
+        setDepartureStation("");
+        setArrivalStation("");
+        setSubscribeFlightData(null);
+      } else {
+        // Reset unsubscribe tab filters if needed
+      }
+    },
+    [activeTab]
+  );
 
   const handleDepartureStationChange = (value: string) => {
     setDepartureStation(value);
@@ -74,6 +94,16 @@ export default function FlightSearch() {
   const handleSearch = useCallback(async () => {
     if (!flightNumber) {
       setSearchError("Please enter a flight number");
+      return;
+    }
+
+    if (!departureStation) {
+      setSearchError("Please enter a departure station");
+      return;
+    }
+
+    if (!selectedDate) {
+      setSearchError("Please select a departure date");
       return;
     }
 
@@ -98,27 +128,72 @@ export default function FlightSearch() {
     }
 
     try {
-      const data = await flightService.viewFlightDetails(
-        carrier,
-        flightNumber,
-        selectedDate
+      setIsLoading(true);
+
+      // Instead of calling the API directly, we'll use our getSubscribedFlights method
+      // and then filter the results based on the search criteria
+      const subscribedFlights = await flightService.getSubscribedFlights(
+        walletAddress
       );
 
-      setViewFlightData(data);
+      // Filter the flights based on the search criteria
+      let filteredFlights = subscribedFlights;
+
+      if (flightNumber) {
+        filteredFlights = filteredFlights.filter((flight) =>
+          flight.flightNumber.toString().includes(flightNumber)
+        );
+      }
+
+      if (carrier) {
+        filteredFlights = filteredFlights.filter(
+          (flight) => flight.carrierCode === carrier
+        );
+      }
+
+      if (selectedDate) {
+        const dateString = selectedDate
+          ? format(selectedDate, "yyyy-MM-dd")
+          : undefined;
+        filteredFlights = filteredFlights.filter(
+          (flight) => flight.scheduledDepartureDate === dateString
+        );
+      }
+
+      setViewFlightData(filteredFlights.length > 0 ? filteredFlights[0] : null);
       setSearchError("");
+
+      if (filteredFlights.length === 0) {
+        setSearchError("No matching flights found");
+      }
     } catch (error) {
-      setSearchError("Flight is not found");
+      console.error("Error fetching flight details:", error);
+      setSearchError("Error fetching flight details");
       setViewFlightData(null);
+    } finally {
+      setIsLoading(false);
     }
-  }, [carrier, flightNumber, selectedDate]);
+  }, [carrier, flightNumber, selectedDate, walletAddress]);
 
   const handleRefresh = useCallback(async () => {
-    if (viewFlightData) {
-      await handleView();
+    if (activeTab === "view") {
+      // Refresh subscribed flights
+      try {
+        const flights = await flightService.getSubscribedFlights(walletAddress);
+        setSubscribedFlights(flights);
+      } catch (error) {
+        console.error("Error refreshing subscribed flights:", error);
+      }
     } else if (subscribeFlightData) {
       await handleSearch();
     }
-  }, [viewFlightData, subscribeFlightData, handleSearch, handleView]);
+  }, [
+    activeTab,
+    viewFlightData,
+    subscribeFlightData,
+    handleSearch,
+    walletAddress,
+  ]);
 
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value);
@@ -221,9 +296,6 @@ export default function FlightSearch() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
                     >
-                      {/* <SubscribeFlightStatusView
-                        flightData={subscribeFlightData}
-                      /> */}
                       <div className="w-full flex items-start justify-start">
                         <SubscribeFlightCard flightData={subscribeFlightData} />
                       </div>
