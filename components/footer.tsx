@@ -175,7 +175,7 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Mail size={18} className="text-primary shrink-0" />
                 <span className="text-sm text-muted-foreground text-left">
-                  support@gotravelx.com
+                  sales@gotravelx.com
                 </span>
               </li>
             </ul>
