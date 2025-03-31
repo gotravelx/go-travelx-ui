@@ -17,21 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { AlertCircle, CalendarIcon, XCircle } from "lucide-react";
+import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 import ViewFlightDatTable from "@/components/view-flight-data-table";
-
-// Sample airport data
-const airports = [
-  { code: "JFK", name: "John F. Kennedy International Airport" },
-  { code: "ORD", name: "O'Hare International Airport" },
-  { code: "LAX", name: "Los Angeles International Airport" },
-  { code: "SFO", name: "San Francisco International Airport" },
-  { code: "DEN", name: "Denver International Airport" },
-  { code: "MIA", name: "Miami International Airport" },
-  { code: "PHX", name: "Phoenix Sky Harbor International Airport" },
-  { code: "SAN", name: "San Diego International Airport" },
-];
+import { useWeb3 } from "@/contexts/web3-context";
+import { flightService, type FlightData } from "@/services/api";
+import { toast } from "sonner";
 
 const ViewFlight = memo(
   ({
@@ -51,106 +42,194 @@ const ViewFlight = memo(
     isLoading: boolean;
     searchError: string;
     selectedDate: Date | undefined;
-    onDateChange: (value: Date) => void;
+    onDateChange: (value: Date | undefined) => void;
     carrier: string;
     onCarrierChange: (value: string) => void;
   }) => {
+    const { walletAddress } = useWeb3();
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [departureStation, setDepartureStation] = useState("");
-    const [arrivalStation, setArrivalStation] = useState("");
-    const [departureResults, setDepartureResults] = useState(airports);
-    const [arrivalResults, setArrivalResults] = useState(airports);
-    const [showDepartureResults, setShowDepartureResults] = useState(false);
-    const [showArrivalResults, setShowArrivalResults] = useState(false);
+
+    // Local filter state for View Flight tab
+    const [viewDepartureStation, setViewDepartureStation] = useState("");
+    const [viewArrivalStation, setViewArrivalStation] = useState("");
+
+    const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>(
+      []
+    );
+    const [filteredFlights, setFilteredFlights] = useState<FlightData[]>([]);
+    const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(false);
+    const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+    const [localSearchError, setLocalSearchError] = useState("");
 
     // Add pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [totalItems, setTotalItems] = useState(0);
 
+    // Fetch subscribed flights when component mounts
+    useEffect(() => {
+      const fetchSubscribedFlights = async () => {
+        if (!walletAddress) return;
+
+        setIsLoadingSubscriptions(true);
+        try {
+          const flights = await flightService.getSubscribedFlights(
+            walletAddress
+          );
+          setSubscribedFlights(flights);
+          setFilteredFlights(flights);
+          setTotalItems(flights.length);
+          setHasInitiallyLoaded(true);
+        } catch (error) {
+          console.error("Error fetching subscribed flights:", error);
+          toast.error("Failed to fetch subscribed flights");
+        } finally {
+          setIsLoadingSubscriptions(false);
+        }
+      };
+
+      fetchSubscribedFlights();
+    }, [walletAddress]);
+
     // Handle pagination changes
     const handlePageChange = useCallback((page: number) => {
       setCurrentPage(page);
-      // You might want to trigger a new search here with the updated page
     }, []);
 
     const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
       setItemsPerPage(itemsPerPage);
       setCurrentPage(1); // Reset to first page when changing items per page
-      // You might want to trigger a new search here with the updated items per page
     }, []);
 
-    // Update total items when data changes
-    useEffect(() => {
-      // This is a placeholder - in a real app, you would get this from your API response
-      setTotalItems(20); // Example: 20 total flights
+    // Handle flight number validation
+    const handleFlightNumberChange = useCallback(
+      (value: string) => {
+        // Only allow numeric input and limit to 4 digits
+        const numericValue = value.replace(/\D/g, "").slice(0, 4);
+        onFlightNumberChange(numericValue);
+      },
+      [onFlightNumberChange]
+    );
+
+    // Handle departure station validation
+    const handleDepartureStationChange = useCallback((value: string) => {
+      // Convert to uppercase and limit to 3 characters
+      const formattedValue = value.toUpperCase().slice(0, 3);
+      setViewDepartureStation(formattedValue);
     }, []);
 
-    // Search function for departure station
-    const searchDepartureStation = useCallback((query: string) => {
-      setDepartureStation(query);
-      if (query.trim() === "") {
-        setDepartureResults(airports);
-      } else {
-        const filteredResults = airports.filter(
-          (airport) =>
-            airport.code.toLowerCase().includes(query.toLowerCase()) ||
-            airport.name.toLowerCase().includes(query.toLowerCase())
-        );
-        setDepartureResults(filteredResults);
-      }
-      setShowDepartureResults(true);
-    }, []);
-
-    // Search function for arrival station
-    const searchArrivalStation = useCallback((query: string) => {
-      setArrivalStation(query);
-      if (query.trim() === "") {
-        setArrivalResults(airports);
-      } else {
-        const filteredResults = airports.filter(
-          (airport) =>
-            airport.code.toLowerCase().includes(query.toLowerCase()) ||
-            airport.name.toLowerCase().includes(query.toLowerCase())
-        );
-        setArrivalResults(filteredResults);
-      }
-      setShowArrivalResults(true);
-    }, []);
-
-    // Select departure station
-    const selectDepartureStation = useCallback((code: string) => {
-      setDepartureStation(code);
-      setShowDepartureResults(false);
-    }, []);
-
-    // Select arrival station
-    const selectArrivalStation = useCallback((code: string) => {
-      setArrivalStation(code);
-      setShowArrivalResults(false);
+    // Handle arrival station validation
+    const handleArrivalStationChange = useCallback((value: string) => {
+      // Convert to uppercase and limit to 3 characters
+      const formattedValue = value.toUpperCase().slice(0, 3);
+      setViewArrivalStation(formattedValue);
     }, []);
 
     // Reset all filters
     const resetFilters = useCallback(() => {
-      setDepartureStation("JFK");
-      setArrivalStation("ORD");
+      setViewDepartureStation("");
+      setViewArrivalStation("");
       onFlightNumberChange("");
       onCarrierChange("UA");
-      onDateChange(new Date());
-    }, [onFlightNumberChange, onCarrierChange, onDateChange]);
+      onDateChange(undefined); // Set to undefined instead of new Date()
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-      const handleClickOutside = () => {
-        setShowDepartureResults(false);
-        setShowArrivalResults(false);
-      };
+      // Reset to original subscribed flights
+      setFilteredFlights(subscribedFlights);
+      setTotalItems(subscribedFlights.length);
+      setLocalSearchError("");
+    }, [
+      onFlightNumberChange,
+      onCarrierChange,
+      onDateChange,
+      subscribedFlights,
+      setLocalSearchError,
+    ]);
 
-      document.addEventListener("click", handleClickOutside);
-      return () => {
-        document.removeEventListener("click", handleClickOutside);
-      };
-    }, []);
+    // Apply filters to subscribed flights
+    const applyFilters = useCallback(() => {
+      if (subscribedFlights.length === 0) return;
+
+      // Validate inputs before filtering
+      let hasError = false;
+      let errorMessage = "";
+
+      if (
+        flightNumber &&
+        (flightNumber.length !== 4 || !/^\d+$/.test(flightNumber))
+      ) {
+        errorMessage = "Flight number must be 4 digits";
+        hasError = true;
+      }
+
+      if (viewDepartureStation && viewDepartureStation.length !== 3) {
+        errorMessage = "Departure station must be 3 characters";
+        hasError = true;
+      }
+
+      if (viewArrivalStation && viewArrivalStation.length !== 3) {
+        errorMessage = "Arrival station must be 3 characters";
+        hasError = true;
+      }
+
+      if (hasError) {
+        setLocalSearchError(errorMessage);
+        return;
+      }
+
+      setLocalSearchError("");
+
+      let filtered = [...subscribedFlights];
+
+      // Filter by flight number if provided
+      if (flightNumber) {
+        filtered = filtered.filter((flight) =>
+          flight.flightNumber.toString().includes(flightNumber)
+        );
+      }
+
+      // Filter by carrier if provided
+      if (carrier) {
+        filtered = filtered.filter((flight) => flight.carrierCode === carrier);
+      }
+
+      // Filter by departure station if provided
+      if (viewDepartureStation) {
+        filtered = filtered.filter(
+          (flight) => flight.departureAirport === viewDepartureStation
+        );
+      }
+
+      // Filter by arrival station if provided
+      if (viewArrivalStation) {
+        filtered = filtered.filter(
+          (flight) => flight.arrivalAirport === viewArrivalStation
+        );
+      }
+
+      // Filter by date if selected (only if a date is actually selected)
+      if (selectedDate) {
+        const dateString = format(selectedDate, "yyyy-MM-dd");
+        filtered = filtered.filter(
+          (flight) => flight.scheduledDepartureDate === dateString
+        );
+      }
+
+      setFilteredFlights(filtered);
+      setTotalItems(filtered.length);
+      setCurrentPage(1); // Reset to first page after filtering
+
+      if (filtered.length === 0) {
+        toast.info("No flights match your search criteria");
+      }
+    }, [
+      subscribedFlights,
+      flightNumber,
+      carrier,
+      viewDepartureStation,
+      viewArrivalStation,
+      selectedDate,
+      setLocalSearchError,
+    ]);
 
     return (
       <div className="w-full mx-auto">
@@ -174,6 +253,8 @@ const ViewFlight = memo(
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="UA">UA</SelectItem>
+                <SelectItem value="AA">AA</SelectItem>
+                <SelectItem value="DL">DL</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -184,12 +265,12 @@ const ViewFlight = memo(
             </label>
             <Input
               id="flight-number"
-              placeholder="Enter Flight no."
+              placeholder="Enter Flight Number"
               value={flightNumber}
-              onChange={(e) => onFlightNumberChange(e.target.value)}
-              // onKeyDown={(e) => e.key === "Enter" && onSearch()}
+              onChange={(e) => handleFlightNumberChange(e.target.value)}
               disabled={isLoading}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm focus-visible:border-primary"
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
+              maxLength={4}
             />
           </div>
 
@@ -198,75 +279,39 @@ const ViewFlight = memo(
           </div>
 
           {/* Departure Station */}
-          <div className="flex flex-col w-full md:w-auto relative">
+          <div className="flex flex-col w-full md:w-auto">
             <label
               htmlFor="departure-station"
               className="text-sm font-medium mb-1"
             >
               Dep Stn
             </label>
-            <div className="relative">
-              <Input
-                id="departure-station"
-                placeholder="From"
-                value={departureStation}
-                onChange={(e) => searchDepartureStation(e.target.value)}
-                onFocus={() => setShowDepartureResults(true)}
-                className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              />
-              {showDepartureResults && (
-                <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-auto">
-                  {departureResults.map((airport) => (
-                    <div
-                      key={airport.code}
-                      className="p-2 hover:bg-accent cursor-pointer"
-                      onClick={() => selectDepartureStation(airport.code)}
-                    >
-                      <div className="font-bold">{airport.code}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {airport.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Input
+              id="departure-station"
+              placeholder="Enter Station Code"
+              value={viewDepartureStation}
+              onChange={(e) => handleDepartureStationChange(e.target.value)}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+              maxLength={3}
+            />
           </div>
 
           {/* Arrival Station */}
-          <div className="flex flex-col w-full md:w-auto relative">
+          <div className="flex flex-col w-full md:w-auto">
             <label
               htmlFor="arrival-station"
               className="text-sm font-medium mb-1"
             >
               Arr Stn
             </label>
-            <div className="relative">
-              <Input
-                id="arrival-station"
-                placeholder="To"
-                value={arrivalStation}
-                onChange={(e) => searchArrivalStation(e.target.value)}
-                onFocus={() => setShowArrivalResults(true)}
-                className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              />
-              {showArrivalResults && (
-                <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-auto">
-                  {arrivalResults.map((airport) => (
-                    <div
-                      key={airport.code}
-                      className="p-2 hover:bg-accent cursor-pointer"
-                      onClick={() => selectArrivalStation(airport.code)}
-                    >
-                      <div className="font-bold">{airport.code}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {airport.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Input
+              id="arrival-station"
+              placeholder="Enter Station Code"
+              value={viewArrivalStation}
+              onChange={(e) => handleArrivalStationChange(e.target.value)}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+              maxLength={3}
+            />
           </div>
 
           {/* Date Picker */}
@@ -279,29 +324,17 @@ const ViewFlight = memo(
                   className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                 >
                   <CalendarIcon className="h-4 w-4 mr-2" />
-                  {selectedDate
-                    ? format(selectedDate, "PPP")
-                    : format(new Date(), "PPP")}
+                  {selectedDate ? format(selectedDate, "PPP") : "Select date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0 w-auto" align="start">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(selectedDate) => {
-                    if (selectedDate) {
-                      const normalizedDate = new Date(
-                        Date.UTC(
-                          selectedDate.getFullYear(),
-                          selectedDate.getMonth(),
-                          selectedDate.getDate()
-                        )
-                      );
-                      onDateChange(normalizedDate);
-                    }
+                  onSelect={(date) => {
+                    onDateChange(date || undefined);
                     setIsCalendarOpen(false);
                   }}
-                  disabled={(d) => d > new Date() || d < new Date("2023-01-01")}
                   initialFocus
                 />
               </PopoverContent>
@@ -309,42 +342,79 @@ const ViewFlight = memo(
           </div>
 
           {/* Search and Reset Buttons */}
-          <div className="flex  gap-2 justify-end mt-auto">
+          <div className="flex justify-end mt-auto gap-2">
             <Button
-              onClick={onSearch}
+              onClick={applyFilters}
               className="h-10 w-full gradient-border md:w-auto"
-              disabled={isLoading}
+              disabled={isLoading || isLoadingSubscriptions}
             >
-              {isLoading ? "Searching..." : "Search"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                "Search"
+              )}
             </Button>
             <Button
               onClick={resetFilters}
               variant="outline"
               className="h-10 w-full md:w-auto"
-              disabled={isLoading}
+              disabled={isLoading || isLoadingSubscriptions}
             >
-              Clear Filter
+              Clear Filters
             </Button>
           </div>
         </div>
 
-        {searchError && (
+        {localSearchError && (
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{searchError}</AlertDescription>
+            <AlertDescription>{localSearchError}</AlertDescription>
           </Alert>
         )}
 
         {/* Add the flight data table */}
         <div className="mt-8">
-          <ViewFlightDatTable
-            isLoading={isLoading}
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-            totalItems={totalItems}
-            onPageChange={handlePageChange}
-            onItemsPerPageChange={handleItemsPerPageChange}
-          />
+          {isLoadingSubscriptions ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Loading subscribed flights...</span>
+            </div>
+          ) : hasInitiallyLoaded && filteredFlights.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {subscribedFlights.length === 0 ? (
+                <>
+                  You don't have any flight subscriptions yet.
+                  <br />
+                  Go to the "Add Flight Subscription" tab to subscribe to
+                  flights.
+                </>
+              ) : (
+                <>
+                  No flights match your search criteria.
+                  <Button
+                    variant="link"
+                    onClick={resetFilters}
+                    className="px-1 text-primary"
+                  >
+                    Clear all filters
+                  </Button>
+                </>
+              )}
+            </div>
+          ) : (
+            <ViewFlightDatTable
+              flights={filteredFlights}
+              isLoading={isLoading || isLoadingSubscriptions}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={totalItems}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
+          )}
         </div>
       </div>
     );

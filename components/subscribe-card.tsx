@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Plane, Bell, Clock, MapPin, Info, AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plane, Bell, MapPin, Info, AlertCircle, Loader2 } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -11,56 +11,69 @@ import {
 } from "@/components/ui/accordion";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import { Badge } from "./ui/badge";
-import { useState } from "react";
-export interface FlightStatusViewProps {
-  flightData: {
-    flightNumber: string;
-    departureDate: string;
-    carrierCode: string;
-    operatingAirline: string;
-    estimatedArrivalUTC: string;
-    estimatedDepartureUTC: string;
-    arrivalAirport: string;
-    departureAirport: string;
-    arrivalCity: string;
-    departureCity: string;
-    departureGate: string;
-    arrivalGate: string;
-    flightStatus: string;
-    statusCode: string;
-    equipmentModel: string;
-    phase: string;
-    departureTerminal: string;
-    arrivalTerminal: string;
-    actualDepartureUTC: string;
-    actualArrivalUTC: string;
-    baggageClaim: string;
-    departureDelayMinutes: number;
-    arrivalDelayMinutes: number;
-    boardingTime: string;
-    isCanceled: boolean;
-    scheduledArrivalUTCDateTime: string;
-    scheduledDepartureUTCDateTime: string;
-    outTimeUTC: string;
-    offTimeUTC: string;
-    onTimeUTC: string;
-    inTimeUTC: string;
-  };
-}
+import { useState, useEffect } from "react";
+import { flightService, type MarketedFlightSegment } from "@/services/api";
+import { useWeb3 } from "@/contexts/web3-context";
+import { toast } from "sonner";
+import { FlightData } from "@/types/flight";
 
-const marketingData = [
-  { MarketingAirlineCode: "NZ", FlightNumber: "6619" },
-  { MarketingAirlineCode: "LH", FlightNumber: "8642" },
-  { MarketingAirlineCode: "CM", FlightNumber: "1672" },
-  { MarketingAirlineCode: "AC", FlightNumber: "3754" },
-];
+export interface FlightStatusViewProps {
+  flightData: FlightData;
+}
 
 export default function SubscribeFlightCard({
   flightData,
 }: FlightStatusViewProps) {
-  // Replace the date formatting section with this safer implementation
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const { walletAddress } = useWeb3();
 
-  const [currentStatus, setCurrentStatus] = useState("");
+  // Set isMounted to true when component mounts
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Check if flight is already subscribed
+
+  // Handle subscription
+  const handleSubscribe = async () => {
+    if (!walletAddress) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    try {
+      setIsSubscribing(true);
+
+      console.log("Subscribing with wallet address:", walletAddress);
+      console.log("Flight data:", {
+        flightNumber: flightData.flightNumber,
+        carrierCode: flightData.carrierCode,
+        departureAirport: flightData.departureAirport,
+        departureDate: flightData.scheduledDepartureDate,
+      });
+
+      await flightService.subscribeToFlight(
+        flightData.flightNumber,
+        flightData.carrierCode,
+        flightData.departureAirport,
+        flightData.scheduledDepartureDate,
+        walletAddress
+      );
+
+      setIsSubscribed(true);
+      toast.success("Successfully subscribed to flight updates");
+    } catch (error) {
+      console.error("Error subscribing to flight:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to subscribe to flight"
+      );
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   // Format times with error handling
   const formatDate = (dateString: string) => {
     try {
@@ -136,6 +149,62 @@ export default function SubscribeFlightCard({
     ? formatTime(flightData.boardingTime)
     : "Not available";
 
+  // Get status badge color based on status
+  const getStatusBadgeVariant = (status: string | undefined) => {
+    if (!status) return "outline";
+
+    switch (status.toLowerCase()) {
+      case "on time":
+        return "bg-green-500/20 text-green-500";
+      case "delayed":
+        return "bg-amber-500/20 text-amber-500";
+      case "early":
+        return "bg-blue-500/20 text-blue-500";
+      case "cancelled":
+        return "bg-red-500/20 text-red-500";
+      default:
+        return "bg-gray-500/20 text-gray-500";
+    }
+  };
+
+  // Get flight status badge
+  const getFlightStatusBadge = () => {
+    const status = flightData.flightStatus || flightData.currentFlightStatus;
+    if (!status) return null;
+
+    const badgeText = status;
+    let badgeClass = "bg-gray-500/20 text-gray-500";
+
+    switch (status.toLowerCase()) {
+      case "in flight":
+        badgeClass = "bg-blue-500/20 text-blue-500";
+        break;
+      case "arrived at gate":
+        badgeClass = "bg-green-500/20 text-green-500";
+        break;
+      case "departed":
+        badgeClass = "bg-purple-500/20 text-purple-500";
+        break;
+      case "cancelled":
+        badgeClass = "bg-red-500/20 text-red-500";
+        break;
+      case "delayed":
+        badgeClass = "bg-amber-500/20 text-amber-500";
+        break;
+    }
+
+    return (
+      <Badge variant="outline" className={`${badgeClass} text-lg`}>
+        {badgeText}
+      </Badge>
+    );
+  };
+
+  // Don't render anything during SSR to prevent hydration errors
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <>
       <Card className="p-4 w-full max-w-3xl bg-gradient-to-br from-background to-muted/20">
@@ -144,20 +213,12 @@ export default function SubscribeFlightCard({
             <div className="text-2xl font-semibold">
               Flight Status - {flightData.carrierCode} {flightData.flightNumber}
             </div>
-            {/* show here day ex : Wednesday, March 21, 2025 */}
             <span>
-              <span>{formatDate(flightData.departureDate)}</span>
+              <span>{formatDate(flightData.scheduledDepartureDate)} </span>
             </span>
           </div>
           <div>
-            <div className="text-lg font-bold">
-              <Badge
-                variant="outline"
-                className={`bg-green-500/20 text-green-500 text-lg`}
-              >
-                Arrived At Gate
-              </Badge>
-            </div>
+            <div className="text-lg font-bold">{getFlightStatusBadge()}</div>
           </div>
         </div>
         <CardContent className="p-4 border-[3px] rounded-xl border-[#0F172A] ">
@@ -174,16 +235,18 @@ export default function SubscribeFlightCard({
                   </div>
                   <Badge
                     variant="outline"
-                    className={`bg-green-500/20 text-green-500 text-lg`}
+                    className={`${getStatusBadgeVariant(
+                      flightData.departureStatus
+                    )} text-lg`}
                   >
-                    On Time
+                    {flightData.departureStatus || "Status Unknown"}
                   </Badge>
                   <div>
                     <span className="text-2xl font-bold text-primary">
                       {flightData.departureAirport}
                     </span>
                     <p className="text-sm text-muted-foreground mt-2">
-                      {flightData.departureCity}, US
+                      {flightData.departureCity}
                     </p>
                   </div>
                 </div>
@@ -216,16 +279,18 @@ export default function SubscribeFlightCard({
                   </div>
                   <Badge
                     variant="outline"
-                    className={`bg-green-500/20 text-green-500 text-lg`}
+                    className={`${getStatusBadgeVariant(
+                      flightData.arrivalStatus
+                    )} text-lg`}
                   >
-                    On Time
+                    {flightData.arrivalStatus || "Status Unknown"}
                   </Badge>
                   <div>
                     <span className="text-2xl font-bold text-primary">
                       {flightData.arrivalAirport}
                     </span>
                     <p className="text-sm text-muted-foreground mt-2">
-                      {flightData.arrivalCity}, US
+                      {flightData.arrivalCity}
                     </p>
                   </div>
                 </div>
@@ -300,12 +365,12 @@ export default function SubscribeFlightCard({
                             </span>
                             <span
                               className={`font-medium ${
-                                flightData.departureDelayMinutes > 0
+                                flightData.departureDelayMinutes ?? 0 > 0
                                   ? "text-destructive"
                                   : "text-emerald-500"
                               }`}
                             >
-                              {flightData.departureDelayMinutes > 0
+                              {flightData.departureDelayMinutes ?? 0 > 0
                                 ? `${flightData.departureDelayMinutes} minutes`
                                 : "On time"}
                             </span>
@@ -369,12 +434,12 @@ export default function SubscribeFlightCard({
                             </span>
                             <span
                               className={`font-medium ${
-                                flightData.arrivalDelayMinutes > 0
+                                flightData.arrivalDelayMinutes ?? 0 > 0
                                   ? "text-destructive"
                                   : "text-emerald-500"
                               }`}
                             >
-                              {flightData.arrivalDelayMinutes > 0
+                              {flightData.arrivalDelayMinutes ?? 0 > 0
                                 ? `${flightData.arrivalDelayMinutes} minutes`
                                 : "On time"}
                             </span>
@@ -386,7 +451,7 @@ export default function SubscribeFlightCard({
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            {/* Marketing Flight Details Accordion */}{" "}
+            {/* Marketing Flight Details Accordion */}
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="marketing-details" className="border-none">
                 <AccordionTrigger className="py-2.5 px-4 bg-muted/30 rounded-lg border border-border hover:bg-muted/50 hover:no-underline transition-all data-[state=open]:rounded-b-none">
@@ -409,16 +474,30 @@ export default function SubscribeFlightCard({
                         </tr>
                       </thead>
                       <tbody>
-                        {marketingData.map((detail, index) => (
-                          <tr key={index} className="hover:bg-muted/30">
-                            <td className="border border-border p-2">
-                              {detail.MarketingAirlineCode}
-                            </td>
-                            <td className="border border-border p-2">
-                              {detail.FlightNumber}
+                        {flightData.marketedFlightSegment &&
+                        flightData.marketedFlightSegment.length > 0 ? (
+                          flightData.marketedFlightSegment.map(
+                            (segment, index) => (
+                              <tr key={index} className="hover:bg-muted/30">
+                                <td className="border border-border p-2">
+                                  {segment.MarketingAirlineCode}
+                                </td>
+                                <td className="border border-border p-2">
+                                  {segment.FlightNumber}
+                                </td>
+                              </tr>
+                            )
+                          )
+                        ) : (
+                          <tr className="hover:bg-muted/30">
+                            <td
+                              colSpan={2}
+                              className="border border-border p-2 text-center"
+                            >
+                              No marketing flight segments available
                             </td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -427,10 +506,37 @@ export default function SubscribeFlightCard({
             </Accordion>
             {/* Subscribe Button */}
             <div className="flex justify-end">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors gap-2">
-                <Bell className="h-4 w-4" />
-                Subscribe For Updates
-              </Button>
+              {flightData.isSubscribed ? (
+                <Button
+                  className="bg-red-400 cursor-pointer text-primary-foreground hover:bg-primary/90 transition-colors gap-2"
+                  onClick={handleSubscribe}
+                  disabled={flightData.isSubscribed}
+                >
+                  {isSubscribing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Bell className="h-4 w-4" />
+                  )}
+                  Subscribed
+                </Button>
+              ) : (
+                <Button
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors gap-2"
+                  onClick={handleSubscribe}
+                  disabled={isSubscribing || isSubscribed}
+                >
+                  {isSubscribing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Bell className="h-4 w-4" />
+                  )}
+                  {isSubscribed
+                    ? "Subscribed"
+                    : isSubscribing
+                    ? "Subscribing..."
+                    : "Subscribe For Updates"}
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>

@@ -18,19 +18,7 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { AlertCircle, CalendarIcon } from "lucide-react";
-import { memo, useState, useEffect, useRef } from "react";
-
-// Sample airport data
-const airports = [
-  { code: "JFK", name: "John F. Kennedy International Airport" },
-  { code: "ORD", name: "O'Hare International Airport" },
-  { code: "LAX", name: "Los Angeles International Airport" },
-  { code: "SFO", name: "San Francisco International Airport" },
-  { code: "DEN", name: "Denver International Airport" },
-  { code: "MIA", name: "Miami International Airport" },
-  { code: "PHX", name: "Phoenix Sky Harbor International Airport" },
-  { code: "SAN", name: "San Diego International Airport" },
-];
+import { memo, useState } from "react";
 
 const SubscribeFlight = memo(
   ({
@@ -49,6 +37,7 @@ const SubscribeFlight = memo(
     onDepartureStationChange,
     onArrivalStationChange,
     onCarrierChange,
+    setSearchError,
   }: {
     flightNumber: string;
     onFlightNumberChange: (value: string) => void;
@@ -65,86 +54,69 @@ const SubscribeFlight = memo(
     onDepartureStationChange: (value: string) => void;
     onArrivalStationChange: (value: string) => void;
     onCarrierChange: (value: string) => void;
+    setSearchError: (value: string) => void;
   }) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [showDepartureResults, setShowDepartureResults] = useState(false);
-    const [showArrivalResults, setShowArrivalResults] = useState(false);
 
-    // Add refs for the dropdown containers
-    const departureDropdownRef = useRef<HTMLDivElement>(null);
-    const arrivalDropdownRef = useRef<HTMLDivElement>(null);
-
-    // Filter airports based on search term
-    const filteredDepartureAirports = departureStation
-      ? airports.filter(
-          (airport) =>
-            airport.code
-              .toLowerCase()
-              .includes(departureStation.toLowerCase()) ||
-            airport.name.toLowerCase().includes(departureStation.toLowerCase())
-        )
-      : airports;
-
-    const filteredArrivalAirports = arrivalStation
-      ? airports.filter(
-          (airport) =>
-            airport.code.toLowerCase().includes(arrivalStation.toLowerCase()) ||
-            airport.name.toLowerCase().includes(arrivalStation.toLowerCase())
-        )
-      : airports;
-
-    // Handle departure station search
-    const handleDepartureSearch = (value: string) => {
-      setDepartureStation(value);
-      setShowDepartureResults(true);
+    // Add flight number validation
+    const handleFlightNumberChange = (value: string) => {
+      // Only allow numeric input and limit to 4 digits
+      const numericValue = value.replace(/\D/g, "").slice(0, 4);
+      onFlightNumberChange(numericValue);
     };
 
-    // Handle arrival station search
-    const handleArrivalSearch = (value: string) => {
-      setArrivalStation(value);
-      setShowArrivalResults(true);
+    // Add departure station validation
+    const handleDepartureStationChange = (value: string) => {
+      // Convert to uppercase and limit to 3 characters
+      const formattedValue = value.toUpperCase().slice(0, 3);
+      setDepartureStation(formattedValue);
+      onDepartureStationChange(formattedValue);
     };
 
-    // Handle departure station selection
-    const handleDepartureSelect = (code: string) => {
-      onDepartureStationChange(code);
-      setShowDepartureResults(false);
+    // Handle arrival station validation
+    const handleArrivalStationChange = (value: string) => {
+      // Convert to uppercase and limit to 3 characters
+      const formattedValue = value.toUpperCase().slice(0, 3);
+      setArrivalStation(formattedValue);
+      onArrivalStationChange(formattedValue);
     };
 
-    // Handle arrival station selection
-    const handleArrivalSelect = (code: string) => {
-      onArrivalStationChange(code);
-      setShowArrivalResults(false);
-    };
+    // Update the onSearch function to validate inputs before searching
+    const handleSearch = () => {
+      // Validate inputs before searching
+      let hasError = false;
+      let errorMessage = "";
 
-    // Add click outside handler to close dropdowns
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        // Close departure dropdown if clicked outside
-        if (
-          departureDropdownRef.current &&
-          !departureDropdownRef.current.contains(event.target as Node)
-        ) {
-          setShowDepartureResults(false);
+      if (
+        !flightNumber ||
+        flightNumber.length !== 4 ||
+        !/^\d+$/.test(flightNumber)
+      ) {
+        errorMessage = "Flight number must be 4 digits";
+        hasError = true;
+      }
+
+      if (!departureStation || departureStation.length !== 3) {
+        errorMessage = "Departure station must be 3 characters";
+        hasError = true;
+      }
+
+      if (hasError) {
+        // Set error message if setSearchError is available
+        if (typeof setSearchError === "function") {
+          setSearchError(errorMessage);
         }
+        return;
+      }
 
-        // Close arrival dropdown if clicked outside
-        if (
-          arrivalDropdownRef.current &&
-          !arrivalDropdownRef.current.contains(event.target as Node)
-        ) {
-          setShowArrivalResults(false);
-        }
-      };
+      // Clear any previous error if setSearchError is available
+      if (searchError && typeof setSearchError === "function") {
+        setSearchError("");
+      }
 
-      // Add event listener
-      document.addEventListener("mousedown", handleClickOutside);
-
-      // Clean up event listener
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
+      // Proceed with search
+      onSearch();
+    };
 
     return (
       <div className="w-full mx-auto">
@@ -178,12 +150,12 @@ const SubscribeFlight = memo(
             </label>
             <Input
               id="flight-number"
-              placeholder="Enter Flight no."
+              placeholder="Enter Flight Number"
               value={flightNumber}
-              onChange={(e) => onFlightNumberChange(e.target.value)}
-              // onKeyDown={(e) => e.key === "Enter" && onSearch()}
+              onChange={(e) => handleFlightNumberChange(e.target.value)}
               disabled={isLoading}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
+              maxLength={4}
             />
           </div>
 
@@ -192,81 +164,39 @@ const SubscribeFlight = memo(
           </div>
 
           {/* Departure Station */}
-          <div
-            className="flex flex-col w-full md:w-auto relative"
-            ref={departureDropdownRef}
-          >
+          <div className="flex flex-col w-full md:w-auto">
             <label
               htmlFor="departure-station"
               className="text-sm font-medium mb-1"
             >
               Dep Stn
             </label>
-            <div className="relative">
-              <Input
-                id="departure-station"
-                placeholder="From"
-                value={departureStation}
-                onChange={(e) => handleDepartureSearch(e.target.value)}
-                onFocus={() => setShowDepartureResults(true)}
-                className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              />
-              {showDepartureResults && (
-                <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-auto ">
-                  {filteredDepartureAirports.map((airport) => (
-                    <div
-                      key={airport.code}
-                      className="p-2 hover:bg-accent cursor-pointer"
-                      onClick={() => handleDepartureSelect(airport.code)}
-                    >
-                      <div className="font-bold">{airport.code}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {airport.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Input
+              id="departure-station"
+              placeholder="Enter Station Code"
+              value={departureStation}
+              onChange={(e) => handleDepartureStationChange(e.target.value)}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+              maxLength={3}
+            />
           </div>
 
           {/* Arrival Station */}
-          <div
-            className="flex flex-col w-full md:w-auto relative"
-            ref={arrivalDropdownRef}
-          >
+          <div className="flex flex-col w-full md:w-auto">
             <label
               htmlFor="arrival-station"
               className="text-sm font-medium mb-1"
             >
               Arr Stn
             </label>
-            <div className="relative">
-              <Input
-                id="arrival-station"
-                placeholder="To"
-                value={arrivalStation}
-                onChange={(e) => handleArrivalSearch(e.target.value)}
-                onFocus={() => setShowArrivalResults(true)}
-                className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              />
-              {showArrivalResults && (
-                <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-auto">
-                  {filteredArrivalAirports.map((airport) => (
-                    <div
-                      key={airport.code}
-                      className="p-2 hover:bg-accent cursor-pointer"
-                      onClick={() => handleArrivalSelect(airport.code)}
-                    >
-                      <div className="font-bold">{airport.code}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {airport.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Input
+              id="arrival-station"
+              placeholder="Enter Station Code"
+              value={arrivalStation}
+              onChange={(e) => handleArrivalStationChange(e.target.value)}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+              maxLength={3}
+            />
           </div>
 
           {/* Date Picker */}
@@ -309,9 +239,9 @@ const SubscribeFlight = memo(
           </div>
 
           {/* Search Button */}
-          <div className="flex  justify-end mt-auto">
+          <div className="flex justify-end mt-auto">
             <Button
-              onClick={onSearch}
+              onClick={handleSearch}
               className="h-10 w-full gradient-border md:w-auto"
               disabled={isLoading}
             >

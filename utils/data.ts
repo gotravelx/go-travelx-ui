@@ -1,4 +1,4 @@
-import { FlightData } from "@/types/flight";
+import type { FlightData } from "@/types/flight"
 
 const flights: FlightData[] = [
   {
@@ -259,7 +259,7 @@ const flights: FlightData[] = [
     onTimeUTC: "2025-03-09T10:05:00Z",
     inTimeUTC: "2025-03-09T10:10:00Z",
   },
-];
+]
 
-export default flights;
+export default flights
 

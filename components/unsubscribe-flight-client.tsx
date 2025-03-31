@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { CalendarIcon, AlertCircle, Plane } from "lucide-react";
+import { CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWeb3 } from "@/contexts/web3-context";
@@ -35,12 +36,9 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import UnSubscribeDataTable from "./unsubscribe-flight-data-table";
+import { flightService, type SubscriptionDetails } from "@/services/api";
 
-// Import from the second file
-import type { FlightData } from "@/services/api";
-import flights from "@/utils/data";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-
+// Sample airport data
 const airports = [
   { code: "JFK", name: "John F. Kennedy International Airport" },
   { code: "ORD", name: "O'Hare International Airport" },
@@ -50,46 +48,74 @@ const airports = [
   { code: "MIA", name: "Miami International Airport" },
   { code: "PHX", name: "Phoenix Sky Harbor International Airport" },
   { code: "SAN", name: "San Diego International Airport" },
+  { code: "ICN", name: "Seoul Incheon International Airport" },
+  { code: "PHL", name: "Philadelphia International Airport" },
+  { code: "PIT", name: "Pittsburgh International Airport" },
 ];
 
-// Dummy flight data from the second file
-const SubscribedFlights = flights;
-
 export default function UnsubscribeFlightClient() {
-  const { isLoading } = useWeb3();
+  const { isLoading: web3Loading, walletAddress } = useWeb3();
   const [isUnsubscribeDialogOpen, setIsUnsubscribeDialogOpen] = useState(false);
-  const [subscribedFlights, setSubscribedFlights] =
-    useState<FlightData[]>(SubscribedFlights);
-  const [filteredFlights, setFilteredFlights] =
-    useState<FlightData[]>(SubscribedFlights);
-  const [isUnsubscribing, setIsUnsubscribing] = useState(false); // Simplified loading state
+  const [subscriptionDetails, setSubscriptionDetails] = useState<
+    SubscriptionDetails[]
+  >([]);
+  const [filteredSubscriptions, setFilteredSubscriptions] = useState<
+    SubscriptionDetails[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFlights, setSelectedFlights] = useState<Set<string>>(
-    new Set()
-  );
+  const [selectedSubscriptions, setSelectedSubscriptions] = useState<
+    Set<string>
+  >(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [flightsPerPage, setFlightsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
-  const [departureResults, setDepartureResults] = useState(airports);
-  const [arrivalResults, setArrivalResults] = useState(airports);
-  const [showDepartureResults, setShowDepartureResults] = useState(false);
-  const [showArrivalResults, setShowArrivalResults] = useState(false);
+  const [departureStationError, setDepartureStationError] = useState("");
+  const [arrivalStationError, setArrivalStationError] = useState("");
+  const [flightNumberError, setFlightNumberError] = useState("");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+
+  // Fetch subscription details when component mounts
+  useEffect(() => {
+    const fetchSubscriptionDetails = async () => {
+      if (!walletAddress) return;
+
+      setIsLoading(true);
+      try {
+        const details = await flightService.getSubscribedFlightsDetails(
+          walletAddress
+        );
+        setSubscriptionDetails(details);
+        setFilteredSubscriptions(details);
+        setHasInitiallyLoaded(true);
+      } catch (error) {
+        console.error("Error fetching subscription details:", error);
+        setError("Failed to fetch subscription details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubscriptionDetails();
+  }, [walletAddress]);
+
   // Handle checkbox selection
-  const handleFlightSelect = useCallback((flightId: string) => {
-    setSelectedFlights((prev) => {
+  const handleSubscriptionSelect = useCallback((subscriptionId: string) => {
+    setSelectedSubscriptions((prev) => {
       const newSelected = new Set(prev);
-      if (newSelected.has(flightId)) {
-        newSelected.delete(flightId);
+      if (newSelected.has(subscriptionId)) {
+        newSelected.delete(subscriptionId);
       } else {
-        newSelected.add(flightId);
+        newSelected.add(subscriptionId);
       }
       return newSelected;
     });
@@ -97,255 +123,290 @@ export default function UnsubscribeFlightClient() {
 
   // Reset selections when filters change
   useEffect(() => {
-    setSelectedFlights(new Set());
+    setSelectedSubscriptions(new Set());
     setSelectAll(false);
-  }, [filteredFlights]);
+  }, [filteredSubscriptions]);
 
   // Handlers for filter changes
-  const handleFlightNumberChange = useCallback((value: string) => {
-    setFlightNumber(value);
-  }, []);
-
   const handleCarrierChange = useCallback((value: string) => {
     setCarrier(value);
   }, []);
 
+  // Handle flight number validation
+  const handleFlightNumberChange = useCallback((value: string) => {
+    // Only allow numeric input and limit to 4 digits
+    const numericValue = value.replace(/\D/g, "").slice(0, 4);
+    setFlightNumber(numericValue);
+
+    // Validate
+    if (numericValue && numericValue.length !== 4) {
+      setFlightNumberError("Flight number must be 4 digits");
+    } else {
+      setFlightNumberError("");
+    }
+  }, []);
+
+  // Handle departure station validation
   const handleDepartureStationChange = useCallback((value: string) => {
-    setDepartureStation(value);
+    // Convert to uppercase and limit to 3 characters
+    const formattedValue = value.toUpperCase().slice(0, 3);
+    setDepartureStation(formattedValue);
+
+    // Validate
+    if (formattedValue && formattedValue.length !== 3) {
+      setDepartureStationError("Station code must be 3 characters");
+    } else {
+      setDepartureStationError("");
+    }
   }, []);
 
+  // Handle arrival station validation
   const handleArrivalStationChange = useCallback((value: string) => {
-    setArrivalStation(value);
-  }, []);
+    // Convert to uppercase and limit to 3 characters
+    const formattedValue = value.toUpperCase().slice(0, 3);
+    setArrivalStation(formattedValue);
 
-  const onFlightNumberChange = useCallback((value: string) => {
-    setFlightNumber(value);
-  }, []);
-
-  const onCarrierChange = useCallback((value: string) => {
-    setCarrier(value);
-  }, []);
-
-  const onDateChange = useCallback((date: Date) => {
-    setSelectedDate(date);
-  }, []);
-
-  // Search function for departure station
-  const handleDepartureSearch = useCallback((query: string) => {
-    setDepartureStation(query);
-    if (query.trim() === "") {
-      setDepartureResults(airports);
+    // Validate
+    if (formattedValue && formattedValue.length !== 3) {
+      setArrivalStationError("Station code must be 3 characters");
     } else {
-      const filteredResults = airports.filter(
-        (airport) =>
-          airport.code.toLowerCase().includes(query.toLowerCase()) ||
-          airport.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setDepartureResults(filteredResults);
+      setArrivalStationError("");
     }
-    setShowDepartureResults(true);
-  }, []);
-
-  // Search function for arrival station
-  const handleArrivalSearch = useCallback((query: string) => {
-    setArrivalStation(query);
-    if (query.trim() === "") {
-      setArrivalResults(airports);
-    } else {
-      const filteredResults = airports.filter(
-        (airport) =>
-          airport.code.toLowerCase().includes(query.toLowerCase()) ||
-          airport.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setArrivalResults(filteredResults);
-    }
-    setShowArrivalResults(true);
-  }, []);
-
-  // Select departure station
-  const handleDepartureSelect = useCallback((code: string) => {
-    setDepartureStation(code);
-    setShowDepartureResults(false);
-  }, []);
-
-  // Select arrival station
-  const handleArrivalSelect = useCallback((code: string) => {
-    setArrivalStation(code);
-    setShowArrivalResults(false);
   }, []);
 
   // Add a reset filters function
   const resetFilters = useCallback(() => {
     setFlightNumber("");
-    setCarrier("UA");
-    setDepartureStation("JFK");
-    setArrivalStation("ORD");
-    setSelectedDate(new Date());
-    setFilteredFlights(subscribedFlights);
+    setCarrier("");
+    setDepartureStation("");
+    setArrivalStation("");
+    setSelectedDate(null);
+    setFilteredSubscriptions(subscriptionDetails);
     setSearchError("");
-    setSelectedFlights(new Set());
+    setSelectedSubscriptions(new Set());
     setSelectAll(false);
-  }, [subscribedFlights]);
+    setFlightNumberError("");
+    setDepartureStationError("");
+    setArrivalStationError("");
+  }, [subscriptionDetails]);
 
-  // Enhance the onSearch function
-  const onSearch = useCallback(() => {
+  // Apply filters to subscriptions
+  const applyFilters = useCallback(() => {
     setIsSearching(true);
     setSearchError("");
 
-    // Validate flight number
-    if (flightNumber && !/^\d+$/.test(flightNumber)) {
-      setSearchError("Flight number must contain only digits");
+    // Validate inputs
+    let hasError = false;
+
+    if (flightNumber && flightNumber.length !== 4) {
+      setFlightNumberError("Flight number must be 4 digits");
+      hasError = true;
+    }
+
+    if (departureStation && departureStation.length !== 3) {
+      setDepartureStationError("Station code must be 3 characters");
+      hasError = true;
+    }
+
+    if (arrivalStation && arrivalStation.length !== 3) {
+      setArrivalStationError("Station code must be 3 characters");
+      hasError = true;
+    }
+
+    if (hasError) {
       setIsSearching(false);
       return;
     }
 
-    // Filter flights based on search criteria
-    const results = subscribedFlights.filter((flight) => {
-      // Match carrier
-      if (carrier && flight.carrierCode !== carrier) {
-        return false;
-      }
+    try {
+      let filtered = [...subscriptionDetails];
 
-      // Match flight number if provided
-      if (flightNumber && flight.flightNumber !== flightNumber) {
-        return false;
-      }
-
-      // Match departure station
-      if (departureStation && flight.departureAirport !== departureStation) {
-        return false;
-      }
-
-      // Match arrival station
-      if (arrivalStation && flight.arrivalAirport !== arrivalStation) {
-        return false;
-      }
-
-      // Match date if selected - fix timezone issues
-      if (selectedDate) {
-        const flightDate = new Date(flight.departureDate);
-        const searchDate = new Date(selectedDate);
-
-        // Compare only year, month, and day
-        return (
-          flightDate.getFullYear() === searchDate.getFullYear() &&
-          flightDate.getMonth() === searchDate.getMonth() &&
-          flightDate.getDate() === searchDate.getDate()
+      // Filter by flight number if provided
+      if (flightNumber) {
+        filtered = filtered.filter((item) =>
+          item.flight.flightNumber.toString().includes(flightNumber)
         );
       }
 
-      return true;
-    });
+      // Filter by carrier if provided
+      if (carrier) {
+        filtered = filtered.filter(
+          (item) => item.flight.carrierCode === carrier
+        );
+      }
 
-    setFilteredFlights(results);
-    setCurrentPage(1); // Reset to first page after search
-    setSelectedFlights(new Set()); // Clear selections
-    setSelectAll(false);
+      // Filter by departure station if provided
+      if (departureStation) {
+        filtered = filtered.filter(
+          (item) => item.flight.departureAirport === departureStation
+        );
+      }
 
-    if (results.length === 0) {
-      toast.info("No flights match your search criteria");
-    } else {
-      toast.success(`Found ${results.length} matching flights`);
+      // Filter by arrival station if provided
+      if (arrivalStation) {
+        filtered = filtered.filter(
+          (item) => item.flight.arrivalAirport === arrivalStation
+        );
+      }
+
+      // Filter by date if selected
+      if (selectedDate) {
+        const dateString = format(selectedDate, "yyyy-MM-dd");
+        filtered = filtered.filter(
+          (item) => item.flight.scheduledDepartureDate === dateString
+        );
+      }
+
+      setFilteredSubscriptions(filtered);
+      setCurrentPage(1); // Reset to first page after filtering
+
+      if (
+        filtered.length === 0 &&
+        (flightNumber ||
+          carrier ||
+          departureStation ||
+          arrivalStation ||
+          selectedDate)
+      ) {
+        toast.info("No subscriptions match your search criteria");
+      }
+    } catch (error) {
+      console.error("Error applying filters:", error);
+      setSearchError("Error applying filters");
+    } finally {
+      setIsSearching(false);
     }
-
-    setIsSearching(false);
   }, [
+    subscriptionDetails,
     flightNumber,
     carrier,
     departureStation,
     arrivalStation,
     selectedDate,
-    subscribedFlights,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
+  ]);
 
   // Reset to first page when rows per page changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [flightsPerPage]);
+  }, [itemsPerPage]);
 
   // Calculate pagination
-  const indexOfLastFlight = currentPage * flightsPerPage;
-  const indexOfFirstFlight = indexOfLastFlight - flightsPerPage;
-  const currentFlights = filteredFlights.slice(
-    indexOfFirstFlight,
-    indexOfLastFlight
+  const indexOfLastSubscription = currentPage * itemsPerPage;
+  const indexOfFirstSubscription = indexOfLastSubscription - itemsPerPage;
+  const currentSubscriptions = filteredSubscriptions.slice(
+    indexOfFirstSubscription,
+    indexOfLastSubscription
   );
-  const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
-
-  // Computed filtered airports
-  const filteredDepartureAirports = departureResults;
-  const filteredArrivalAirports = arrivalResults;
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setShowDepartureResults(false);
-      setShowArrivalResults(false);
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage);
 
   // Handle select all checkbox
   const handleSelectAll = useCallback(
     (checked: boolean) => {
       setSelectAll(checked);
       if (checked) {
-        const allFlightIds = currentFlights.map(
-          (flight) => flight.flightNumber
+        const allSubscriptionIds = currentSubscriptions.map(
+          (sub) => sub.subscription._id
         );
-        setSelectedFlights(new Set(allFlightIds));
+        setSelectedSubscriptions(new Set(allSubscriptionIds));
       } else {
-        setSelectedFlights(new Set());
+        setSelectedSubscriptions(new Set());
       }
     },
-    [currentFlights]
+    [currentSubscriptions]
   );
 
-  // Handle bulk unsubscribe
+  // Update the handleBulkUnsubscribe function to refresh the list after unsubscribing
   const handleBulkUnsubscribe = useCallback(async () => {
-    if (selectedFlights.size === 0) {
-      toast.error("Please select at least one flight to unsubscribe");
+    if (selectedSubscriptions.size === 0) {
+      toast.error("Please select at least one subscription to unsubscribe");
       return;
     }
 
-    setIsUnsubscribing(true); // Start loading
+    setIsUnsubscribing(true);
 
     try {
-      // Simulate an API call or actual unsubscribe logic
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
-      toast.success(`Unsubscribed from ${selectedFlights.size} flights`);
-      setSelectedFlights(new Set());
+      // Collect the data for all selected subscriptions
+      const flightNumbers: string[] = [];
+      const carrierCodes: string[] = [];
+      const departureAirports: string[] = [];
+
+      // Process each selected subscription
+      Array.from(selectedSubscriptions).forEach((subscriptionId) => {
+        const subscription = subscriptionDetails.find(
+          (sub) => sub.subscription._id === subscriptionId
+        );
+        if (subscription) {
+          flightNumbers.push(subscription.subscription.flightNumber);
+          carrierCodes.push(subscription.flight.carrierCode);
+          departureAirports.push(subscription.subscription.departureAirport);
+        }
+      });
+
+      // Call the consolidated API method
+      const success = await flightService.unsubscribeFlights(
+        walletAddress,
+        flightNumbers,
+        carrierCodes,
+        departureAirports
+      );
+
+      if (success) {
+        toast.success(
+          `Successfully unsubscribed from ${flightNumbers.length} flight${
+            flightNumbers.length > 1 ? "s" : ""
+          }`
+        );
+
+        // Refresh subscription list
+        await refreshSubscriptions();
+      } else {
+        toast.error("Failed to unsubscribe from selected flights");
+      }
+    } catch (error) {
+      console.error("Error unsubscribing from flights:", error);
+      toast.error("An error occurred while unsubscribing");
+    } finally {
+      setIsUnsubscribing(false);
+      setIsUnsubscribeDialogOpen(false);
+    }
+  }, [selectedSubscriptions, subscriptionDetails, walletAddress]);
+
+  // Add a function to refresh subscriptions
+  const refreshSubscriptions = useCallback(async () => {
+    if (!walletAddress) return;
+
+    setIsLoading(true);
+    try {
+      const details = await flightService.getSubscribedFlightsDetails(
+        walletAddress
+      );
+      setSubscriptionDetails(details);
+      setFilteredSubscriptions(details);
+      setSelectedSubscriptions(new Set());
       setSelectAll(false);
     } catch (error) {
-      toast.error("Failed to unsubscribe from flights");
+      console.error("Error refreshing subscription details:", error);
+      setError("Failed to refresh subscription details");
     } finally {
-      setIsUnsubscribing(false); // End loading
-      setIsUnsubscribeDialogOpen(false); // Close the dialog
+      setIsLoading(false);
     }
-  }, [selectedFlights]);
+  }, [walletAddress]);
 
   const handleUnsubscribe = () => {
-    if (selectedFlights.size === 0) {
-      toast.error("Please select at least one flight to unsubscribe");
+    if (selectedSubscriptions.size === 0) {
+      toast.error("Please select at least one subscription to unsubscribe");
       return;
     }
-    setIsUnsubscribeDialogOpen(true); // Open the dialog
+    setIsUnsubscribeDialogOpen(true);
   };
-
-  // Reset selections when filters change
-  useEffect(() => {
-    setSelectedFlights(new Set());
-    setSelectAll(false);
-  }, [filteredFlights]);
 
   return (
     <>
-      {isLoading ? (
-        <div>Loading</div>
+      {web3Loading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading wallet information...</span>
+        </div>
       ) : (
         <div className="space-y-6">
           {error && (
@@ -354,15 +415,30 @@ export default function UnsubscribeFlightClient() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          {/* search functionality start*/}
+
           <Card>
             <CardHeader>
-              {selectedFlights.size > 0 && (
+              {selectedSubscriptions.size > 0 && (
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-muted-foreground">
-                    {selectedFlights.size} flight
-                    {selectedFlights.size > 1 ? "s" : ""} selected
+                    {selectedSubscriptions.size} subscription
+                    {selectedSubscriptions.size > 1 ? "s" : ""} selected
                   </div>
+                  <Button
+                    onClick={handleUnsubscribe}
+                    variant="destructive"
+                    disabled={isUnsubscribing}
+                    className="h-9"
+                  >
+                    {isUnsubscribing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Unsubscribing...
+                      </>
+                    ) : (
+                      "Unsubscribe Selected"
+                    )}
+                  </Button>
                 </div>
               )}
             </CardHeader>
@@ -382,14 +458,12 @@ export default function UnsubscribeFlightClient() {
                     >
                       Carrier
                     </label>
-                    <Select value={carrier} onValueChange={onCarrierChange}>
+                    <Select value={carrier} onValueChange={handleCarrierChange}>
                       <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
-                        <SelectValue placeholder="Carrier" />
+                        <SelectValue placeholder="Any" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="UA">UA</SelectItem>
-                        <SelectItem value="AA">AA</SelectItem>
-                        <SelectItem value="DL">DL</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -401,15 +475,28 @@ export default function UnsubscribeFlightClient() {
                     >
                       Flight
                     </label>
-                    <Input
-                      id="flight-number"
-                      placeholder="Enter Flight no."
-                      value={flightNumber}
-                      onChange={(e) => onFlightNumberChange(e.target.value)}
-                      // onKeyDown={(e) => e.key === "Enter" && onSearch()}
-                      disabled={isLoading}
-                      className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
-                    />
+                    <div>
+                      <Input
+                        id="flight-number"
+                        placeholder="Enter Flight Number"
+                        value={flightNumber}
+                        onChange={(e) =>
+                          handleFlightNumberChange(e.target.value)
+                        }
+                        disabled={isLoading || isSearching}
+                        className={`bg-background/90 border-2 ${
+                          flightNumberError
+                            ? "border-red-500"
+                            : "border-primary/50"
+                        } shadow-sm w-full focus-visible:border-primary`}
+                        maxLength={4}
+                      />
+                      {flightNumberError && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {flightNumberError}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex flex-5 flex-col justify-center items-center">
@@ -417,75 +504,63 @@ export default function UnsubscribeFlightClient() {
                   </div>
 
                   {/* Departure Station */}
-                  <div className="flex  flex-col w-full md:w-auto relative">
+                  <div className="flex flex-col w-full md:w-auto">
                     <label
                       htmlFor="departure-station"
                       className="text-sm font-medium mb-1"
                     >
                       Dep Stn
                     </label>
-                    <div className="relative">
+                    <div>
                       <Input
                         id="departure-station"
-                        placeholder="From"
+                        placeholder="Enter Station Code"
                         value={departureStation}
-                        onChange={(e) => handleDepartureSearch(e.target.value)}
-                        onFocus={() => setShowDepartureResults(true)}
-                        className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+                        onChange={(e) =>
+                          handleDepartureStationChange(e.target.value)
+                        }
+                        className={`bg-background/90 border-2 ${
+                          departureStationError
+                            ? "border-red-500"
+                            : "border-primary/50"
+                        } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
+                        maxLength={3}
                       />
-                      {showDepartureResults && (
-                        <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
-                          {filteredDepartureAirports.map((airport) => (
-                            <div
-                              key={airport.code}
-                              className="p-2 hover:bg-accent cursor-pointer"
-                              onClick={() =>
-                                handleDepartureSelect(airport.code)
-                              }
-                            >
-                              <div className="font-bold">{airport.code}</div>
-                              <div className="text-xs text-muted-foreground truncate">
-                                {airport.name}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                      {departureStationError && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {departureStationError}
+                        </p>
                       )}
                     </div>
                   </div>
 
                   {/* Arrival Station */}
-                  <div className="flex flex-col w-full md:w-auto relative">
+                  <div className="flex flex-col w-full md:w-auto">
                     <label
                       htmlFor="arrival-station"
                       className="text-sm font-medium mb-1"
                     >
                       Arr Stn
                     </label>
-                    <div className="relative">
+                    <div>
                       <Input
                         id="arrival-station"
-                        placeholder="To"
+                        placeholder="Enter Station Code"
                         value={arrivalStation}
-                        onChange={(e) => handleArrivalSearch(e.target.value)}
-                        onFocus={() => setShowArrivalResults(true)}
-                        className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+                        onChange={(e) =>
+                          handleArrivalStationChange(e.target.value)
+                        }
+                        className={`bg-background/90 border-2 ${
+                          arrivalStationError
+                            ? "border-red-500"
+                            : "border-primary/50"
+                        } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
+                        maxLength={3}
                       />
-                      {showArrivalResults && (
-                        <div className="absolute z-10 mt-1 w-64 bg-background border border-border rounded-md shadow-lg max-h-auto ">
-                          {filteredArrivalAirports.map((airport) => (
-                            <div
-                              key={airport.code}
-                              className="p-2 hover:bg-accent cursor-pointer"
-                              onClick={() => handleArrivalSelect(airport.code)}
-                            >
-                              <div className="font-bold">{airport.code}</div>
-                              <div className="text-xs text-muted-foreground truncate">
-                                {airport.name}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                      {arrivalStationError && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {arrivalStationError}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -507,29 +582,17 @@ export default function UnsubscribeFlightClient() {
                           <CalendarIcon className="h-4 w-4 mr-2" />
                           {selectedDate
                             ? format(selectedDate, "PPP")
-                            : format(new Date(), "PPP")}
+                            : "Select Date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="p-0 w-auto" align="start">
                         <Calendar
                           mode="single"
-                          selected={selectedDate}
-                          onSelect={(selectedDate) => {
-                            if (selectedDate) {
-                              const normalizedDate = new Date(
-                                Date.UTC(
-                                  selectedDate.getFullYear(),
-                                  selectedDate.getMonth(),
-                                  selectedDate.getDate()
-                                )
-                              );
-                              onDateChange(normalizedDate);
-                            }
+                          selected={selectedDate || undefined}
+                          onSelect={(date: Date | undefined) => {
+                            setSelectedDate(date || null);
                             setIsCalendarOpen(false);
                           }}
-                          disabled={(d) =>
-                            d > new Date() || d < new Date("2023-01-01")
-                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -539,11 +602,18 @@ export default function UnsubscribeFlightClient() {
                   {/* Search Button Group */}
                   <div className="flex justify-end mt-auto gap-2">
                     <Button
-                      onClick={onSearch}
+                      onClick={applyFilters}
                       className="h-10 w-full gradient-border md:w-auto"
                       disabled={isSearching || isLoading}
                     >
-                      {isSearching ? "Searching..." : "Search"}
+                      {isSearching ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Searching...
+                        </>
+                      ) : (
+                        "Search"
+                      )}
                     </Button>
                     <Button
                       onClick={resetFilters}
@@ -553,17 +623,6 @@ export default function UnsubscribeFlightClient() {
                     >
                       Clear Filters
                     </Button>
-                    {selectedFlights.size > 0 && (
-                      <div className="flex justify-between items-center">
-                        <Button
-                          onClick={handleUnsubscribe}
-                          variant="outline"
-                          className="h-9"
-                        >
-                          Unsubscribe Selected
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -574,182 +633,207 @@ export default function UnsubscribeFlightClient() {
                   </Alert>
                 )}
               </div>
+
               <div className="mt-8">
-                {filteredFlights.length === 0 && !isSearching ? (
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="ml-2">Loading subscriptions...</span>
+                  </div>
+                ) : hasInitiallyLoaded && filteredSubscriptions.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    No flights match your search criteria. Try different filters
-                    or
-                    <Button
-                      variant="link"
-                      onClick={resetFilters}
-                      className="px-1 text-primary"
-                    >
-                      clear all filters
-                    </Button>
+                    {subscriptionDetails.length === 0 ? (
+                      <>
+                        You don't have any flight subscriptions yet.
+                        <br />
+                        Go to the "Add Flight Subscription" tab to subscribe to
+                        flights.
+                      </>
+                    ) : (
+                      <>
+                        No subscriptions match your search criteria.
+                        <Button
+                          variant="link"
+                          onClick={resetFilters}
+                          className="px-1 text-primary"
+                        >
+                          Clear all filters
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <UnSubscribeDataTable
-                    flights={currentFlights}
-                    isLoading={isLoading}
-                    currentPage={currentPage}
-                    itemsPerPage={flightsPerPage}
-                    totalItems={filteredFlights.length}
-                    selectedFlights={selectedFlights}
-                    onFlightSelect={handleFlightSelect}
+                    subscriptions={currentSubscriptions}
+                    isLoading={isLoading || isSearching}
+                    selectedSubscriptions={selectedSubscriptions}
+                    onSubscriptionSelect={handleSubscriptionSelect}
                     selectAll={selectAll}
                     onSelectAll={handleSelectAll}
+                    onUnsubscribe={refreshSubscriptions}
                   />
                 )}
               </div>
             </CardContent>
 
             {/* pagination start */}
-            <CardFooter>
-              {/* Pagination controls */}
-              <div className="flex justify-between w-full items-center">
-                <div className="text-muted-foreground text-sm">
-                  Showing{" "}
-                  {filteredFlights.length === 0 ? 0 : indexOfFirstFlight + 1}-
-                  {Math.min(indexOfLastFlight, filteredFlights.length)} of{" "}
-                  {filteredFlights.length} flights
-                </div>
+            {filteredSubscriptions.length > 0 && (
+              <CardFooter>
+                {/* Pagination controls */}
+                <div className="flex justify-between w-full items-center">
+                  <div className="text-muted-foreground text-sm">
+                    Showing{" "}
+                    {filteredSubscriptions.length === 0
+                      ? 0
+                      : indexOfFirstSubscription + 1}
+                    -
+                    {Math.min(
+                      indexOfLastSubscription,
+                      filteredSubscriptions.length
+                    )}{" "}
+                    of {filteredSubscriptions.length} subscriptions
+                  </div>
 
-                <div className="flex justify-end gap-4 items-center">
-                  <Select
-                    value={flightsPerPage.toString()}
-                    onValueChange={(value) =>
-                      setFlightsPerPage(Number.parseInt(value))
-                    }
-                  >
-                    <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-[80px] focus:border-primary">
-                      <SelectValue placeholder="10" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex space-x-2">
-                    {totalPages > 0 && (
-                      <Pagination>
-                        <PaginationContent>
-                          {/* First page button */}
-                          <PaginationItem>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage(1);
-                              }}
-                              disabled={currentPage === 1}
-                              className="bg-background/90 border-2 border-primary/50 h-9 shadow-sm w-9 focus:border-primary"
-                            >
-                              <span className="sr-only">First page</span>
-                              <span>«</span>
-                            </Button>
-                          </PaginationItem>
+                  <div className="flex justify-end gap-4 items-center">
+                    <Select
+                      value={itemsPerPage.toString()}
+                      onValueChange={(value) =>
+                        setItemsPerPage(Number.parseInt(value))
+                      }
+                    >
+                      <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-[80px] focus:border-primary">
+                        <SelectValue placeholder="5" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="flex space-x-2">
+                      {totalPages > 0 && (
+                        <Pagination>
+                          <PaginationContent>
+                            {/* First page button */}
+                            <PaginationItem>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setCurrentPage(1)}
+                                disabled={currentPage === 1}
+                                className="bg-background/90 border-2 border-primary/50 h-9 shadow-sm w-9 focus:border-primary"
+                              >
+                                <span className="sr-only">First page</span>
+                                <span>«</span>
+                              </Button>
+                            </PaginationItem>
 
-                          {/* Previous page button */}
-                          <PaginationItem>
-                            <PaginationPrevious
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage((prev) => Math.max(prev - 1, 1));
-                              }}
-                              className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
-                              disabled={currentPage === 1}
-                            />
-                          </PaginationItem>
+                            {/* Previous page button */}
+                            <PaginationItem>
+                              <PaginationPrevious
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (currentPage > 1) {
+                                    setCurrentPage((prev) =>
+                                      Math.max(prev - 1, 1)
+                                    );
+                                  }
+                                }}
+                                className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
+                              />
+                            </PaginationItem>
 
-                          {/* Current page indicator */}
-                          <PaginationItem>
-                            <PaginationLink
-                              className={
-                                "bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
-                              }
-                            >
-                              {currentPage}
-                            </PaginationLink>
-                          </PaginationItem>
+                            {/* Current page indicator */}
+                            <PaginationItem>
+                              <PaginationLink
+                                className={
+                                  "bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
+                                }
+                              >
+                                {currentPage}
+                              </PaginationLink>
+                            </PaginationItem>
 
-                          {/* Next page button */}
-                          <PaginationItem>
-                            <PaginationNext
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage((prev) =>
-                                  Math.min(prev + 1, totalPages)
-                                );
-                              }}
-                              className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
-                              disabled={currentPage === totalPages}
-                            />
-                          </PaginationItem>
+                            {/* Next page button */}
+                            <PaginationItem>
+                              <PaginationNext
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (currentPage < totalPages) {
+                                    setCurrentPage((prev) =>
+                                      Math.min(prev + 1, totalPages)
+                                    );
+                                  }
+                                }}
+                                className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
+                              />
+                            </PaginationItem>
 
-                          {/* Last page button */}
-                          <PaginationItem>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage(totalPages);
-                              }}
-                              disabled={currentPage === totalPages}
-                              className="bg-background/90 border-2 border-primary/50 h-9 shadow-sm w-9 focus:border-primary"
-                            >
-                              <span className="sr-only">Last page</span>
-                              <span>»</span>
-                            </Button>
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    )}
+                            {/* Last page button */}
+                            <PaginationItem>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setCurrentPage(totalPages)}
+                                disabled={currentPage === totalPages}
+                                className="bg-background/90 border-2 border-primary/50 h-9 shadow-sm w-9 focus:border-primary"
+                              >
+                                <span className="sr-only">Last page</span>
+                                <span>»</span>
+                              </Button>
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardFooter>
+              </CardFooter>
+            )}
             {/* pagination end */}
           </Card>
         </div>
       )}
 
       {/* Unsubscribe Confirmation Dialog */}
-      <Dialog
-        open={isUnsubscribeDialogOpen}
-        onOpenChange={setIsUnsubscribeDialogOpen}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Unsubscription</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to unsubscribe from {selectedFlights.size}{" "}
-            selected flight{selectedFlights.size > 1 ? "s" : ""}?
-          </p>
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsUnsubscribeDialogOpen(false)}
-              disabled={isUnsubscribing}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleBulkUnsubscribe}
-              disabled={isUnsubscribing}
-            >
-              {isUnsubscribing ? "Unsubscribing..." : "Unsubscribe"}
-            </Button>
+      {isUnsubscribeDialogOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg shadow-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Confirm Unsubscription</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to unsubscribe from{" "}
+              {selectedSubscriptions.size} selected flight
+              {selectedSubscriptions.size > 1 ? "s" : ""}?
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setIsUnsubscribeDialogOpen(false)}
+                disabled={isUnsubscribing}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleBulkUnsubscribe}
+                disabled={isUnsubscribing}
+              >
+                {isUnsubscribing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Unsubscribing...
+                  </>
+                ) : (
+                  "Unsubscribe"
+                )}
+              </Button>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </>
   );
 }

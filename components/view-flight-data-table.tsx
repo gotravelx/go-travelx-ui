@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import {
   Table,
   TableBody,
@@ -18,6 +18,7 @@ import {
   Calendar,
   Clock,
   Copy,
+  ExternalLink,
 } from "lucide-react";
 import {
   Dialog,
@@ -42,21 +43,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import flights from "@/utils/data";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { CardContent } from "./ui/card";
 import { toast } from "sonner";
 
-// Dummy flight data for initial display
-const dummyFlights: FlightData[] = flights;
-
 interface FlightDataTableProps {
-  flights?: FlightData[];
+  flights: FlightData[];
   isLoading?: boolean;
   currentPage?: number;
   itemsPerPage?: number;
@@ -66,11 +62,11 @@ interface FlightDataTableProps {
 }
 
 export default function ViewFlightDatTable({
-  flights = dummyFlights,
+  flights,
   isLoading = false,
   currentPage = 1,
   itemsPerPage = 5,
-  totalItems = dummyFlights.length,
+  totalItems = 0,
   onPageChange = () => {},
   onItemsPerPageChange = () => {},
 }: FlightDataTableProps) {
@@ -107,7 +103,7 @@ export default function ViewFlightDatTable({
   };
 
   const startIndex = (localCurrentPage - 1) * localItemsPerPage;
-  const endIndex = startIndex + localItemsPerPage;
+  const endIndex = Math.min(startIndex + localItemsPerPage, totalItems);
   const paginatedFlights = flights.slice(startIndex, endIndex);
 
   const toggleRow = (flightNumber: string) => {
@@ -119,9 +115,9 @@ export default function ViewFlightDatTable({
     setIsDialogOpen(true);
   };
 
-  const getStatusBadgeColor = (flight: FlightData) => {
+  const getStatusBadgeColor = (flight: any) => {
     if (flight.isCanceled) return "bg-red-500/20 text-red-500";
-    if (flight.departureDelayMinutes > 0)
+    if ((flight.departureDelayMinutes ?? 0) > 0)
       return "bg-yellow-500/20 text-yellow-500";
 
     switch (flight.statusCode) {
@@ -142,38 +138,45 @@ export default function ViewFlightDatTable({
 
   const getStatusText = (flight: FlightData) => {
     if (flight.isCanceled) return "Canceled";
-    if (flight.departureDelayMinutes > 0)
+    if ((flight.departureDelayMinutes ?? 0) > 0)
       return `Delayed ${flight.departureDelayMinutes} min`;
 
+    // Use currentFlightStatus if available, otherwise use statusCode
+    if (flight.currentFlightStatus) {
+      return flight.currentFlightStatus.toUpperCase();
+    }
+
     switch (flight.statusCode) {
-      case "NDPT":
+      case "ndpt":
         return "Not Departed";
-      case "OUT":
+      case "out":
         return "Departed";
-      case "OFF":
+      case "off":
         return "In Flight";
-      case "ON":
+      case "on":
         return "Landing";
-      case "IN":
+      case "in":
         return "Arrived";
       default:
         return "Unknown";
     }
   };
 
-  const copyAddress = async () => {
-    await navigator.clipboard.writeText(
-      "0x70c8a24de705c1d62601376974669863bb21cd6a35ef7127a5d130f44a10a469"
-    );
-    toast.success("transactions copied to clipboard");
+  const copyTxHash = async (hash: string) => {
+    if (!hash) return;
+
+    await navigator.clipboard.writeText(hash);
+    toast.success("Transaction hash copied to clipboard");
   };
 
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  const formatTxHash = (hash: string) => {
+    if (!hash) return "N/A";
+    return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
   };
 
   const formatTime = (dateString: string) => {
     try {
+      if (!dateString) return "N/A";
       const date = new Date(dateString);
       return new Intl.DateTimeFormat("en-US", {
         hour: "2-digit",
@@ -182,6 +185,20 @@ export default function ViewFlightDatTable({
       }).format(date);
     } catch (error) {
       return "Invalid time";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(date);
+    } catch (error) {
+      return "Invalid date";
     }
   };
 
@@ -199,8 +216,9 @@ export default function ViewFlightDatTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>Transaction Id</TableHead>
-              <TableHead>Flt</TableHead>
+              <TableHead className="hidden md:table-cell">Tx Hash</TableHead>
+
+              <TableHead>Flight</TableHead>
               <TableHead className="hidden md:table-cell">Sch Dep Dt</TableHead>
               <TableHead>Dep Stn</TableHead>
               <TableHead>Arr Stn</TableHead>
@@ -211,260 +229,321 @@ export default function ViewFlightDatTable({
                 Est Arr DTM
               </TableHead>
               <TableHead>Sts</TableHead>
+
               <TableHead className="w-[100px]">Actions</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedFlights.map((flight) => (
-              <>
-                <TableRow
-                  key={flight.flightNumber}
-                  className="hover:bg-muted/50"
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <CardContent className="flex items-center justify-between p-4 cursor-pointer">
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-sm font-medium">
-                              {formatAddress(
-                                "0x70c8a24de705c1d62601376974669863bb21cd6a35ef7127a5d130f44a10a469"
-                              )}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={copyAddress}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Camino Transaction Hash</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TableCell className="font-medium">
-                    <div className="flex gap-2 items-center">
-                      <Plane className="h-4 text-primary w-4" />
-                      {flight.carrierCode} {flight.flightNumber}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="flex gap-2 items-center">
-                      <Calendar className="h-4 text-muted-foreground w-4" />
-                      {flight.departureDate}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 items-center">
-                      <span className="font-medium">
-                        {flight.departureAirport}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 items-center">
-                      <span className="font-medium">
-                        {flight.arrivalAirport}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="flex gap-2 items-center">
-                      <Clock className="h-4 text-muted-foreground w-4" />
-                      {flight.estimatedDepartureUTC}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <div className="flex gap-2 items-center">
-                      <Clock className="h-4 text-muted-foreground w-4" />
-                      {flight.estimatedArrivalUTC}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`${getStatusBadgeColor(
-                        flight
-                      )} p-2 px-4 text-md`}
-                    >
-                      {getStatusText(flight)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openFlightDetails(flight)}
-                    >
-                      Details
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 p-0 w-8"
-                      onClick={() => toggleRow(flight.flightNumber)}
-                    >
-                      {expandedRow === flight.flightNumber ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                {expandedRow === flight.flightNumber && (
-                  <TableRow key={`${flight.flightNumber}-expanded`}>
-                    <TableCell colSpan={8} className="bg-muted/20 p-0">
-                      <div className="p-4">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">Departure</h4>
-                            <div className="grid grid-cols-2 text-sm gap-2">
-                              <div className="text-muted-foreground">
-                                Airport:
-                              </div>
-                              <div>{flight.departureAirport}</div>
-                              <div className="text-muted-foreground">City:</div>
-                              <div>{flight.departureCity}</div>
-                              <div className="text-muted-foreground">
-                                Terminal:
-                              </div>
-                              <div>{flight.departureTerminal || "N/A"}</div>
-                              <div className="text-muted-foreground">Gate:</div>
-                              <div>{flight.departureGate || "N/A"}</div>
-                              <div className="text-muted-foreground">
-                                Scheduled:
-                              </div>
-                              <div>
-                                {formatTime(
-                                  flight.scheduledDepartureUTCDateTime
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">Arrival</h4>
-                            <div className="grid grid-cols-2 text-sm gap-2">
-                              <div className="text-muted-foreground">
-                                Airport:
-                              </div>
-                              <div>{flight.arrivalAirport}</div>
-                              <div className="text-muted-foreground">City:</div>
-                              <div>{flight.arrivalCity}</div>
-                              <div className="text-muted-foreground">
-                                Terminal:
-                              </div>
-                              <div>{flight.arrivalTerminal || "N/A"}</div>
-                              <div className="text-muted-foreground">Gate:</div>
-                              <div>{flight.arrivalGate || "N/A"}</div>
-                              <div className="text-muted-foreground">
-                                Scheduled:
-                              </div>
-                              <div>
-                                {formatTime(flight.scheduledArrivalUTCDateTime)}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">
-                              Flight Details
-                            </h4>
-                            <div className="grid grid-cols-2 text-sm gap-2">
-                              <div className="text-muted-foreground">
-                                Carrier:
-                              </div>
-                              <div>{flight.operatingAirline}</div>
-                              <div className="text-muted-foreground">
-                                Aircraft:
-                              </div>
-                              <div>{flight.equipmentModel}</div>
-                              <div className="text-muted-foreground">
-                                Status:
-                              </div>
-                              <div>
-                                <Badge
-                                  variant="outline"
-                                  className={`${getStatusBadgeColor(flight)}`}
+            {paginatedFlights.length > 0 ? (
+              paginatedFlights.map((flight) => (
+                <>
+                  <TableRow
+                    key={`${flight.flightNumber}-${flight.scheduledDepartureDate}`}
+                    className="hover:bg-muted/50"
+                  >
+                    <TableCell className="hidden md:table-cell">
+                      {flight.blockchainTxHash ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs">
+                                  {formatTxHash(flight.blockchainTxHash)}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyTxHash(flight.blockchainTxHash || "");
+                                  }}
                                 >
-                                  {getStatusText(flight)}
-                                </Badge>
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                                <a
+                                  href={`https://columbus.caminoscan.com/tx/${flight.blockchainTxHash}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
                               </div>
-                              <div className="text-muted-foreground">
-                                Delay:
-                              </div>
-                              <div>
-                                {flight.departureDelayMinutes > 0
-                                  ? `${flight.departureDelayMinutes} minutes`
-                                  : "None"}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Blockchain Transaction Hash</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">
+                          N/A
+                        </span>
+                      )}
+                    </TableCell>
 
-                        <div className="flex justify-end mt-4">
-                          <Button
-                            onClick={() => openFlightDetails(flight)}
-                            className="gradient-border"
-                          >
-                            View Full Details
-                          </Button>
-                        </div>
+                    <TableCell className="font-medium">
+                      <div className="flex gap-2 items-center">
+                        <Plane className="h-4 text-primary w-4" />
+                        {flight.carrierCode} {flight.flightNumber}
                       </div>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Calendar className="h-4 text-muted-foreground w-4" />
+                        {formatDate(flight.scheduledDepartureDate)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <span className="font-medium">
+                          {flight.departureAirport}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <span className="font-medium">
+                          {flight.arrivalAirport}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Clock className="h-4 text-muted-foreground w-4" />
+                        {formatTime(flight.estimatedDepartureUTC)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Clock className="h-4 text-muted-foreground w-4" />
+                        {formatTime(flight.estimatedArrivalUTC)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`${getStatusBadgeColor(
+                          flight
+                        )} p-2 px-4 text-md`}
+                      >
+                        {getStatusText(flight)}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openFlightDetails(flight)}
+                      >
+                        Details
+                      </Button>
+                    </TableCell>
+
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 p-0 w-8"
+                        onClick={() => toggleRow(flight.flightNumber)}
+                      >
+                        {expandedRow === flight.flightNumber ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
                   </TableRow>
-                )}
-              </>
-            ))}
+                  {expandedRow === flight.flightNumber && (
+                    <TableRow key={`${flight.flightNumber}-expanded`}>
+                      <TableCell colSpan={10} className="bg-muted/20 p-0">
+                        <div className="p-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div className="space-y-2">
+                              <h4 className="text-sm font-semibold">
+                                Departure
+                              </h4>
+                              <div className="grid grid-cols-2 text-sm gap-2">
+                                <div className="text-muted-foreground">
+                                  Airport:
+                                </div>
+                                <div>{flight.departureAirport}</div>
+                                <div className="text-muted-foreground">
+                                  City:
+                                </div>
+                                <div>{flight.departureCity}</div>
+                                <div className="text-muted-foreground">
+                                  Terminal:
+                                </div>
+                                <div>{flight.departureTerminal || "N/A"}</div>
+                                <div className="text-muted-foreground">
+                                  Gate:
+                                </div>
+                                <div>{flight.departureGate || "N/A"}</div>
+                                <div className="text-muted-foreground">
+                                  Scheduled:
+                                </div>
+                                <div>
+                                  {formatTime(
+                                    flight.scheduledDepartureUTCDateTime
+                                  )}
+                                </div>
+                                <div className="text-muted-foreground">
+                                  Status:
+                                </div>
+                                <div>{flight.departureStatus || "N/A"}</div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <h4 className="text-sm font-semibold">Arrival</h4>
+                              <div className="grid grid-cols-2 text-sm gap-2">
+                                <div className="text-muted-foreground">
+                                  Airport:
+                                </div>
+                                <div>{flight.arrivalAirport}</div>
+                                <div className="text-muted-foreground">
+                                  City:
+                                </div>
+                                <div>{flight.arrivalCity}</div>
+                                <div className="text-muted-foreground">
+                                  Terminal:
+                                </div>
+                                <div>{flight.arrivalTerminal || "N/A"}</div>
+                                <div className="text-muted-foreground">
+                                  Gate:
+                                </div>
+                                <div>{flight.arrivalGate || "N/A"}</div>
+                                <div className="text-muted-foreground">
+                                  Scheduled:
+                                </div>
+                                <div>
+                                  {formatTime(
+                                    flight.scheduledArrivalUTCDateTime
+                                  )}
+                                </div>
+                                <div className="text-muted-foreground">
+                                  Status:
+                                </div>
+                                <div>{flight.arrivalStatus || "N/A"}</div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <h4 className="text-sm font-semibold">
+                                Flight Details
+                              </h4>
+                              <div className="grid grid-cols-2 text-sm gap-2">
+                                <div className="text-muted-foreground">
+                                  Carrier:
+                                </div>
+                                <div>{flight.operatingAirline}</div>
+                                <div className="text-muted-foreground">
+                                  Aircraft:
+                                </div>
+                                <div>{flight.equipmentModel}</div>
+                                <div className="text-muted-foreground">
+                                  Status:
+                                </div>
+                                <div>
+                                  <Badge
+                                    variant="outline"
+                                    className={`${getStatusBadgeColor(flight)}`}
+                                  >
+                                    {getStatusText(flight)}
+                                  </Badge>
+                                </div>
+                                <div className="text-muted-foreground">
+                                  Delay:
+                                </div>
+                                <div>
+                                  {(flight.departureDelayMinutes ?? 0) > 0
+                                    ? `${flight.departureDelayMinutes} minutes`
+                                    : "None"}
+                                </div>
+                                {flight.marketedFlightSegment &&
+                                  flight.marketedFlightSegment.length > 0 && (
+                                    <>
+                                      <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
+                                        Marketed Flight Segments:
+                                      </div>
+                                      {flight.marketedFlightSegment.map(
+                                        (segment, idx) => (
+                                          <Fragment key={idx}>
+                                            <div className="text-muted-foreground pl-2">
+                                              Airline:
+                                            </div>
+                                            <div>
+                                              {segment.MarketingAirlineCode}{" "}
+                                              {segment.FlightNumber}
+                                            </div>
+                                          </Fragment>
+                                        )
+                                      )}
+                                    </>
+                                  )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end mt-4">
+                            <Button
+                              onClick={() => openFlightDetails(flight)}
+                              className="gradient-border"
+                            >
+                              View Full Details
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={10} className="h-24 text-center">
+                  No flights found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
-          {paginatedFlights.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
-                No flights found
-              </TableCell>
-            </TableRow>
-          )}
         </Table>
       </div>
 
       {/* Pagination controls */}
-      <div className="flex justify-between items-center mt-4">
-        <div className="text-muted-foreground text-sm">
-          Showing{" "}
-          {totalItems === 0
-            ? 0
-            : (localCurrentPage - 1) * localItemsPerPage + 1}
-          -{Math.min(localCurrentPage * localItemsPerPage, totalItems)} of{" "}
-          {totalItems} flights
-        </div>
+      {totalPages > 0 && (
+        <div className="flex justify-between items-center mt-4">
+          <div className="text-muted-foreground text-sm">
+            Showing{" "}
+            {totalItems === 0
+              ? 0
+              : (localCurrentPage - 1) * localItemsPerPage + 1}
+            -{Math.min(localCurrentPage * localItemsPerPage, totalItems)} of{" "}
+            {totalItems} flights
+          </div>
 
-        <div className="flex justify-end gap-4 items-center">
-          <Select
-            value={localItemsPerPage.toString()}
-            onValueChange={handleItemsPerPageChange}
-          >
-            <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-[80px] focus:border-primary">
-              <SelectValue placeholder="5" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex space-x-2">
-            {totalPages > 0 && (
+          <div className="flex justify-end gap-4 items-center">
+            <Select
+              value={localItemsPerPage.toString()}
+              onValueChange={handleItemsPerPageChange}
+            >
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-[80px] focus:border-primary">
+                <SelectValue placeholder="5" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex space-x-2">
               <Pagination>
                 <PaginationContent>
                   {/* First page button */}
@@ -489,10 +568,11 @@ export default function ViewFlightDatTable({
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        handlePageChange(Math.max(localCurrentPage - 1, 1));
+                        if (localCurrentPage > 1) {
+                          handlePageChange(Math.max(localCurrentPage - 1, 1));
+                        }
                       }}
                       className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
-                      disabled={localCurrentPage === 1}
                     />
                   </PaginationItem>
                   {/* Page numbers */}
@@ -502,7 +582,7 @@ export default function ViewFlightDatTable({
                         "bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
                       }
                     >
-                      {currentPage}
+                      {localCurrentPage}
                     </PaginationLink>
                   </PaginationItem>
                   {/* Next page button */}
@@ -511,12 +591,13 @@ export default function ViewFlightDatTable({
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        setLocalCurrentPage((prev) =>
-                          Math.min(prev + 1, totalPages)
-                        );
+                        if (localCurrentPage < totalPages) {
+                          handlePageChange(
+                            Math.min(localCurrentPage + 1, totalPages)
+                          );
+                        }
                       }}
                       className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
-                      disabled={currentPage === totalPages}
                     />
                   </PaginationItem>
                   {/* Last page button */}
@@ -537,10 +618,10 @@ export default function ViewFlightDatTable({
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Flight Status Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
