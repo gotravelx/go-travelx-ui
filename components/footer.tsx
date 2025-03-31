@@ -163,13 +163,13 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <MapPin size={18} className="text-primary shrink-0 mt-0.5" />
                 <span className="text-sm text-muted-foreground text-left">
-                  123 Blockchain Avenue, Web3 District, Digital City, 10101
+                  900 Oakmont Lane, Suite 350, Westmont, IL 60559
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={18} className="text-primary shrink-0" />
                 <span className="text-sm text-muted-foreground text-left">
-                  +1 (555) 123-4567
+                  +1 (708) 247-1764
                 </span>
               </li>
               <li className="flex items-center gap-2">
