@@ -2,20 +2,38 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plane, Bell, MapPin, Info, AlertCircle, Loader2 } from "lucide-react";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { format, parseISO, isToday, isTomorrow } from "date-fns";
+  Plane,
+  Bell,
+  MapPin,
+  Info,
+  AlertCircle,
+  Loader2,
+  LockIcon,
+  ShieldCheck,
+  ShieldAlert,
+} from "lucide-react";
 import { Badge } from "./ui/badge";
 import { useState, useEffect } from "react";
-import { flightService, type MarketedFlightSegment } from "@/services/api";
+import { flightService } from "@/services/api";
 import { useWeb3 } from "@/contexts/web3-context";
 import { toast } from "sonner";
-import { FlightData } from "@/types/flight";
+import { format, parseISO, isToday, isTomorrow } from "date-fns";
+import type { FlightData } from "@/types/flight";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export interface FlightStatusViewProps {
   flightData: FlightData;
@@ -25,7 +43,9 @@ export default function SubscribeFlightCard({
   flightData,
 }: FlightStatusViewProps) {
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isSecureSubscribing, setIsSecureSubscribing] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSecureSubscribed, setIsSecureSubscribed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const { walletAddress } = useWeb3();
 
@@ -34,9 +54,21 @@ export default function SubscribeFlightCard({
     setIsMounted(true);
   }, []);
 
-  // Check if flight is already subscribed
+  // State for confirmation dialogs
+  const [isStandardDialogOpen, setIsStandardDialogOpen] = useState(false);
+  const [isSecureDialogOpen, setIsSecureDialogOpen] = useState(false);
 
-  // Handle subscription
+  // Handle standard subscription button click - opens confirmation dialog
+  const handleSubscribeClick = () => {
+    setIsStandardDialogOpen(true);
+  };
+
+  // Handle secure subscription button click - opens confirmation dialog
+  const handleSecureSubscribeClick = () => {
+    setIsSecureDialogOpen(true);
+  };
+
+  // Execute standard subscription after confirmation
   const handleSubscribe = async () => {
     if (!walletAddress) {
       toast.error("Please connect your wallet first");
@@ -63,7 +95,7 @@ export default function SubscribeFlightCard({
       );
 
       setIsSubscribed(true);
-      toast.success("Successfully subscribed to flight updates");
+      toast.success("Successfully subscribed to standard flight updates");
     } catch (error) {
       console.error("Error subscribing to flight:", error);
       toast.error(
@@ -71,6 +103,49 @@ export default function SubscribeFlightCard({
       );
     } finally {
       setIsSubscribing(false);
+      setIsStandardDialogOpen(false);
+    }
+  };
+
+  // Execute secure subscription after confirmation
+  const handleSecureSubscribe = async () => {
+    if (!walletAddress) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    try {
+      setIsSecureSubscribing(true);
+
+      console.log("Secure subscribing with wallet address:", walletAddress);
+      console.log("Flight data:", {
+        flightNumber: flightData.flightNumber,
+        carrierCode: flightData.carrierCode,
+        departureAirport: flightData.departureAirport,
+        departureDate: flightData.scheduledDepartureDate,
+      });
+
+      // In a real implementation, this would call a different API endpoint for secure subscriptions
+      await flightService.subscribeToFlight(
+        flightData.flightNumber,
+        flightData.carrierCode,
+        flightData.departureAirport,
+        flightData.scheduledDepartureDate,
+        walletAddress
+      );
+
+      setIsSecureSubscribed(true);
+      toast.success(
+        "Successfully subscribed to secure encrypted flight updates"
+      );
+    } catch (error) {
+      console.error("Error subscribing to flight:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to subscribe to flight"
+      );
+    } finally {
+      setIsSecureSubscribing(false);
+      setIsSecureDialogOpen(false);
     }
   };
 
@@ -93,7 +168,7 @@ export default function SubscribeFlightCard({
       } else if (isTomorrow(date)) {
         dayLabel = "Tomorrow";
       } else if (isSameWeekday) {
-        dayLabel = `This ${dayLabel}`;
+        dayLabel = `${dayLabel}`;
       }
 
       return `${dayLabel}, ${format(date, "MMMM d, yyyy")}`;
@@ -105,15 +180,15 @@ export default function SubscribeFlightCard({
 
   const formatTime = (timeString: string) => {
     try {
-      if (!timeString) return "N/A";
+      if (!timeString) return "TBD";
       const date = parseISO(timeString);
       if (isNaN(date.getTime())) {
-        return "Time unavailable";
+        return "TBD";
       }
       return format(date, "h:mm a");
     } catch (error) {
       console.error("Error formatting time:", error);
-      return "Time unavailable";
+      return "TBD";
     }
   };
 
@@ -206,341 +281,542 @@ export default function SubscribeFlightCard({
   }
 
   return (
-    <>
-      <Card className="p-4 w-full max-w-3xl bg-gradient-to-br from-background to-muted/20">
-        <div className="pb-6 flex justify-between">
-          <div className="">
-            <div className="text-2xl font-semibold">
-              Flight Status - {flightData.carrierCode} {flightData.flightNumber}
-            </div>
-            <span>
-              <span>{formatDate(flightData.scheduledDepartureDate)} </span>
-            </span>
-          </div>
-          <div>
-            <div className="text-lg font-bold">{getFlightStatusBadge()}</div>
-          </div>
-        </div>
-        <CardContent className="p-4 border-[3px] rounded-xl border-[#0F172A] ">
-          <div className="flex flex-col gap-8 ">
-            <div className="flex justify-between relative">
-              {/* Departure Section */}
-              <div className="flex-1 text-left pr-12">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground tracking-wider">
-                      DEPARTURE
-                    </p>
-                    <p className="text-2xl font-bold mt-1">{departureTime}</p>
+    <Card className="p-4 w-full bg-gradient-to-br from-background to-muted/20">
+      {/* Flight header outside the flex container */}
+
+      <CardContent className="p-0">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left side - Flight Card */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-between">
+            <div className="border-[3px] p-4 rounded-xl border-[#0F172A]">
+              <div className="pb-4 flex justify-between">
+                <div>
+                  <div className="text-2xl font-semibold">
+                    Flight Status - {flightData.carrierCode}{" "}
+                    {flightData.flightNumber}
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={`${getStatusBadgeVariant(
-                      flightData.departureStatus
-                    )} text-lg`}
-                  >
-                    {flightData.departureStatus || "Status Unknown"}
-                  </Badge>
-                  <div>
-                    <span className="text-2xl font-bold text-primary">
-                      {flightData.departureAirport}
-                    </span>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {flightData.departureCity}
-                    </p>
+                  <span>{formatDate(flightData.scheduledDepartureDate)}</span>
+                </div>
+                <div>
+                  <div className="text-lg font-bold">
+                    {getFlightStatusBadge()}
                   </div>
                 </div>
               </div>
-
-              {/* Center Line and Button */}
-              <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 z-10">
-                <div className="relative h-32 flex items-center">
-                  <div className="w-[2px] h-full bg-gradient-to-b from-primary/20 via-primary to-primary/20"></div>
-                  <Button
-                    size="icon"
-                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full w-12 h-12 bg-primary hover:bg-primary/90"
-                  >
-                    <Plane className="w-6 h-6 " />
-                  </Button>
-                </div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {durationFormatted}
-                </p>
-              </div>
-
-              {/* Arrival Section */}
-              <div className="flex-1 text-right pl-12">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground tracking-wider">
-                      ARRIVAL
-                    </p>
-                    <p className="text-2xl font-bold mt-1">{arrivalTime}</p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={`${getStatusBadgeVariant(
-                      flightData.arrivalStatus
-                    )} text-lg`}
-                  >
-                    {flightData.arrivalStatus || "Status Unknown"}
-                  </Badge>
-                  <div>
-                    <span className="text-2xl font-bold text-primary">
-                      {flightData.arrivalAirport}
-                    </span>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {flightData.arrivalCity}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Flight Details Accordion */}
-            <Accordion type="single" collapsible className="w-full mt-4">
-              <AccordionItem value="flight-details" className="border-none">
-                <AccordionTrigger className="py-2.5 px-4 bg-muted/30 rounded-lg border border-border hover:bg-muted/50 hover:no-underline transition-all data-[state=open]:rounded-b-none">
-                  <span className="flex items-center gap-2 text-primary font-medium">
-                    <Info className="h-4 w-4" />
-                    Flight Details
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 px-0">
-                  <div className="bg-muted/20 border-x border-b border-border rounded-b-lg p-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Departure Details */}
-                      <div className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2 text-primary">
-                          <MapPin className="h-4 w-4" />
-                          Departure Details
-                        </h3>
-                        <div className="space-y-2.5 text-sm">
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Scheduled Departure:
-                            </span>
-                            <span className="font-medium">
-                              {formatTime(
-                                flightData.scheduledDepartureUTCDateTime
-                              )}
-                            </span>
-                          </div>
-
-                          {flightData.actualDepartureUTC && (
-                            <div className="flex justify-between items-center">
-                              <span className="text-muted-foreground">
-                                Actual Departure:
-                              </span>
-                              <span className="font-medium">
-                                {formatTime(flightData.actualDepartureUTC)}
-                              </span>
-                            </div>
-                          )}
-
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Terminal:
-                            </span>
-                            <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
-                              {flightData.departureTerminal || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Gate:</span>
-                            <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
-                              {flightData.departureGate || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Boarding Time:
-                            </span>
-                            <span className="font-medium">
-                              {boardingTimeFormatted}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Delay:
-                            </span>
-                            <span
-                              className={`font-medium ${
-                                flightData.departureDelayMinutes ?? 0 > 0
-                                  ? "text-destructive"
-                                  : "text-emerald-500"
-                              }`}
-                            >
-                              {flightData.departureDelayMinutes ?? 0 > 0
-                                ? `${flightData.departureDelayMinutes} minutes`
-                                : "On time"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Arrival Details */}
-                      <div className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2 text-primary">
-                          <MapPin className="h-4 w-4" />
-                          Arrival Details
-                        </h3>
-                        <div className="space-y-2.5 text-sm">
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Scheduled Arrival:
-                            </span>
-                            <span className="font-medium">
-                              {formatTime(
-                                flightData.scheduledArrivalUTCDateTime
-                              )}
-                            </span>
-                          </div>
-                          {flightData.actualArrivalUTC && (
-                            <div className="flex justify-between items-center">
-                              <span className="text-muted-foreground">
-                                Actual Arrival:
-                              </span>
-                              <span className="font-medium">
-                                {formatTime(flightData.actualArrivalUTC)}
-                              </span>
-                            </div>
-                          )}
-
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Terminal:
-                            </span>
-                            <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
-                              {flightData.arrivalTerminal || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Gate:</span>
-                            <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
-                              {flightData.arrivalGate || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Baggage Claim:
-                            </span>
-                            <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
-                              {flightData.baggageClaim || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">
-                              Delay:
-                            </span>
-                            <span
-                              className={`font-medium ${
-                                flightData.arrivalDelayMinutes ?? 0 > 0
-                                  ? "text-destructive"
-                                  : "text-emerald-500"
-                              }`}
-                            >
-                              {flightData.arrivalDelayMinutes ?? 0 > 0
-                                ? `${flightData.arrivalDelayMinutes} minutes`
-                                : "On time"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+              <div className="flex justify-between relative">
+                {/* Departure Section */}
+                <div className="flex-1 text-left pr-12">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground tracking-wider">
+                        DEPARTURE
+                      </p>
+                      <p className="text-2xl font-bold mt-1">{departureTime}</p>
+                    </div>
+                    <div>
+                      <span className="text-2xl font-bold text-primary">
+                        {flightData.departureAirport}
+                      </span>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {flightData.departureCity}
+                      </p>
                     </div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            {/* Marketing Flight Details Accordion */}
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="marketing-details" className="border-none">
-                <AccordionTrigger className="py-2.5 px-4 bg-muted/30 rounded-lg border border-border hover:bg-muted/50 hover:no-underline transition-all data-[state=open]:rounded-b-none">
-                  <span className="flex items-center gap-2 text-primary font-medium">
-                    <AlertCircle className="h-4 w-4" />
-                    Marketing Details
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 px-0">
-                  <div className="bg-muted/20 border-x border-b border-border rounded-b-lg">
-                    <table className="w-full border-collapse border border-border">
-                      <thead>
-                        <tr className="bg-muted/50">
-                          <th className="border border-border p-2 text-left">
-                            Marketing Airline Code
-                          </th>
-                          <th className="border border-border p-2 text-left">
-                            Marketing Flight Number
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {flightData.marketedFlightSegment &&
-                        flightData.marketedFlightSegment.length > 0 ? (
-                          flightData.marketedFlightSegment.map(
-                            (segment, index) => (
-                              <tr key={index} className="hover:bg-muted/30">
-                                <td className="border border-border p-2">
-                                  {segment.MarketingAirlineCode}
-                                </td>
-                                <td className="border border-border p-2">
-                                  {segment.FlightNumber}
-                                </td>
-                              </tr>
-                            )
-                          )
-                        ) : (
-                          <tr className="hover:bg-muted/30">
-                            <td
-                              colSpan={2}
-                              className="border border-border p-2 text-center"
-                            >
-                              No marketing flight segments available
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                </div>
+
+                {/* Center Line and Button */}
+                <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 z-10">
+                  <div className="relative h-32 flex items-center">
+                    <div className="w-[2px] h-full bg-gradient-to-b from-primary/20 via-primary to-primary/20"></div>
+                    <Button
+                      size="icon"
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full w-12 h-12 bg-primary hover:bg-primary/90"
+                    >
+                      <Plane className="w-6 h-6" />
+                    </Button>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            {/* Subscribe Button */}
-            <div className="flex justify-end">
-              {flightData.isSubscribed ? (
-                <Button
-                  className="bg-red-400 cursor-pointer text-primary-foreground hover:bg-primary/90 transition-colors gap-2"
-                  onClick={handleSubscribe}
-                  disabled={flightData.isSubscribed}
-                >
-                  {isSubscribing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Bell className="h-4 w-4" />
-                  )}
-                  Subscribed
-                </Button>
-              ) : (
-                <Button
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors gap-2"
-                  onClick={handleSubscribe}
-                  disabled={isSubscribing || isSubscribed}
-                >
-                  {isSubscribing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Bell className="h-4 w-4" />
-                  )}
-                  {isSubscribed
-                    ? "Subscribed"
-                    : isSubscribing
-                    ? "Subscribing..."
-                    : "Subscribe For Updates"}
-                </Button>
-              )}
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {durationFormatted}
+                  </p>
+                </div>
+
+                {/* Arrival Section */}
+                <div className="flex-1 text-right pl-12">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground tracking-wider">
+                        ARRIVAL
+                      </p>
+                      <p className="text-2xl font-bold mt-1">{arrivalTime}</p>
+                    </div>
+                    <div>
+                      <span className="text-2xl font-bold text-primary">
+                        {flightData.arrivalAirport}
+                      </span>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {flightData.arrivalCity}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subscribe Buttons */}
+              <div className="flex flex-col sm:flex-row mt-[55px] justify-between w-full  gap-3">
+                {/* Secure Subscription Button with Tooltip */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full sm:w-1/2">
+                        <Button
+                          className="bg-emerald-600 text-white hover:bg-emerald-700 transition-colors gap-2 w-full"
+                          onClick={handleSecureSubscribeClick}
+                          disabled={isSecureSubscribing || isSecureSubscribed}
+                        >
+                          {isSecureSubscribing ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <LockIcon className="h-4 w-4" />
+                          )}
+                          {isSecureSubscribed
+                            ? "Securely Subscribed"
+                            : isSecureSubscribing
+                            ? "Subscribing..."
+                            : "Private Subscription"}
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Subscribe to encrypted flight updates with enhanced
+                        security
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* Standard Subscription Button with Tooltip */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full sm:w-1/2">
+                        <Button
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors gap-2 w-full"
+                          onClick={handleSubscribeClick}
+                          disabled={isSubscribing || isSubscribed}
+                        >
+                          {isSubscribing ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Bell className="h-4 w-4" />
+                          )}
+                          {isSubscribed
+                            ? "Subscribed"
+                            : isSubscribing
+                            ? "Subscribing..."
+                            : "Public Subscription"}
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Subscribe to standard non-encrypted flight updates</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </>
+
+          {/* Right side - Flight Details */}
+          <div className="w-full lg:w-1/2 border rounded-lg flex flex-col">
+            <div className="bg-muted/30 p-3 border-b flex items-center gap-2 text-primary font-medium">
+              <Info className="h-4 w-4" />
+              Flight Details
+            </div>
+
+            <div className="p-5 flex-grow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Departure Details */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold flex items-center gap-2 text-primary">
+                    <MapPin className="h-4 w-4" />
+                    Departure Details
+                  </h3>
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Departure Status:
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={getStatusBadgeVariant(
+                          flightData.departureStatus
+                        )}
+                      >
+                        {flightData.departureStatus || "TBD"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Scheduled Departure:
+                      </span>
+                      <span className="font-medium">
+                        {formatTime(flightData.scheduledDepartureUTCDateTime)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Actual Departure:
+                      </span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md whitespace-nowrap">
+                        {formatTime(flightData.actualDepartureUTC)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Terminal:</span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md whitespace-nowrap">
+                        {flightData.departureTerminal || "TBD"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Gate:</span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
+                        {flightData.departureGate || "TBD"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Boarding Time:
+                      </span>
+                      <span className="font-medium">
+                        {boardingTimeFormatted}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Delay:</span>
+                      <span
+                        className={`font-medium ${
+                          (flightData.departureDelayMinutes ?? 0) > 0
+                            ? "text-destructive"
+                            : "text-emerald-500"
+                        }`}
+                      >
+                        {(flightData.departureDelayMinutes ?? 0) > 0
+                          ? `${flightData.departureDelayMinutes} minutes`
+                          : "On time"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arrival Details */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold flex items-center gap-2 text-primary">
+                    <MapPin className="h-4 w-4" />
+                    Arrival Details
+                  </h3>
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Arrival Status:
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={getStatusBadgeVariant(
+                          flightData.arrivalStatus
+                        )}
+                      >
+                        {flightData.arrivalStatus || "TBD"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Scheduled Arrival:
+                      </span>
+                      <span className="font-medium">
+                        {formatTime(flightData.scheduledArrivalUTCDateTime)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Actual Arrival:</span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md whitespace-nowrap">
+                        {formatTime(flightData?.actualArrivalUTC || "TBD")}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Terminal:</span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md whitespace-nowrap">
+                        {flightData.arrivalTerminal || "TBD"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Gate:</span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
+                        {flightData.arrivalGate || "TBD"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">
+                        Baggage Claim:
+                      </span>
+                      <span className="font-medium px-2 py-0.5 bg-accent/50 rounded-md">
+                        {flightData.baggageClaim || "TBD"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Delay:</span>
+                      <span
+                        className={`font-medium ${
+                          (flightData.arrivalDelayMinutes ?? 0) > 0
+                            ? "text-destructive"
+                            : "text-emerald-500"
+                        }`}
+                      >
+                        {(flightData.arrivalDelayMinutes ?? 0) > 0
+                          ? `${flightData.arrivalDelayMinutes} minutes`
+                          : "On time"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Codeshare Details section */}
+              <div className="mt-6">
+                <h3 className="font-semibold flex items-center gap-2 text-primary mb-3">
+                  <AlertCircle className="h-4 w-4" />
+                  Codeshare Airline Details
+                </h3>
+                <div className="bg-muted/20 border border-border rounded-lg">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-muted/50">
+                        <th className="border border-border p-2 text-left">
+                          Codeshare
+                        </th>
+                        <th className="border border-border p-2 text-left">
+                          Flight Number
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {flightData.marketedFlightSegment &&
+                      flightData.marketedFlightSegment.length > 0 ? (
+                        flightData.marketedFlightSegment.map(
+                          (segment, index) => (
+                            <tr key={index} className="hover:bg-muted/30">
+                              <td className="border border-border p-2">
+                                {segment.MarketingAirlineCode || "TBD"}
+                              </td>
+                              <td className="border border-border p-2">
+                                {segment.FlightNumber || "TBD"}
+                              </td>
+                            </tr>
+                          )
+                        )
+                      ) : (
+                        <tr className="hover:bg-muted/30">
+                          <td
+                            colSpan={2}
+                            className="border border-border p-2 text-center"
+                          >
+                            No codeshare flight segments available
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+
+      {/* Standard Subscription Confirmation Dialog */}
+      <Dialog
+        open={isStandardDialogOpen}
+        onOpenChange={setIsStandardDialogOpen}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Confirm Standard Subscription
+            </DialogTitle>
+            <DialogDescription>
+              You are about to subscribe to standard flight updates for{" "}
+              {flightData.carrierCode} {flightData.flightNumber}.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-muted/30 p-4 rounded-lg border">
+              <h4 className="font-medium text-sm mb-2">Subscription Details</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <span className="text-muted-foreground">Flight:</span>
+                <span>
+                  {flightData.carrierCode} {flightData.flightNumber}
+                </span>
+
+                <span className="text-muted-foreground">Route:</span>
+                <span>
+                  {flightData.departureAirport} → {flightData.arrivalAirport}
+                </span>
+
+                <span className="text-muted-foreground">Date:</span>
+                <span>{formatDate(flightData.scheduledDepartureDate)}</span>
+
+                <span className="text-muted-foreground">Departure:</span>
+                <span>{departureTime}</span>
+
+                <span className="text-muted-foreground">Arrival:</span>
+                <span>{arrivalTime}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="h-5 w-5 text-amber-500" />
+                <h4 className="font-medium text-sm">
+                  Standard Subscription Features
+                </h4>
+              </div>
+              <ul className="text-xs space-y-1 text-muted-foreground pl-7 list-disc">
+                <li>Non-encrypted flight notifications</li>
+                <li>Basic flight status information</li>
+                <li>Regular update frequency</li>
+                <li>Lower blockchain gas costs</li>
+                <li>Updates visible to network participants</li>
+              </ul>
+            </div>
+
+            <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                By subscribing, you agree to receive flight updates through the
+                blockchain network. Standard subscriptions are not encrypted and
+                may be visible to other network participants.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsStandardDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSubscribe} disabled={isSubscribing}>
+              {isSubscribing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Subscribing...
+                </>
+              ) : (
+                "Confirm Subscription"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Secure Subscription Confirmation Dialog */}
+      <Dialog open={isSecureDialogOpen} onOpenChange={setIsSecureDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LockIcon className="h-5 w-5" />
+              Confirm Secure Subscription
+            </DialogTitle>
+            <DialogDescription>
+              You are about to subscribe to secure encrypted flight updates for{" "}
+              {flightData.carrierCode} {flightData.flightNumber}.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-muted/30 p-4 rounded-lg border">
+              <h4 className="font-medium text-sm mb-2">Subscription Details</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <span className="text-muted-foreground">Flight:</span>
+                <span>
+                  {flightData.carrierCode} {flightData.flightNumber}
+                </span>
+
+                <span className="text-muted-foreground">Route:</span>
+                <span>
+                  {flightData.departureAirport} → {flightData.arrivalAirport}
+                </span>
+
+                <span className="text-muted-foreground">Date:</span>
+                <span>{formatDate(flightData.scheduledDepartureDate)}</span>
+
+                <span className="text-muted-foreground">Departure:</span>
+                <span>{departureTime}</span>
+
+                <span className="text-muted-foreground">Arrival:</span>
+                <span>{arrivalTime}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                <h4 className="font-medium text-sm">
+                  Secure Subscription Features
+                </h4>
+              </div>
+              <ul className="text-xs space-y-1 text-muted-foreground pl-7 list-disc">
+                <li>End-to-end encrypted updates</li>
+                <li>Access to sensitive flight information</li>
+                <li>Real-time secure notifications</li>
+                <li>Blockchain-verified data integrity</li>
+                <li>Enhanced privacy protection</li>
+              </ul>
+            </div>
+
+            <div className="bg-emerald-50 dark:bg-emerald-950/20 p-3 rounded-md border border-emerald-200 dark:border-emerald-800">
+              <p className="text-xs text-emerald-800 dark:text-emerald-300">
+                Secure subscriptions use encryption to protect your flight data.
+                Only you will be able to decrypt and view the detailed flight
+                information. This subscription type requires slightly higher gas
+                fees due to the encryption overhead.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsSecureDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSecureSubscribe}
+              disabled={isSecureSubscribing}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {isSecureSubscribing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Subscribing...
+                </>
+              ) : (
+                "Confirm Secure Subscription"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }

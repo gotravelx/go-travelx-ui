@@ -246,11 +246,11 @@ export default function ExpandableFlightTable({
                                   <div className="text-muted-foreground">
                                     Terminal:
                                   </div>
-                                  <div>{flight.departureTerminal || "N/A"}</div>
+                                  <div>{flight.departureTerminal || "TBD"}</div>
                                   <div className="text-muted-foreground">
                                     Gate:
                                   </div>
-                                  <div>{flight.departureGate || "N/A"}</div>
+                                  <div>{flight.departureGate || "TBD"}</div>
                                   <div className="text-muted-foreground">
                                     Scheduled:
                                   </div>
