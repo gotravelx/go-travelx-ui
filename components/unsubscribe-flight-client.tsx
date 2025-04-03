@@ -417,31 +417,7 @@ export default function UnsubscribeFlightClient() {
           )}
 
           <Card>
-            <CardHeader>
-              {selectedSubscriptions.size > 0 && (
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    {selectedSubscriptions.size} subscription
-                    {selectedSubscriptions.size > 1 ? "s" : ""} selected
-                  </div>
-                  <Button
-                    onClick={handleUnsubscribe}
-                    variant="destructive"
-                    disabled={isUnsubscribing}
-                    className="h-9"
-                  >
-                    {isUnsubscribing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Unsubscribing...
-                      </>
-                    ) : (
-                      "Unsubscribe Selected"
-                    )}
-                  </Button>
-                </div>
-              )}
-            </CardHeader>
+            <CardHeader></CardHeader>
             <CardContent>
               <div className="w-full mx-auto">
                 <style jsx global>{`
@@ -623,6 +599,32 @@ export default function UnsubscribeFlightClient() {
                     >
                       Clear Filters
                     </Button>
+                  </div>
+
+                  <div className="flex justify-end mt-auto gap-2">
+                    {selectedSubscriptions.size > 0 && (
+                      <div className="flex justify-between items-center gap-2">
+                        <Button
+                          onClick={handleUnsubscribe}
+                          variant="destructive"
+                          disabled={isUnsubscribing}
+                          className="h-9"
+                        >
+                          {isUnsubscribing ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Unsubscribing...
+                            </>
+                          ) : (
+                            `Unsubscribe Selected ( ${
+                              selectedSubscriptions.size
+                            }
+                          ${selectedSubscriptions.size > 1 ? "" : ""})`
+                          )}
+                        </Button>
+                        <div className="text-xs"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

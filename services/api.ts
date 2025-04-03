@@ -1,5 +1,9 @@
 import type { FlightPhase } from "@/types/flight";
 
+// Add this constant at the top of the file
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+
 // Add this interface to the top of the file with other interfaces
 export interface SubscriptionDetails {
   subscription: {
@@ -81,7 +85,7 @@ export const flightService = {
 
       // Use the API to get flight data
       const response = await fetch(
-        `http://localhost:3000/v1/flights/get-flight-status/${flightNumber}?departureDate=${
+        `${API_BASE_URL}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&walletAddress=${walletAddress}`
       );
@@ -111,7 +115,7 @@ export const flightService = {
       );
 
       const response = await fetch(
-        `http://localhost:3000/v1/flights/get-flight-details`,
+        `${API_BASE_URL}/v1/flights/get-flight-details`,
         {
           method: "POST",
           headers: {
@@ -173,7 +177,7 @@ export const flightService = {
       }
 
       const response = await fetch(
-        "http://localhost:3000/v1/flights/add-flight-subscription",
+        `${API_BASE_URL}/v1/flights/add-flight-subscription`,
         {
           method: "POST",
           headers: {

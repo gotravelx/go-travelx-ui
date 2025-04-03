@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +17,6 @@ import {
   Timer,
   AlertTriangle,
   Luggage,
-  Terminal,
-  Calendar,
   SettingsIcon,
 } from "lucide-react";
 import { format } from "date-fns-tz";
@@ -30,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FlightData, FlightPhase } from "@/types/flight";
+import type { FlightData, FlightPhase } from "@/types/flight";
 import { convertUTCToLocal } from "@/utils/common";
 
 export interface FlightStatusViewProps {
@@ -47,6 +45,12 @@ export default function SubscribeFlightStatusView({
   const isFlightDataEmpty = Object.values(flightData).every(
     (value) => typeof value === "string" && value.trim() === ""
   );
+
+  const [currentPhase, setCurrentPhase] = useState<FlightPhase>("ndpt");
+  const [activeTab, setActiveTab] = useState<FlightPhase>("ndpt");
+  const [currentStatus, setCurrentStatus] = useState("");
+  const [timeFormat, setTimeFormat] = useState<TimeFormat>("utc");
+  const [timezone, setTimezone] = useState("America/New_York");
 
   if (isFlightDataEmpty) {
     return (
@@ -68,12 +72,6 @@ export default function SubscribeFlightStatusView({
       </Card>
     );
   }
-
-  const [currentPhase, setCurrentPhase] = useState<FlightPhase>("ndpt");
-  const [activeTab, setActiveTab] = useState<FlightPhase>("ndpt");
-  const [currentStatus, setCurrentStatus] = useState("");
-  const [timeFormat, setTimeFormat] = useState<TimeFormat>("utc");
-  const [timezone, setTimezone] = useState("America/New_York");
 
   // Map API status code to flight phase
   const getFlightPhase = useCallback(
@@ -254,35 +252,35 @@ export default function SubscribeFlightStatusView({
           {type === "departure" ? "From" : "To"}
         </span>
       </div>
-      <div className="text-2xl font-bold">{city}</div>
+      <div className="text-2xl font-bold">{city || "TBD"}</div>
       <div>
         <span className="text-lg font-medium">
           {type === "departure" ? "Departure Airport" : "Arrival Airport"}:{" "}
-          {airport}
+          {airport || "TBD"}
         </span>
       </div>
 
       <div className="space-y-2 mt-2">
         <div className="flex flex-col gap-1">
           <div className="text-sm text-muted-foreground">Estimated Time:</div>
-          <div className="font-mono">{formatTime(estimatedTime)}</div>
+          <div className="font-mono">{formatTime(estimatedTime) || "TBD"}</div>
         </div>
         <div className="flex flex-col gap-1">
           <div className="text-sm text-muted-foreground">Scheduled Time:</div>
-          <div className="font-mono">{formatTime(scheduledTime)}</div>
+          <div className="font-mono">{formatTime(scheduledTime) || "TBD"}</div>
         </div>
         {actualTime && (
           <div className="flex flex-col gap-1">
             <div className="text-sm text-muted-foreground">Actual Time:</div>
-            <div className="font-mono">{formatTime(actualTime)}</div>
+            <div className="font-mono">{formatTime(actualTime) || "TBD"}</div>
           </div>
         )}
       </div>
 
       {terminal && (
-        <div className="flex items-center gap-2  mt-2">
-          <div className="text-sm text-muted-foreground">Terminal Gate :</div>
-          <div>{terminal}</div>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="text-sm text-muted-foreground">Terminal Gate:</div>
+          <div>{terminal || "TBD"}</div>
         </div>
       )}
     </div>
@@ -354,7 +352,7 @@ export default function SubscribeFlightStatusView({
   }
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">

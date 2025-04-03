@@ -146,32 +146,30 @@ export default function UnSubscribeDataTable({
     }
   };
 
+  // Modify the getStatusText function to return uppercase status codes
   const getStatusText = (flight: any) => {
-    if (flight.isCanceled) return "Canceled";
+    if (flight.isCanceled) return "CNCL";
     if ((flight.departureDelayMinutes ?? 0) > 0)
-      return `Delayed ${flight.departureDelayMinutes} min`;
+      return `DELAYED ${flight.departureDelayMinutes} min`;
 
     // Use currentFlightStatus if available, otherwise use statusCode
     if (flight.currentFlightStatus) {
-      return (
-        flight.currentFlightStatus.charAt(0).toUpperCase() +
-        flight.currentFlightStatus.slice(1)
-      );
+      return flight.currentFlightStatus.toUpperCase();
     }
 
     switch (flight.statusCode) {
       case "NDPT":
-        return "Not Departed";
+        return "NDPT";
       case "OUT":
-        return "Departed";
+        return "OUT";
       case "OFF":
-        return "In Flight";
+        return "OFF";
       case "ON":
-        return "Landing";
+        return "ON";
       case "IN":
-        return "Arrived";
+        return "IN";
       default:
-        return "Unknown";
+        return "UNKNOWN";
     }
   };
 
@@ -228,6 +226,7 @@ export default function UnSubscribeDataTable({
                   aria-label="Select all subscriptions"
                 />
               </TableHead>
+              <TableHead className="hidden md:table-cell">Tx Hash</TableHead>
               <TableHead>Flight</TableHead>
               <TableHead className="hidden md:table-cell">Sch Dep Dt</TableHead>
               <TableHead>Dep Stn</TableHead>
@@ -236,7 +235,7 @@ export default function UnSubscribeDataTable({
                 Subscribed On
               </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Tx Hash</TableHead>
+
               <TableHead className="w-[100px]">Actions</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -259,49 +258,6 @@ export default function UnSubscribeDataTable({
                         }
                         aria-label={`Select subscription ${subscription.subscription._id}`}
                       />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex gap-2 items-center">
-                        <Plane className="h-4 text-primary w-4" />
-                        {subscription.flight.carrierCode}{" "}
-                        {subscription.flight.flightNumber}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(subscription.flight.scheduledDepartureDate)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 items-center">
-                        <span className="font-medium">
-                          {subscription.flight.departureAirport}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 items-center">
-                        <span className="font-medium">
-                          {subscription.flight.arrivalAirport}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatDate(subscription.subscription.subscriptionDate)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`${getStatusBadgeColor(
-                          subscription.flight
-                        )} p-2 px-4 text-md`}
-                      >
-                        {getStatusText(subscription.flight)}
-                      </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {subscription.subscription.blockchainTxHash ? (
@@ -349,6 +305,50 @@ export default function UnSubscribeDataTable({
                         </span>
                       )}
                     </TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex gap-2 items-center">
+                        <Plane className="h-4 text-primary w-4" />
+                        {subscription.flight.carrierCode}{" "}
+                        {subscription.flight.flightNumber}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Calendar className="h-4 text-muted-foreground w-4" />
+                        {formatDate(subscription.flight.scheduledDepartureDate)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <span className="font-medium">
+                          {subscription.flight.departureAirport}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <span className="font-medium">
+                          {subscription.flight.arrivalAirport}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Clock className="h-4 text-muted-foreground w-4" />
+                        {formatDate(subscription.subscription.subscriptionDate)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`${getStatusBadgeColor(
+                          subscription.flight
+                        )} p-2 px-4 text-md`}
+                      >
+                        {getStatusText(subscription.flight)}
+                      </Badge>
+                    </TableCell>
+
                     <TableCell>
                       <div className="flex flex-col gap-2 sm:flex-row">
                         <Button
@@ -396,24 +396,27 @@ export default function UnSubscribeDataTable({
                                   Airport:
                                 </div>
                                 <div>
-                                  {subscription.flight.departureAirport}
+                                  {subscription.flight.departureAirport ||
+                                    "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   City:
                                 </div>
-                                <div>{subscription.flight.departureCity}</div>
+                                <div>
+                                  {subscription.flight.departureCity || "TBD"}
+                                </div>
                                 <div className="text-muted-foreground">
                                   Terminal:
                                 </div>
                                 <div>
                                   {subscription.flight.departureTerminal ||
-                                    "N/A"}
+                                    "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Gate:
                                 </div>
                                 <div>
-                                  {subscription.flight.departureGate || "N/A"}
+                                  {subscription.flight.departureGate || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Scheduled:
@@ -422,13 +425,13 @@ export default function UnSubscribeDataTable({
                                   {formatTime(
                                     subscription.flight
                                       .scheduledDepartureUTCDateTime
-                                  )}
+                                  ) || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
                                 <div>
-                                  {subscription.flight.departureStatus || "N/A"}
+                                  {subscription.flight.departureStatus || "TBD"}
                                 </div>
                               </div>
                             </div>
@@ -439,22 +442,26 @@ export default function UnSubscribeDataTable({
                                 <div className="text-muted-foreground">
                                   Airport:
                                 </div>
-                                <div>{subscription.flight.arrivalAirport}</div>
+                                <div>
+                                  {subscription.flight.arrivalAirport || "TBD"}
+                                </div>
                                 <div className="text-muted-foreground">
                                   City:
                                 </div>
-                                <div>{subscription.flight.arrivalCity}</div>
+                                <div>
+                                  {subscription.flight.arrivalCity || "TBD"}
+                                </div>
                                 <div className="text-muted-foreground">
                                   Terminal:
                                 </div>
                                 <div>
-                                  {subscription.flight.arrivalTerminal || "N/A"}
+                                  {subscription.flight.arrivalTerminal || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Gate:
                                 </div>
                                 <div>
-                                  {subscription.flight.arrivalGate || "N/A"}
+                                  {subscription.flight.arrivalGate || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Scheduled:
@@ -463,13 +470,13 @@ export default function UnSubscribeDataTable({
                                   {formatTime(
                                     subscription.flight
                                       .scheduledArrivalUTCDateTime
-                                  )}
+                                  ) || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
                                 <div>
-                                  {subscription.flight.arrivalStatus || "N/A"}
+                                  {subscription.flight.arrivalStatus || "TBD"}
                                 </div>
                               </div>
                             </div>
@@ -485,7 +492,7 @@ export default function UnSubscribeDataTable({
                                 <div>
                                   {formatDate(
                                     subscription.subscription.subscriptionDate
-                                  )}
+                                  ) || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:
@@ -505,12 +512,15 @@ export default function UnSubscribeDataTable({
                                   Carrier:
                                 </div>
                                 <div>
-                                  {subscription.flight.operatingAirline}
+                                  {subscription.flight.operatingAirline ||
+                                    "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Aircraft:
                                 </div>
-                                <div>{subscription.flight.equipmentModel}</div>
+                                <div>
+                                  {subscription.flight.equipmentModel || "TBD"}
+                                </div>
                                 <div className="text-muted-foreground">
                                   Flight Status:
                                 </div>
@@ -529,7 +539,7 @@ export default function UnSubscribeDataTable({
                                     .length > 0 && (
                                     <>
                                       <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
-                                        Marketed Flight Segments:
+                                        Codeshare Details:
                                       </div>
                                       {subscription.flight.MarketedFlightSegment.map(
                                         (segment: any, idx: number) => (
@@ -538,8 +548,9 @@ export default function UnSubscribeDataTable({
                                               Airline:
                                             </div>
                                             <div>
-                                              {segment.MarketingAirlineCode}{" "}
-                                              {segment.FlightNumber}
+                                              {segment.MarketingAirlineCode ||
+                                                "TBD"}{" "}
+                                              {segment.FlightNumber || "TBD"}
                                             </div>
                                           </React.Fragment>
                                         )

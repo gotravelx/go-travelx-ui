@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   Table,
   TableBody,
@@ -136,10 +136,11 @@ export default function ViewFlightDatTable({
     }
   };
 
+  // Modify the getStatusText function to return uppercase status codes
   const getStatusText = (flight: FlightData) => {
-    if (flight.isCanceled) return "Canceled";
+    if (flight.isCanceled) return "CNCL";
     if ((flight.departureDelayMinutes ?? 0) > 0)
-      return `Delayed ${flight.departureDelayMinutes} min`;
+      return `DELAYED ${flight.departureDelayMinutes} min`;
 
     // Use currentFlightStatus if available, otherwise use statusCode
     if (flight.currentFlightStatus) {
@@ -148,17 +149,17 @@ export default function ViewFlightDatTable({
 
     switch (flight.statusCode) {
       case "ndpt":
-        return "Not Departed";
+        return "NDPT";
       case "out":
-        return "Departed";
+        return "OUT";
       case "off":
-        return "In Flight";
+        return "OFF";
       case "on":
-        return "Landing";
+        return "ON";
       case "in":
-        return "Arrived";
+        return "IN";
       default:
-        return "Unknown";
+        return "UNKNOWN";
     }
   };
 
@@ -314,13 +315,13 @@ export default function ViewFlightDatTable({
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatTime(flight.estimatedDepartureUTC)}
+                        {flight.estimatedDepartureUTC}
                       </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       <div className="flex gap-2 items-center">
                         <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatTime(flight.estimatedArrivalUTC)}
+                        {flight.estimatedArrivalUTC}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -372,31 +373,31 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">
                                   Airport:
                                 </div>
-                                <div>{flight.departureAirport}</div>
+                                <div>{flight.departureAirport || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   City:
                                 </div>
-                                <div>{flight.departureCity}</div>
+                                <div>{flight.departureCity || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Terminal:
                                 </div>
-                                <div>{flight.departureTerminal || "N/A"}</div>
+                                <div>{flight.departureTerminal || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Gate:
                                 </div>
-                                <div>{flight.departureGate || "N/A"}</div>
+                                <div>{flight.departureGate || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Scheduled:
                                 </div>
                                 <div>
                                   {formatTime(
                                     flight.scheduledDepartureUTCDateTime
-                                  )}
+                                  ) || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
-                                <div>{flight.departureStatus || "N/A"}</div>
+                                <div>{flight.departureStatus || "TBD"}</div>
                               </div>
                             </div>
 
@@ -406,31 +407,31 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">
                                   Airport:
                                 </div>
-                                <div>{flight.arrivalAirport}</div>
+                                <div>{flight.arrivalAirport || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   City:
                                 </div>
-                                <div>{flight.arrivalCity}</div>
+                                <div>{flight.arrivalCity || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Terminal:
                                 </div>
-                                <div>{flight.arrivalTerminal || "N/A"}</div>
+                                <div>{flight.arrivalTerminal || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Gate:
                                 </div>
-                                <div>{flight.arrivalGate || "N/A"}</div>
+                                <div>{flight.arrivalGate || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Scheduled:
                                 </div>
                                 <div>
                                   {formatTime(
                                     flight.scheduledArrivalUTCDateTime
-                                  )}
+                                  ) || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
-                                <div>{flight.arrivalStatus || "N/A"}</div>
+                                <div>{flight.arrivalStatus || "TBD"}</div>
                               </div>
                             </div>
 
@@ -442,11 +443,11 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">
                                   Carrier:
                                 </div>
-                                <div>{flight.operatingAirline}</div>
+                                <div>{flight.operatingAirline || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Aircraft:
                                 </div>
-                                <div>{flight.equipmentModel}</div>
+                                <div>{flight.equipmentModel || "TBD"}</div>
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
@@ -464,13 +465,13 @@ export default function ViewFlightDatTable({
                                 <div>
                                   {(flight.departureDelayMinutes ?? 0) > 0
                                     ? `${flight.departureDelayMinutes} minutes`
-                                    : "None"}
+                                    : "TBD"}
                                 </div>
                                 {flight.marketedFlightSegment &&
                                   flight.marketedFlightSegment.length > 0 && (
                                     <>
                                       <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
-                                        Marketed Flight Segments:
+                                        Codeshare Details:
                                       </div>
                                       {flight.marketedFlightSegment.map(
                                         (segment, idx) => (
@@ -479,8 +480,9 @@ export default function ViewFlightDatTable({
                                               Airline:
                                             </div>
                                             <div>
-                                              {segment.MarketingAirlineCode}{" "}
-                                              {segment.FlightNumber}
+                                              {segment.MarketingAirlineCode ||
+                                                "TBD"}{" "}
+                                              {segment.FlightNumber || "TBD"}
                                             </div>
                                           </Fragment>
                                         )
