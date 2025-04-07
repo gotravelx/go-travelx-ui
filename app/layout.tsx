@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Web3Provider>{children}</Web3Provider>
+        {children}
       </body>
     </html>
   );
