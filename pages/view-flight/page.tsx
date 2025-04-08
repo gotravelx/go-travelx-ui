@@ -21,10 +21,12 @@ import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 import ViewFlightDatTable from "@/components/view-flight-data-table";
 import { useWeb3 } from "@/contexts/web3-context";
-import { flightService, type FlightData } from "@/services/api";
+import { flightService } from "@/services/api";
 import { toast } from "sonner";
+import { FlightData } from "@/types/flight";
 
-const ViewFlight = memo(
+// Create a client-side only component
+const ViewFlightClient = memo(
   ({
     flightNumber,
     onFlightNumberChange,
@@ -46,6 +48,8 @@ const ViewFlight = memo(
     carrier: string;
     onCarrierChange: (value: string) => void;
   }) => {
+    if (typeof window === "undefined") return null; // SSR fallback
+
     const { walletAddress } = useWeb3();
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
@@ -421,6 +425,21 @@ const ViewFlight = memo(
   }
 );
 
-ViewFlight.displayName = "ViewFlight";
+ViewFlightClient.displayName = "ViewFlightClient";
 
-export default ViewFlight;
+// Server-side safe component
+export default function ViewFlightPage() {
+  return (
+    <ViewFlightClient
+      flightNumber=""
+      onFlightNumberChange={() => {}}
+      onSearch={() => {}}
+      isLoading={false}
+      searchError=""
+      selectedDate={undefined}
+      onDateChange={() => {}}
+      carrier="UA"
+      onCarrierChange={() => {}}
+    />
+  );
+}

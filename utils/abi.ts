@@ -781,7 +781,7 @@ export const flightContractABI = [
     stateMutability: "view",
     type: "function",
   },
-]
+];
 
-export const FLIGHT_CONTRACT_ADDRESS = "0xC79861438b8FCEa139f510B21D204ab775e07818"
-
+export const FLIGHT_CONTRACT_ADDRESS =
+  "0x59A4FC607439fd71b99cd1e43E4fA910d029Fb6b";

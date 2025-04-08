@@ -102,6 +102,23 @@ export interface FlightUpdates {
   updates: FieldUpdate[];
 }
 
+export interface SubscriptionDetails {
+  subscription: {
+    _id: string;
+    walletAddress: string;
+    flightNumber: string;
+    departureAirport: string;
+    arrivalAirport: string;
+    blockchainTxHash: string;
+    flightSubscriptionStatus: string;
+    isSubscriptionActive: boolean;
+    subscriptionDate: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  flight: FlightData;
+}
+
 // Type for flight status event from contract
 export interface FlightStatusEvent {
   flightNumber: string;

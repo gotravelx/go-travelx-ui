@@ -308,44 +308,48 @@ export default function UnSubscribeDataTable({
                     <TableCell className="font-medium">
                       <div className="flex gap-2 items-center">
                         <Plane className="h-4 text-primary w-4" />
-                        {subscription.flight.carrierCode}{" "}
-                        {subscription.flight.flightNumber}
+                        {subscription?.flight?.carrierCode}{" "}
+                        {subscription?.flight?.flightNumber}
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(subscription.flight.scheduledDepartureDate)}
+                        {formatDate(
+                          subscription?.flight?.scheduledDepartureDate
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
-                          {subscription.flight.departureAirport}
+                          {subscription?.flight?.departureAirport}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
-                          {subscription.flight.arrivalAirport}
+                          {subscription?.flight?.arrivalAirport}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatDate(subscription.subscription.subscriptionDate)}
+                        {formatDate(
+                          subscription?.subscription?.subscriptionDate
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
                         className={`${getStatusBadgeColor(
-                          subscription.flight
+                          subscription?.flight
                         )} p-2 px-4 text-md`}
                       >
-                        {getStatusText(subscription.flight)}
+                        {getStatusText(subscription?.flight)}
                       </Badge>
                     </TableCell>
 
@@ -356,10 +360,11 @@ export default function UnSubscribeDataTable({
                           size="sm"
                           onClick={() => handleSingleUnsubscribe(subscription)}
                           disabled={
-                            isUnsubscribing === subscription.subscription._id
+                            isUnsubscribing === subscription?.subscription._id
                           }
                         >
-                          {isUnsubscribing === subscription.subscription._id ? (
+                          {isUnsubscribing ===
+                          subscription?.subscription._id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             "Unsubscribe"
@@ -372,7 +377,9 @@ export default function UnSubscribeDataTable({
                         variant="ghost"
                         size="icon"
                         className="h-8 p-0 w-8"
-                        onClick={() => toggleRow(subscription.subscription._id)}
+                        onClick={() =>
+                          toggleRow(subscription?.subscription._id)
+                        }
                       >
                         {expandedRow === subscription.subscription._id ? (
                           <ChevronDown className="h-4 w-4" />
@@ -382,8 +389,10 @@ export default function UnSubscribeDataTable({
                       </Button>
                     </TableCell>
                   </TableRow>
-                  {expandedRow === subscription.subscription._id && (
-                    <TableRow key={`${subscription.subscription._id}-expanded`}>
+                  {expandedRow === subscription?.subscription?._id && (
+                    <TableRow
+                      key={`${subscription?.subscription?._id}-expanded`}
+                    >
                       <TableCell colSpan={10} className="bg-muted/20 p-0">
                         <div className="p-4">
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
