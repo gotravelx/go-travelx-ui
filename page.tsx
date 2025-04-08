@@ -10,11 +10,16 @@ import { NavBar } from "@/components/nav-bar";
 import SubscribeFlight from "./pages/subscribe-flight/page";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ViewFlight from "./pages/view-flight/page";
+import dynamic from "next/dynamic";
 import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
 import { Footer } from "@/components/footer";
 import SubscribeFlightCard from "./components/subscribe-card";
 import { format } from "date-fns";
+
+// Create a client-side only component that uses the web3 context
+const ViewFlight = dynamic(() => import("./pages/view-flight/page"), {
+  ssr: false,
+});
 
 export default function FlightSearch() {
   const { isLoading: web3IsLoading, walletAddress } = useWeb3();

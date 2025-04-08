@@ -1,72 +1,14 @@
-import type { FlightPhase } from "@/types/flight";
+import type {
+  FlightData,
+  FlightPhase,
+  SubscriptionDetails,
+} from "@/types/flight";
 
 // Add this constant at the top of the file
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+console.log("API BASE URL -->", API_BASE_URL);
 // Add this interface to the top of the file with other interfaces
-export interface SubscriptionDetails {
-  subscription: {
-    _id: string;
-    walletAddress: string;
-    flightNumber: string;
-    departureAirport: string;
-    arrivalAirport: string;
-    blockchainTxHash: string;
-    flightSubscriptionStatus: string;
-    isSubscriptionActive: boolean;
-    subscriptionDate: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  flight: FlightData;
-}
-
-// Define the interface for marketed flight segments
-export interface MarketedFlightSegment {
-  MarketingAirlineCode: string;
-  FlightNumber: string;
-}
-
-export interface FlightData {
-  flightNumber: string; // key  Flight Number :   5300
-  scheduledDepartureDate: string; // key  exa : 2025-03-06
-  carrierCode: string; // key  ex : UA
-  operatingAirline: string;
-  estimatedArrivalUTC: string;
-  estimatedDepartureUTC: string;
-  arrivalAirport: string; // ex : LAS
-  departureAirport: string; // ex : IAH
-  arrivalCity: string;
-  departureCity: string;
-  departureGate: string;
-  arrivalGate: string;
-  statusCode: FlightPhase;
-  flightStatus: string;
-  equipmentModel: string;
-  departureTerminal?: string;
-  arrivalTerminal?: string;
-  actualDepartureUTC: string;
-  actualArrivalUTC: string;
-  outTimeUTC?: string;
-  offTimeUTC?: string;
-  onTimeUTC?: string;
-  inTimeUTC?: string;
-  baggageClaim?: string;
-  departureDelayMinutes?: number;
-  arrivalDelayMinutes?: number;
-  boardingTime?: string;
-  isCanceled: boolean;
-  scheduledArrivalUTCDateTime: string;
-  scheduledDepartureUTCDateTime: string;
-  departureStatus?: string;
-  arrivalStatus?: string;
-  marketedFlightSegment?: MarketedFlightSegment[];
-  currentFlightStatus?: string;
-  isSubscribed: boolean;
-  blockchainTxHash?: string;
-  MarketedFlightSegment?: MarketedFlightSegment[];
-}
 
 // API service for flight data
 export const flightService = {
@@ -85,7 +27,7 @@ export const flightService = {
 
       // Use the API to get flight data
       const response = await fetch(
-        `${API_BASE_URL}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
+        `${API_BASE_URL}/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&walletAddress=${walletAddress}`
       );
@@ -115,7 +57,7 @@ export const flightService = {
       );
 
       const response = await fetch(
-        `${API_BASE_URL}/v1/flights/get-flight-details`,
+        `${API_BASE_URL}/flights/get-flight-details`,
         {
           method: "POST",
           headers: {
@@ -177,7 +119,7 @@ export const flightService = {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/v1/flights/add-flight-subscription`,
+        `${API_BASE_URL}/flights/add-flight-subscription`,
         {
           method: "POST",
           headers: {
@@ -208,96 +150,6 @@ export const flightService = {
     }
   },
 
-  unsubscribeFromFlights: async (
-    flightNumbers: string[],
-    carrierCodes: string[],
-    departureAirports: string[],
-    walletAddress: string
-  ): Promise<string> => {
-    try {
-      console.log(`Unsubscribing from ${flightNumbers.length} flights`);
-      console.log(`Using wallet address: ${walletAddress}`);
-
-      if (!walletAddress) {
-        throw new Error("Wallet address is required");
-      }
-
-      // Create an array of subscription objects
-      const subscriptions = flightNumbers.map((flightNumber, index) => ({
-        flightNumber,
-        carrierCode: carrierCodes[index],
-        departureAirport: departureAirports[index],
-      }));
-
-      const response = await fetch(
-        "http://localhost:3000/v1/flights/remove-flight-subscriptions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            subscriptions,
-            walletAddress,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.errorMessage || `API error: ${response.status}`);
-      }
-
-      return data.message || "success";
-    } catch (error) {
-      console.error("Error unsubscribing from flights:", error);
-      throw error;
-    }
-  },
-
-  isFlightSubscribed: async (
-    userAddress: string,
-    flightNumber: string,
-    carrierCode: string,
-    departureAirport: string
-  ): Promise<boolean> => {
-    try {
-      if (!userAddress) {
-        console.warn("No wallet address provided for subscription check");
-        return false;
-      }
-
-      const response = await fetch(
-        `http://localhost:3000/v1/flights/check-subscription-status`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            flightNumber,
-            carrierCode,
-            departureAirport,
-            walletAddress: userAddress,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error(`API error: ${response.status}`);
-        return false;
-      }
-
-      return data.isSubscribed || false;
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
-      return false;
-    }
-  },
-
   // New method to fetch subscribed flights
   getSubscribedFlights: async (
     walletAddress: string
@@ -313,7 +165,14 @@ export const flightService = {
       console.log(`Fetching subscribed flights for wallet: ${walletAddress}`);
 
       const response = await fetch(
-        `http://localhost:3000/v1/flights/subscribed-flights/${walletAddress}`
+        `${API_BASE_URL}/flights/all-subscribed-flights/${walletAddress}`,
+        {
+          method: "GET",
+          credentials: "include", // Ensure cookies are sent if needed
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (!response.ok) {
@@ -385,7 +244,7 @@ export const flightService = {
       );
 
       const response = await fetch(
-        `http://localhost:3000/v1/flights/subscribed-flights-details/${walletAddress}`
+        `${API_BASE_URL}/flights/subscribed-flights-details/${walletAddress}`
       );
 
       if (!response.ok) {
@@ -424,7 +283,7 @@ export const flightService = {
       );
 
       const response = await fetch(
-        `http://localhost:3000/v1/flights/subscriptions/unsubscribe`,
+        `${API_BASE_URL}/flights/subscriptions/unsubscribe`,
         {
           method: "POST",
           headers: {
