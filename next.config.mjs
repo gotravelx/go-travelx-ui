@@ -14,8 +14,6 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-  output: "export",
-  basePath: "/Chain4Travel",
 };
 
 export default nextConfig;
