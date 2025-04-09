@@ -1,33 +1,24 @@
-"use client";
-import { useEffect, useState } from "react";
-import { Plane, Clock, RefreshCw } from "lucide-react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { WalletInfo } from "./wallet-info";
-import { useWeb3 } from "@/contexts/web3-context";
-import { ThemeToggle } from "./theme-switcher";
+"use client"
+import { useEffect, useState } from "react"
+import { Plane, Clock, RefreshCw } from "lucide-react"
+import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { WalletInfo } from "./wallet-info"
+import { useWeb3 } from "@/contexts/web3-context"
+import { ThemeToggle } from "./theme-switcher"
 
 interface NavBarProps {
-  lastInteractionTime?: number;
-  onRefresh?: () => void;
-  contractCallCount: number;
+  lastInteractionTime?: number
+  onRefresh?: () => void
+  contractCallCount: number
 }
 
-export function NavBar({
-  lastInteractionTime,
-  onRefresh,
-  contractCallCount,
-}: NavBarProps) {
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [currentUTCTime, setCurrentUTCTime] = useState<string>("");
-  const { walletAddress } = useWeb3();
+export function NavBar({ lastInteractionTime, onRefresh, contractCallCount }: NavBarProps) {
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [currentUTCTime, setCurrentUTCTime] = useState<string>("")
+  const { walletAddress } = useWeb3()
 
   const getOffset = (tz: string) => {
     const offsetObject = Intl.DateTimeFormat("ia", {
@@ -35,57 +26,57 @@ export function NavBar({
       timeZone: tz,
     })
       .formatToParts()
-      .find((i) => i.type === "timeZoneName");
+      .find((i) => i.type === "timeZoneName")
 
     if (offsetObject && offsetObject.value) {
-      const offsetValue = offsetObject.value;
+      const offsetValue = offsetObject.value
       if (!offsetValue.includes(":")) {
-        return offsetValue.replace(/GMT([+-]\d+)/, "GMT$1:00").slice(3);
+        return offsetValue.replace(/GMT([+-]\d+)/, "GMT$1:00").slice(3)
       }
-      return offsetValue.slice(3);
+      return offsetValue.slice(3)
     }
-    return "+00:00"; // Default to UTC if offset cannot be determined
-  };
+    return "+00:00" // Default to UTC if offset cannot be determined
+  }
 
   const formatDateTime = (timestamp: number | undefined) => {
-    if (!timestamp) return "";
+    if (!timestamp) return ""
 
-    const date = new Date(timestamp);
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-    const hours = String(date.getUTCHours()).padStart(2, "0");
-    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+    const date = new Date(timestamp)
+    const year = date.getUTCFullYear()
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0")
+    const day = String(date.getUTCDate()).padStart(2, "0")
+    const hours = String(date.getUTCHours()).padStart(2, "0")
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0")
+    const seconds = String(date.getUTCSeconds()).padStart(2, "0")
 
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds} UTC`;
-  };
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds} UTC`
+  }
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const updateTime = () => {
-      const now = new Date();
-      setCurrentUTCTime(formatDateTime(now.getTime()));
-    };
+      const now = new Date()
+      setCurrentUTCTime(formatDateTime(now.getTime()))
+    }
 
-    updateTime(); // Initial update
-    const timer = setInterval(updateTime, 1000);
+    updateTime() // Initial update
+    const timer = setInterval(updateTime, 1000)
 
-    return () => clearInterval(timer);
-  }, []); // Removed formatDateTime from dependencies
+    return () => clearInterval(timer)
+  }, []) // Removed formatDateTime from dependencies
 
   const handleRefresh = async () => {
     if (onRefresh) {
-      setIsRefreshing(true);
-      await onRefresh();
-      setIsRefreshing(false);
+      setIsRefreshing(true)
+      await onRefresh()
+      setIsRefreshing(false)
     }
-  };
+  }
 
-  if (!mounted) return null;
+  if (!mounted) return null
 
   return (
     <motion.div
@@ -122,9 +113,7 @@ export function NavBar({
                 <TooltipTrigger asChild>
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
-                    <span className="font-mono">
-                      {formatDateTime(lastInteractionTime)}
-                    </span>
+                    <span className="font-mono">{formatDateTime(lastInteractionTime)}</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -143,11 +132,7 @@ export function NavBar({
                     disabled={isRefreshing}
                     className="relative"
                   >
-                    <RefreshCw
-                      className={`h-4 w-4 ${
-                        isRefreshing ? "animate-spin" : ""
-                      }`}
-                    />
+                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
                     <span className="sr-only">Refresh data</span>
                   </Button>
                 </TooltipTrigger>
@@ -162,5 +147,5 @@ export function NavBar({
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

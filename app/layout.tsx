@@ -1,8 +1,9 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { Web3Provider } from "@/contexts/web3-context";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import type React from "react"; // Added import for React
+import type React from "react";
+import { MainNav } from "@/components/main-nav";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,7 +15,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <MainNav />
+          <Toaster position="top-right" />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
