@@ -114,4 +114,3 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     </Card>
   )
 }
-

@@ -6,20 +6,16 @@ import { useWeb3 } from "@/contexts/web3-context";
 import { motion } from "framer-motion";
 import { type FlightData, flightService } from "@/services/api";
 import { Toaster } from "sonner";
-
-import SubscribeFlight from "./pages/subscribe-flight/page";
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import dynamic from "next/dynamic";
-import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
+import { NavBar } from "@/components/nav-bar";
+// Update the imports to point to the correct locations
+import SubscribeFlight from "@/components/subscribe-flight";
+import ViewFlight from "@/components/view-flight";
+import UnsubscribeFlight from "@/components/unsubscribe-flight-client";
 import { Footer } from "@/components/footer";
-import SubscribeFlightCard from "./components/subscribe-card";
+import SubscribeFlightCard from "@/components/subscribe-card";
 import { format } from "date-fns";
 
-// Create a client-side only component that uses the web3 context
-const ViewFlight = dynamic(() => import("./pages/view-flight/page"), {
-  ssr: false,
-});
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function FlightSearch() {
   const { isLoading: web3IsLoading, walletAddress } = useWeb3();
@@ -214,6 +210,11 @@ export default function FlightSearch() {
 
   return (
     <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
+      {/* <NavBar
+        lastInteractionTime={lastInteractionTime}
+        onRefresh={handleRefresh}
+        contractCallCount={contractCallCount}
+      /> */}
       <Toaster position="top-right" />
       <main className="flex-grow">
         <Tabs

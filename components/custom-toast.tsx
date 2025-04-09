@@ -1,48 +1,35 @@
-"use client";
+"use client"
 
-import { CheckCircle, AlertCircle, Info, X } from "lucide-react";
-import { toast, type Toast } from "sonner";
+import { CheckCircle, AlertCircle, Info, X } from "lucide-react"
+import { toast, type Toast } from "sonner"
 
 interface CustomToastProps {
-  title: string;
-  description?: string;
-  type?: "success" | "error" | "info";
+  title: string
+  description?: string
+  type?: "success" | "error" | "info"
 }
 
-export function showCustomToast({
-  title,
-  description,
-  type = "info",
-}: CustomToastProps) {
-  const toastFn =
-    type === "success"
-      ? toast.success
-      : type === "error"
-      ? toast.error
-      : toast.info;
+export function showCustomToast({ title, description, type = "info" }: CustomToastProps) {
+  const toastFn = type === "success" ? toast.success : type === "error" ? toast.error : toast.info
 
   toastFn(
     <div className="flex items-start gap-3">
       <div className="flex-shrink-0">
-        {type === "success" && (
-          <CheckCircle className="h-5 w-5 text-green-500" />
-        )}
+        {type === "success" && <CheckCircle className="h-5 w-5 text-green-500" />}
         {type === "error" && <AlertCircle className="h-5 w-5 text-red-500" />}
         {type === "info" && <Info className="h-5 w-5 text-blue-500" />}
       </div>
       <div className="flex-1">
         <h3 className="font-medium">{title}</h3>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
-    </div>
-  );
+    </div>,
+  )
 }
 
 // Example of a more advanced custom toast component
 export function CustomToastComponent({ toast }: { toast: Toast }) {
-  const { id, title, description, type } = toast;
+  const { id, title, description, type } = toast
 
   return (
     <div
@@ -56,25 +43,18 @@ export function CustomToastComponent({ toast }: { toast: Toast }) {
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0">
-          {type === "success" && (
-            <CheckCircle className="h-5 w-5 text-green-500" />
-          )}
+          {type === "success" && <CheckCircle className="h-5 w-5 text-green-500" />}
           {type === "error" && <AlertCircle className="h-5 w-5 text-red-500" />}
           {type === "info" && <Info className="h-5 w-5 text-blue-500" />}
         </div>
         <div className="flex-1">
           <h3 className="font-medium">{title}</h3>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
       </div>
-      <button
-        onClick={() => toast.dismiss(id)}
-        className="flex-shrink-0 rounded-md p-1 hover:bg-gray-200"
-      >
+      <button onClick={() => toast.dismiss(id)} className="flex-shrink-0 rounded-md p-1 hover:bg-gray-200">
         <X className="h-4 w-4" />
       </button>
     </div>
-  );
+  )
 }

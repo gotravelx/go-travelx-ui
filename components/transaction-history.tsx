@@ -245,10 +245,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                   </PaginationItem>
                   {[...Array(totalPages)].map((_, i) => (
                     <PaginationItem key={i + 1}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(i + 1)}
-                        isActive={currentPage === i + 1}
-                      >
+                      <PaginationLink onClick={() => setCurrentPage(i + 1)} isActive={currentPage === i + 1}>
                         {i + 1}
                       </PaginationLink>
                     </PaginationItem>
@@ -268,4 +265,3 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
     </Card>
   )
 }
-

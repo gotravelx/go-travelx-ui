@@ -30,4 +30,3 @@ export function FlightUpdatesView({ updates }: FlightUpdatesProps) {
     </Card>
   )
 }
-
