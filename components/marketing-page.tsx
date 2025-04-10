@@ -35,9 +35,9 @@ export default function MarketingPage() {
                   Revolutionizing Flight Information with Blockchain
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  GoTravelX is a collaboration between Chain4Travel and leading
-                  airlines to provide secure, transparent, and reliable flight
-                  information using blockchain technology.
+                  GoTravelX is a collaboration between leading airlines to
+                  provide secure, transparent, and reliable flight information
+                  using blockchain technology.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link href="/flifo">
@@ -46,7 +46,7 @@ export default function MarketingPage() {
                       Try Flight Tracking
                     </Button>
                   </Link>
-                  <Link href="/whitepaper">
+                  <Link href="/marketing">
                     <Button size="lg" variant="outline">
                       Read Whitepaper
                       <ArrowRight className="ml-1 h-4 w-4" />
@@ -61,9 +61,7 @@ export default function MarketingPage() {
                       <div className="bg-primary p-4 rounded-full inline-flex mb-4">
                         <Plane className="h-12 w-12 text-primary-foreground" />
                       </div>
-                      <h3 className="text-2xl font-bold mb-2">
-                        Chain4Travel + FLIFO
-                      </h3>
+                      <h3 className="text-2xl font-bold mb-2">FLIFO</h3>
                       <p className="text-muted-foreground">
                         Blockchain-powered flight information for the next
                         generation of travel technology
@@ -262,12 +260,12 @@ export default function MarketingPage() {
 
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {/* Team Member 1 */}
-                    <Card>
+                    {/* <Card>
                       <CardHeader className="text-center">
                         <div className="mx-auto bg-primary/10 p-2 rounded-full w-16 h-16 flex items-center justify-center mb-2">
                           <Users className="h-8 w-8 text-primary" />
                         </div>
-                        <CardTitle>Chain4Travel Team</CardTitle>
+                        <CardTitle> Team</CardTitle>
                         <CardDescription>Blockchain Experts</CardDescription>
                       </CardHeader>
                       <CardContent className="text-center">
@@ -277,7 +275,7 @@ export default function MarketingPage() {
                           solutions.
                         </p>
                       </CardContent>
-                    </Card>
+                    </Card> */}
 
                     {/* Team Member 2 */}
                     <Card>
@@ -340,7 +338,7 @@ export default function MarketingPage() {
                     Try Flight Tracking
                   </Button>
                 </Link>
-                <Link href="/whitepaper">
+                <Link href="/marketing">
                   <Button size="lg" variant="outline">
                     Read Whitepaper
                     <ArrowRight className="ml-1 h-4 w-4" />
