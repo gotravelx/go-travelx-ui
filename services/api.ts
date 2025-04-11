@@ -1,13 +1,13 @@
-import type {
-  FlightData,
-  FlightPhase,
-  SubscriptionDetails,
-} from "@/types/flight";
+import type { FlightData, SubscriptionDetails } from "@/types/flight"
+import { getBaseUrl } from "@/utils/base_url"
 
 // Add this constant at the top of the file
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getBaseUrl()
 
-console.log("API BASE URL -->", API_BASE_URL);
+// Hardcoded wallet address as requested
+const WALLET_ADDRESS = "0x876474671AEe7AC87800A0B99e9e31A625cdF95F"
+
+console.log("API BASE URL -->", API_BASE_URL)
 // Add this interface to the top of the file with other interfaces
 
 // API service for flight data
@@ -16,32 +16,33 @@ export const flightService = {
     carrierCode: string,
     flightNumber: string,
     departureStation: string,
-    departureDate: Date
+    departureDate: Date,
   ): Promise<FlightData> => {
     try {
       console.log(
-        `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} on ${departureDate.toISOString()}`
-      );
-      const walletAddress = localStorage.getItem("walletAddress");
-      console.log(`Using wallet address: ${walletAddress}`);
+        `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} on ${departureDate.toISOString()}`,
+      )
+
+      // Use hardcoded wallet address instead of getting from localStorage
+      console.log(`Using wallet address: ${WALLET_ADDRESS}`)
 
       // Use the API to get flight data
       const response = await fetch(
         `${API_BASE_URL}/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
-        }&departure=${departureStation}&walletAddress=${walletAddress}`
-      );
+        }&departure=${departureStation}&walletAddress=${WALLET_ADDRESS}`,
+      )
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json();
-      console.log("Flight data from API:", data.flightData);
-      return data.flightData;
+      const data = await response.json()
+      console.log("Flight data from API:", data.flightData)
+      return data.flightData
     } catch (error) {
-      console.error("Error fetching flight details:", error);
-      throw error;
+      console.error("Error fetching flight details:", error)
+      throw error
     }
   },
 
@@ -49,38 +50,32 @@ export const flightService = {
     carrierCode: string,
     flightNumber: string,
     departureDate: Date,
-    walletAddress: string
   ): Promise<FlightData> => {
     try {
-      console.log(
-        `Fetching flight details for ${carrierCode} ${flightNumber} on ${departureDate.toISOString()}`
-      );
+      console.log(`Fetching flight details for ${carrierCode} ${flightNumber} on ${departureDate.toISOString()}`)
 
-      const response = await fetch(
-        `${API_BASE_URL}/flights/get-flight-details`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            flightNumber,
-            scheduledDepartureDate: departureDate.toISOString().split("T")[0],
-            carrierCode,
-            walletAddress,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/flights/get-flight-details`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          flightNumber,
+          scheduledDepartureDate: departureDate.toISOString().split("T")[0],
+          carrierCode,
+          walletAddress: WALLET_ADDRESS, // Use hardcoded wallet address
+        }),
+      })
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json();
-      return data.response;
+      const data = await response.json()
+      return data.response
     } catch (error) {
-      console.error("Error fetching flight details:", error);
-      throw error;
+      console.error("Error fetching flight details:", error)
+      throw error
     }
   },
 
@@ -89,98 +84,69 @@ export const flightService = {
     carrierCode: string,
     departureAirport: string,
     departureDate: string,
-    walletAddress: string
   ): Promise<string> => {
     try {
-      console.log(
-        `Subscribing to flight ${carrierCode}${flightNumber} from ${departureAirport} on ${departureDate}`
-      );
-      console.log(`Using wallet address: ${walletAddress}`);
+      console.log(`Subscribing to flight ${carrierCode}${flightNumber} from ${departureAirport} on ${departureDate}`)
+      console.log(`Using wallet address: ${WALLET_ADDRESS}`)
 
-      // Validate all required parameters
-      if (
-        !walletAddress ||
-        !flightNumber ||
-        !carrierCode ||
-        !departureAirport ||
-        !departureDate
-      ) {
+      // No need to validate walletAddress since we're using hardcoded one
+      if (!flightNumber || !carrierCode || !departureAirport || !departureDate) {
         const missingParams = {
           flightNumber: !flightNumber,
           carrierCode: !carrierCode,
           departureAirport: !departureAirport,
           departureDate: !departureDate,
-          walletAddress: !walletAddress,
-        };
-        console.error("Missing required parameters:", missingParams);
-        throw new Error(
-          `Missing required parameters: ${JSON.stringify(missingParams)}`
-        );
+        }
+        console.error("Missing required parameters:", missingParams)
+        throw new Error(`Missing required parameters: ${JSON.stringify(missingParams)}`)
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/flights/add-flight-subscription`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            flightNumber,
-            scheduledDepartureDate: departureDate, // Ensure parameter name matches API
-            carrierCode, // Added missing parameter
-            departureAirport,
-            walletAddress,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/flights/add-flight-subscription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          flightNumber,
+          scheduledDepartureDate: departureDate, // Ensure parameter name matches API
+          carrierCode, // Added missing parameter
+          departureAirport,
+          walletAddress: WALLET_ADDRESS, // Use hardcoded wallet address
+        }),
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(
-          data.error || data.message || `API error: ${response.status}`
-        );
+        throw new Error(data.error || data.message || `API error: ${response.status}`)
       }
 
-      return data.subscriptionId || "success";
+      return data.subscriptionId || "success"
     } catch (error) {
-      console.error("Error subscribing to flight:", error);
-      throw error;
+      console.error("Error subscribing to flight:", error)
+      throw error
     }
   },
 
   // New method to fetch subscribed flights
-  getSubscribedFlights: async (
-    walletAddress: string
-  ): Promise<FlightData[]> => {
+  getSubscribedFlights: async ( ): Promise<FlightData[]> => {
     try {
-      if (!walletAddress) {
-        console.warn(
-          "No wallet address provided for fetching subscribed flights"
-        );
-        return [];
-      }
+      console.log(`Fetching subscribed flights for wallet: ${WALLET_ADDRESS}`)
 
-      console.log(`Fetching subscribed flights for wallet: ${walletAddress}`);
-
-      const response = await fetch(
-        `${API_BASE_URL}/flights/all-subscribed-flights/${walletAddress}`,
-        {
-          method: "GET",
-          credentials: "include", // Ensure cookies are sent if needed
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/flights/all-subscribed-flights/${WALLET_ADDRESS}`, {
+        method: "GET",
+        credentials: "include", // Ensure cookies are sent if needed
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json();
-      console.log("Subscribed flights data:", data);
+      const data = await response.json()
+      console.log("Subscribed flights data:", data)
 
       // Transform the API response to match our FlightData interface if needed
       return data.map((flight: any) => ({
@@ -220,95 +186,74 @@ export const flightService = {
         isSubscribed: true,
         blockchainTxHash: flight.blockchainTxHash,
         MarketedFlightSegment: flight.MarketedFlightSegment,
-      }));
+      }))
     } catch (error) {
-      console.error("Error fetching subscribed flights:", error);
-      return [];
+      console.error("Error fetching subscribed flights:", error)
+      return []
     }
   },
 
   // Add this method to the flightService object
-  getSubscribedFlightsDetails: async (
-    walletAddress: string
-  ): Promise<SubscriptionDetails[]> => {
+  getSubscribedFlightsDetails: async ( ): Promise<SubscriptionDetails[]> => {
     try {
-      if (!walletAddress) {
-        console.warn(
-          "No wallet address provided for fetching subscribed flights details"
-        );
-        return [];
-      }
+      console.log(`Fetching subscribed flights details for wallet: ${WALLET_ADDRESS}`)
 
-      console.log(
-        `Fetching subscribed flights details for wallet: ${walletAddress}`
-      );
-
-      const response = await fetch(
-        `${API_BASE_URL}/flights/subscribed-flights-details/${walletAddress}`
-      );
+      const response = await fetch(`${API_BASE_URL}/flights/subscribed-flights-details/${WALLET_ADDRESS}`)
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json();
-      console.log("Subscribed flights details:", data);
+      const data = await response.json()
+      console.log("Subscribed flights details:", data)
 
       if (!data.success || !data.data) {
-        console.error("API returned unsuccessful response or no data");
-        return [];
+        console.error("API returned unsuccessful response or no data")
+        return []
       }
 
-      return data.data;
+      return data.data
     } catch (error) {
-      console.error("Error fetching subscribed flights details:", error);
-      return [];
+      console.error("Error fetching subscribed flights details:", error)
+      return []
     }
   },
 
   unsubscribeFlights: async (
-    walletAddress: string,
     flightNumbers: string[],
     carrierCodes: string[],
-    departureAirports: string[]
+    departureAirports: string[],
   ): Promise<boolean> => {
     try {
-      if (!walletAddress) {
-        console.warn("No wallet address provided for unsubscribing");
-        return false;
-      }
+      console.log(`Unsubscribing from ${flightNumbers.length} flights for wallet: ${WALLET_ADDRESS}`)
 
-      console.log(
-        `Unsubscribing from ${flightNumbers.length} flights for wallet: ${walletAddress}`
-      );
-
-      const response = await fetch(
-        `${API_BASE_URL}/flights/subscriptions/unsubscribe`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            walletAddress,
-            flightNumbers,
-            carrierCodes,
-            departureAirports,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/flights/subscriptions/unsubscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: WALLET_ADDRESS,
+          flightNumbers,
+          carrierCodes,
+          departureAirports,
+        }),
+      })
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json();
-      console.log("Unsubscribe response:", data);
+      const data = await response.json()
+      console.log("Unsubscribe response:", data)
 
-      return data.success || false;
+      return data.success || false
     } catch (error) {
-      console.error("Error unsubscribing from flights:", error);
-      return false;
+      console.error("Error unsubscribing from flights:", error)
+      return false
     }
   },
-};
+}
+
+export type { FlightData } from "@/types/flight"
+export type { SubscriptionDetails } from "@/types/flight"

@@ -16,7 +16,7 @@ import {
 import { Badge } from "./ui/badge";
 import { useState, useEffect } from "react";
 import { flightService } from "@/services/api";
-import { useWeb3 } from "@/contexts/web3-context";
+
 import { toast } from "sonner";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import type { FlightData } from "@/types/flight";
@@ -47,7 +47,6 @@ export default function SubscribeFlightCard({
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSecureSubscribed, setIsSecureSubscribed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const { walletAddress } = useWeb3();
 
   // Set isMounted to true when component mounts
   useEffect(() => {
@@ -70,15 +69,9 @@ export default function SubscribeFlightCard({
 
   // Execute standard subscription after confirmation
   const handleSubscribe = async () => {
-    if (!walletAddress) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
-
     try {
       setIsSubscribing(true);
 
-      console.log("Subscribing with wallet address:", walletAddress);
       console.log("Flight data:", {
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
@@ -90,8 +83,7 @@ export default function SubscribeFlightCard({
         flightData.flightNumber,
         flightData.carrierCode,
         flightData.departureAirport,
-        flightData.scheduledDepartureDate,
-        walletAddress
+        flightData.scheduledDepartureDate
       );
 
       setIsSubscribed(true);
@@ -109,15 +101,9 @@ export default function SubscribeFlightCard({
 
   // Execute secure subscription after confirmation
   const handleSecureSubscribe = async () => {
-    if (!walletAddress) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
-
     try {
       setIsSecureSubscribing(true);
 
-      console.log("Secure subscribing with wallet address:", walletAddress);
       console.log("Flight data:", {
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
@@ -130,8 +116,7 @@ export default function SubscribeFlightCard({
         flightData.flightNumber,
         flightData.carrierCode,
         flightData.departureAirport,
-        flightData.scheduledDepartureDate,
-        walletAddress
+        flightData.scheduledDepartureDate
       );
 
       setIsSecureSubscribed(true);

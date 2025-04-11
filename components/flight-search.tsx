@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useWeb3 } from "@/contexts/web3-context";
 import { motion } from "framer-motion";
 import { type FlightData, flightService } from "@/services/api";
 import { Toaster } from "sonner";
@@ -18,8 +17,6 @@ import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function FlightSearch() {
-  const { isLoading: web3IsLoading, walletAddress } = useWeb3();
-
   const [flightNumber, setFlightNumber] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
@@ -133,9 +130,7 @@ export default function FlightSearch() {
 
       // Instead of calling the API directly, we'll use our getSubscribedFlights method
       // and then filter the results based on the search criteria
-      const subscribedFlights = await flightService.getSubscribedFlights(
-        walletAddress
-      );
+      const subscribedFlights = await flightService.getSubscribedFlights();
 
       // Filter the flights based on the search criteria
       let filteredFlights = subscribedFlights;
@@ -174,13 +169,13 @@ export default function FlightSearch() {
     } finally {
       setIsLoading(false);
     }
-  }, [carrier, flightNumber, selectedDate, walletAddress]);
+  }, [carrier, flightNumber, selectedDate]);
 
   const handleRefresh = useCallback(async () => {
     if (activeTab === "view") {
       // Refresh subscribed flights
       try {
-        const flights = await flightService.getSubscribedFlights(walletAddress);
+        const flights = await flightService.getSubscribedFlights();
         setSubscribedFlights(flights);
       } catch (error) {
         console.error("Error refreshing subscribed flights:", error);
@@ -188,13 +183,7 @@ export default function FlightSearch() {
     } else if (subscribeFlightData) {
       await handleSearch();
     }
-  }, [
-    activeTab,
-    viewFlightData,
-    subscribeFlightData,
-    handleSearch,
-    walletAddress,
-  ]);
+  }, [activeTab, viewFlightData, subscribeFlightData, handleSearch]);
 
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value);
