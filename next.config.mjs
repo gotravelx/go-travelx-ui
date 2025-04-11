@@ -14,7 +14,6 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-  output: "export",
 };
 
 export default nextConfig;
