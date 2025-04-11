@@ -106,7 +106,7 @@ export function MainNav() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden border-t bg-background">
-          <div className="container py-4 space-y-4">
+          <div className="container w-[200px] py-4 px-4 space-y-4">
             <Link
               href="/"
               className={cn(
@@ -118,6 +118,16 @@ export function MainNav() {
               <span>Home</span>
             </Link>
             <Link
+              href="/about"
+              className={cn(
+                "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                isActive("/about") && "bg-muted"
+              )}
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>About</span>
+            </Link>
+            <Link
               href="/marketing"
               className={cn(
                 "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
@@ -125,17 +135,7 @@ export function MainNav() {
               )}
             >
               <BookOpen className="h-4 w-4" />
-              <span>About</span>
-            </Link>
-            <Link
-              href="/whitepaper"
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                isActive("/whitepaper") && "bg-muted"
-              )}
-            >
-              <BookOpen className="h-4 w-4" />
-              <span>Whitepaper</span>
+              <span>Marketing</span>
             </Link>
             <Link
               href="/flifo"

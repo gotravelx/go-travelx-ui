@@ -155,7 +155,7 @@ export default function LandingPage() {
                     Get Started
                   </Button>
                 </Link>
-                <Link href="/whitepaper">
+                <Link href="/marketing">
                   <Button size="lg" variant="outline">
                     Read Whitepaper
                     <ArrowRight className="ml-1 h-4 w-4" />

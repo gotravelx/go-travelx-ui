@@ -20,7 +20,6 @@ import { format } from "date-fns";
 import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 import ViewFlightDatTable from "@/components/view-flight-data-table";
-import { useWeb3 } from "@/contexts/web3-context";
 import { flightService } from "@/services/api";
 import { toast } from "sonner";
 import { FlightData } from "@/types/flight";
@@ -50,7 +49,6 @@ const ViewFlightClient = memo(
   }) => {
     if (typeof window === "undefined") return null; // SSR fallback
 
-    const { walletAddress } = useWeb3();
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     // Local filter state for View Flight tab
@@ -73,13 +71,9 @@ const ViewFlightClient = memo(
     // Fetch subscribed flights when component mounts
     useEffect(() => {
       const fetchSubscribedFlights = async () => {
-        if (!walletAddress) return;
-
         setIsLoadingSubscriptions(true);
         try {
-          const flights = await flightService.getSubscribedFlights(
-            walletAddress
-          );
+          const flights = await flightService.getSubscribedFlights();
           setSubscribedFlights(flights);
           setFilteredFlights(flights);
           setTotalItems(flights.length);
@@ -93,7 +87,7 @@ const ViewFlightClient = memo(
       };
 
       fetchSubscribedFlights();
-    }, [walletAddress]);
+    }, []);
 
     // Handle pagination changes
     const handlePageChange = useCallback((page: number) => {
