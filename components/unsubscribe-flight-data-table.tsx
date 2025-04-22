@@ -118,11 +118,11 @@ export default function UnSubscribeDataTable({
   };
 
   const getStatusBadgeColor = (flight: any) => {
-    if (flight.isCanceled) return "bg-red-500/20 text-red-500";
-    if ((flight.departureDelayMinutes ?? 0) > 0)
+    if (flight?.isCanceled) return "bg-red-500/20 text-red-500";
+    if ((flight?.departureDelayMinutes ?? 0) > 0)
       return "bg-yellow-500/20 text-yellow-500";
 
-    switch (flight.statusCode) {
+    switch (flight?.statusCode) {
       case "NDPT":
         return "bg-blue-500/20 text-blue-500";
       case "OUT":
@@ -140,16 +140,16 @@ export default function UnSubscribeDataTable({
 
   // Modify the getStatusText function to return uppercase status codes
   const getStatusText = (flight: any) => {
-    if (flight.isCanceled) return "CNCL";
-    if ((flight.departureDelayMinutes ?? 0) > 0)
-      return `DELAYED ${flight.departureDelayMinutes} min`;
+    if (flight?.isCanceled) return "CNCL";
+    if ((flight?.departureDelayMinutes ?? 0) > 0)
+      return `DELAYED ${flight?.departureDelayMinutes} min`;
 
     // Use currentFlightStatus if available, otherwise use statusCode
-    if (flight.currentFlightStatus) {
-      return flight.currentFlightStatus.toUpperCase();
+    if (flight?.currentFlightStatus) {
+      return flight?.currentFlightStatus.toUpperCase();
     }
 
-    switch (flight.statusCode) {
+    switch (flight?.statusCode) {
       case "NDPT":
         return "NDPT";
       case "OUT":
@@ -232,69 +232,73 @@ export default function UnSubscribeDataTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {subscriptions.length > 0 ? (
-              subscriptions.map((subscription) => (
+            {subscriptions?.length > 0 ? (
+              subscriptions?.map((subscription) => (
                 <>
                   <TableRow
-                    key={subscription.subscription._id}
+                    key={subscription?.subscription._id}
                     className="hover:bg-muted/50"
                   >
                     <TableCell>
                       <Checkbox
                         checked={selectedSubscriptions.has(
-                          subscription.subscription._id
+                          subscription?.subscription?._id
                         )}
                         onCheckedChange={() =>
-                          onSubscriptionSelect(subscription.subscription._id)
+                          onSubscriptionSelect(subscription?.subscription?._id)
                         }
-                        aria-label={`Select subscription ${subscription.subscription._id}`}
+                        aria-label={`Select subscription ${subscription?.subscription?._id}`}
                       />
                     </TableCell>
                     <TableCell className="font-medium">
                       <div className="flex gap-2 items-center">
                         <Plane className="h-4 text-primary w-4" />
-                        {subscription.flight.carrierCode}{" "}
-                        {subscription.flight.flightNumber}
+                        {subscription?.flight?.carrierCode}{" "}
+                        {subscription?.flight?.flightNumber}
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(subscription.flight.scheduledDepartureDate)}
+                        {formatDate(
+                          subscription?.flight?.scheduledDepartureDate
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
-                          {subscription.flight.departureAirport}
+                          {subscription?.flight?.departureAirport}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
-                          {subscription.flight.arrivalAirport}
+                          {subscription?.flight?.arrivalAirport}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatDate(subscription.subscription.subscriptionDate)}
+                        {formatDate(
+                          subscription?.subscription?.subscriptionDate
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
                         className={`${getStatusBadgeColor(
-                          subscription.flight
+                          subscription?.flight
                         )} p-2 px-4 text-md`}
                       >
-                        {getStatusText(subscription.flight)}
+                        {getStatusText(subscription?.flight)}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {subscription.subscription.blockchainTxHash ? (
+                      {subscription?.subscription?.blockchainTxHash ? (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
