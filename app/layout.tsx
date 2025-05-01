@@ -7,6 +7,11 @@ import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const metadata = {
+  title: "gotravelx",
+  description: "flight search engine",
+};
+
 export default function RootLayout({
   children,
 }: {

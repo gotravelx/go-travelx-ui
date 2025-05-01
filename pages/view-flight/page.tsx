@@ -230,7 +230,7 @@ const ViewFlightClient = memo(
     ]);
 
     return (
-      <div className="w-full mx-auto">
+      <div className="w-full ">
         <style jsx global>{`
           .form-input-enhanced ::placeholder {
             color: rgba(115, 115, 115, 0.8);

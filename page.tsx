@@ -39,11 +39,6 @@ export default function FlightSearch() {
   const [arrivalStation, setArrivalStation] = useState("");
   const [activeTab, setActiveTab] = useState("view");
 
-  const [lastInteractionTime, setLastInteractionTime] = useState<
-    number | undefined
-  >();
-  const [contractCallCount, setContractCallCount] = useState(0);
-
   useEffect(() => {
     if (viewFlightData) {
       console.log("view flight data ------>", viewFlightData);
@@ -131,12 +126,7 @@ export default function FlightSearch() {
 
     try {
       setIsLoading(true);
-
-      // Instead of calling the API directly, we'll use our getSubscribedFlights method
-      // and then filter the results based on the search criteria
       const subscribedFlights = await flightService.getSubscribedFlights();
-
-      // Filter the flights based on the search criteria
       let filteredFlights = subscribedFlights;
 
       if (flightNumber) {
@@ -177,7 +167,6 @@ export default function FlightSearch() {
 
   const handleRefresh = useCallback(async () => {
     if (activeTab === "view") {
-      // Refresh subscribed flights
       try {
         const flights = await flightService.getSubscribedFlights();
         setSubscribedFlights(flights);
@@ -207,7 +196,7 @@ export default function FlightSearch() {
       <main className="flex-grow">
         <Tabs
           defaultValue="view"
-          className="container mx-auto pt-24 px-4 py-8"
+          className=" pt-24 px-4 py-8"
           onValueChange={handleTabChange}
           value={activeTab}
         >
