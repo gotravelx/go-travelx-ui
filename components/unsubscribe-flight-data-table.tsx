@@ -425,7 +425,7 @@ export default function UnSubscribeDataTable({
                                   Status:
                                 </div>
                                 <div>
-                                  {subscription.flight.departureStatus || "TBD"}
+                                  {subscription.flight.departureState || "TBD"}
                                 </div>
                               </div>
                             </div>
@@ -470,7 +470,7 @@ export default function UnSubscribeDataTable({
                                   Status:
                                 </div>
                                 <div>
-                                  {subscription.flight.arrivalStatus || "TBD"}
+                                  {subscription.flight.arrivalState || "TBD"}
                                 </div>
                               </div>
                             </div>

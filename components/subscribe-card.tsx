@@ -435,10 +435,10 @@ export default function SubscribeFlightCard({
                       <Badge
                         variant="outline"
                         className={getStatusBadgeVariant(
-                          flightData.departureStatus
+                          flightData.departureState
                         )}
                       >
-                        {flightData.departureStatus || "TBD"}
+                        {flightData.departureState || "TBD"}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
@@ -513,10 +513,10 @@ export default function SubscribeFlightCard({
                       <Badge
                         variant="outline"
                         className={getStatusBadgeVariant(
-                          flightData.arrivalStatus
+                          flightData.arrivalState
                         )}
                       >
-                        {flightData.arrivalStatus || "TBD"}
+                        {flightData.arrivalState || "TBD"}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">

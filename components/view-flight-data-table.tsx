@@ -357,7 +357,7 @@ export default function ViewFlightDatTable({
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <Badge className="py-2 ">
-                          {flight?.departureStatus}
+                          {flight?.departureState}
                         </Badge>
                       </div>
                     </TableCell>
@@ -370,7 +370,7 @@ export default function ViewFlightDatTable({
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
-                        <Badge className="py-2 ">{flight?.arrivalStatus}</Badge>
+                        <Badge className="py-2 ">{flight?.arrivalState}</Badge>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -458,7 +458,7 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
-                                <div>{flight.departureStatus || "TBD"}</div>
+                                <div>{flight.departureState || "TBD"}</div>
                               </div>
                             </div>
 
@@ -492,7 +492,7 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">
                                   Status:
                                 </div>
-                                <div>{flight.arrivalStatus || "TBD"}</div>
+                                <div>{flight.arrivalState || "TBD"}</div>
                               </div>
                             </div>
 

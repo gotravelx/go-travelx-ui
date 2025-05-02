@@ -5,6 +5,7 @@ export type FlightPhase =
   | "on"
   | "in"
   | "cncl"
+  | "canceled"
   | "return_to_gate"
   | "return_to_airport"
   | "diverted";
@@ -69,8 +70,8 @@ export interface FlightData {
   isCanceled: boolean;
   scheduledArrivalUTCDateTime: string;
   scheduledDepartureUTCDateTime: string;
-  departureStatus?: string;
-  arrivalStatus?: string;
+  departureState?: string;
+  arrivalState?: string;
   marketedFlightSegment?: MarketedFlightSegment[];
   currentFlightStatus?: string;
   isSubscribed: boolean;
