@@ -278,7 +278,7 @@ const ViewFlight = memo(
               htmlFor="departure-station"
               className="text-sm font-medium mb-1"
             >
-              Dep Stn
+              From
             </label>
             <Input
               id="departure-station"
@@ -296,7 +296,7 @@ const ViewFlight = memo(
               htmlFor="arrival-station"
               className="text-sm font-medium mb-1"
             >
-              Arr Stn
+              To
             </label>
             <Input
               id="arrival-station"
@@ -310,7 +310,7 @@ const ViewFlight = memo(
 
           {/* Date Picker */}
           <div className="flex flex-col w-full md:w-auto">
-            <label className="text-sm font-medium mb-1">Sch Dpt Dt</label>
+            <label className="text-sm font-medium mb-1">Departure Date</label>
             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button

@@ -169,7 +169,7 @@ const SubscribeFlight = memo(
               htmlFor="departure-station"
               className="text-sm font-medium mb-1"
             >
-              Dep Stn
+              From
             </label>
             <Input
               id="departure-station"

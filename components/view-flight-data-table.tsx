@@ -207,20 +207,21 @@ export default function ViewFlightDatTable({
 
   const columnDescriptions = {
     "Txn DTM": "Timestamp of when the transaction was recorded (in UTC/GMT)",
-    "Tx Hash": "Unique transaction hash (likely from a blockchain ledger)",
+    "Transaction ID":
+      "Unique transaction hash (likely from a blockchain ledger)",
     Carrier: "Airline code (e.g., UA for United Airlines)",
     "Flt Nbr": "Flight number",
-    "Dep Stn": "Departure airport code and city",
-    "Dep State": "U.S. state or region of the departure city",
-    "Arr Stn": "Arrival airport code and city",
-    "Arr State": "U.S. state or region of the arrival city",
+    From: "Departure airport code and city",
+    "Departure State": "U.S. state or region of the departure city",
+    To: "Arrival airport code and city",
+    "Arrival State": "U.S. state or region of the arrival city",
     "Flt Status": "Flight status in text format (e.g., Departed)",
     "Flt Status Cd":
       "Abbreviated flight status (OUT = Departed, IN = Arrived, NDPT = Not Departed)",
     "Dep Gate": "Assigned departure gate at the airport",
     "Arr Gate": "Assigned arrival gate at the airport",
-    "Sch Dep DTM": "Scheduled departure date and time (in UTC/GMT)",
-    "Sch Arr DTM": "Scheduled arrival date and time (in UTC/GMT)",
+    "Departure DateTime": "Scheduled departure date and time (in UTC/GMT)",
+    "Arrival DateTime": "Scheduled arrival date and time (in UTC/GMT)",
     "Est Dep DTM": "Estimated departure date and time based on current data",
     "Est Arr DTM": "Estimated arrival date and time based on current data",
     "Actual Dep DTM": "Actual time the flight departed (when it left the gate)",
@@ -254,31 +255,34 @@ export default function ViewFlightDatTable({
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="hidden md:table-cell">
-                {renderTableHeaderWithTooltip("Tx Hash")}
+                {renderTableHeaderWithTooltip("Transaction ID")}
               </TableHead>
 
               <TableHead>{renderTableHeaderWithTooltip("Flight")}</TableHead>
+              <TableHead className="whitespace-nowrap">
+                {renderTableHeaderWithTooltip("From")}
+              </TableHead>
+              <TableHead className="whitespace-nowrap">
+                {renderTableHeaderWithTooltip("To")}
+              </TableHead>
               <TableHead className="hidden md:table-cell">
-                {renderTableHeaderWithTooltip("Sch Dep Dt")}
+                {renderTableHeaderWithTooltip("Departure DateTime")}
               </TableHead>
-              <TableHead className="whitespace-nowrap">
-                {renderTableHeaderWithTooltip("Dep Stn")}
+
+              <TableHead>
+                {renderTableHeaderWithTooltip("Departure State")}
               </TableHead>
-              <TableHead>{renderTableHeaderWithTooltip("Dep State")}</TableHead>
-              <TableHead className="whitespace-nowrap">
-                {renderTableHeaderWithTooltip("Arr Stn")}
+
+              <TableHead className="hidden md:table-cell">
+                {renderTableHeaderWithTooltip("Arrival DateTime")}
               </TableHead>
-              <TableHead>{renderTableHeaderWithTooltip("Arr State")}</TableHead>
+
+              <TableHead>
+                {renderTableHeaderWithTooltip("Arrival State")}
+              </TableHead>
               <TableHead>
                 {renderTableHeaderWithTooltip("Flt Status")}
               </TableHead>
-              {/* <TableHead className="hidden md:table-cell">
-                Est Dep DTM
-              </TableHead>
-              <TableHead className="hidden lg:table-cell">
-                Est Arr DTM
-              </TableHead> */}
-
               <TableHead className="w-[100px]">Actions</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -341,12 +345,7 @@ export default function ViewFlightDatTable({
                         {flight.carrierCode} {flight.flightNumber}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(flight.scheduledDepartureDate)}
-                      </div>
-                    </TableCell>
+
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
@@ -354,13 +353,7 @@ export default function ViewFlightDatTable({
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 items-center">
-                        <Badge className="py-2 ">
-                          {flight?.departureState}
-                        </Badge>
-                      </div>
-                    </TableCell>
+
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
@@ -368,6 +361,29 @@ export default function ViewFlightDatTable({
                         </span>
                       </div>
                     </TableCell>
+
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Calendar className="h-4 text-muted-foreground w-4" />
+                        {formatDate(flight?.scheduledDepartureUTCDateTime)}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <Badge className="py-2 ">
+                          {flight?.departureState}
+                        </Badge>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Calendar className="h-4 text-muted-foreground w-4" />
+                        {formatDate(flight?.scheduledArrivalUTCDateTime)}
+                      </div>
+                    </TableCell>
+
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <Badge className="py-2 ">{flight?.arrivalState}</Badge>
@@ -383,19 +399,6 @@ export default function ViewFlightDatTable({
                         {getStatusText(flight)}
                       </Badge>
                     </TableCell>
-                    {/* <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Clock className="h-4 text-muted-foreground w-4" />
-                        {flight.estimatedDepartureUTC}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Clock className="h-4 text-muted-foreground w-4" />
-                        {flight.estimatedArrivalUTC}
-                      </div>
-                    </TableCell> */}
-
                     <TableCell>
                       <Button
                         variant="outline"
