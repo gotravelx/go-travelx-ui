@@ -119,7 +119,7 @@ const SubscribeFlight = memo(
     };
 
     return (
-      <div className="w-full mx-auto">
+      <div className="w-full mx-auto min-h-[100vh]">
         <style jsx global>{`
           .form-input-enhanced ::placeholder {
             color: rgba(115, 115, 115, 0.8);

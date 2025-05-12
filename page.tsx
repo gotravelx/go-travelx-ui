@@ -239,7 +239,10 @@ export default function FlightSearch() {
           {/* view flight ui end --------------------  */}
 
           {/* subscribe flight ui start --------------------  */}
-          <TabsContent value="subscribe-flight">
+          <TabsContent
+            value="subscribe-flight "
+            className="max-h-max min-h-screen"
+          >
             <motion.div
               className="mx-auto"
               initial={{ opacity: 0 }}
@@ -286,7 +289,10 @@ export default function FlightSearch() {
           {/* subscribe flight ui end --------------------  */}
 
           {/* un-subscribe-flight  ui start --------------------  */}
-          <TabsContent value="un-subscribe-flight">
+          <TabsContent
+            value="un-subscribe-flight"
+            className="max-h-max min-h-screen"
+          >
             <UnsubscribeFlight />
           </TabsContent>
           {/* un-subscribe-flight ui end --------------------  */}
