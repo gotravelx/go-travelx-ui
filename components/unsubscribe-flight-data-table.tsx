@@ -87,20 +87,22 @@ export default function UnSubscribeDataTable({
 
   // Add a new function to actually perform the unsubscription after confirmation
   const confirmSingleUnsubscribe = async () => {
-    setIsUnsubscribing(confirmingSubscription.subscription._id);
+    if (confirmingSubscription) {
+      setIsUnsubscribing(confirmingSubscription.subscription._id);
+    }
 
     try {
       // Use the consolidated API method with arrays of length 1
       const success = await flightService.unsubscribeFlights(
-        [confirmingSubscription.subscription.flightNumber],
-        [confirmingSubscription.flight.carrierCode],
-        [confirmingSubscription.subscription.departureAirport]
+        [confirmingSubscription?.subscription?.flightNumber ?? ""],
+        [confirmingSubscription?.flight?.carrierCode ?? ""],
+        [confirmingSubscription?.subscription?.departureAirport ?? ""]
       );
 
       if (success) {
         toast.success("Successfully unsubscribed from flight");
         // Remove this subscription from the selected set
-        onSubscriptionSelect(confirmingSubscription.subscription._id);
+        onSubscriptionSelect(confirmingSubscription?.subscription?._id ?? "");
 
         // Refresh the subscription list
         onUnsubscribe();
@@ -218,15 +220,21 @@ export default function UnSubscribeDataTable({
                   aria-label="Select all subscriptions"
                 />
               </TableHead>
+              <TableHead className="hidden md:table-cell">
+                Transaction ID
+              </TableHead>
               <TableHead>Flight</TableHead>
-              <TableHead className="hidden md:table-cell">Sch Dep Dt</TableHead>
-              <TableHead>Dep Stn</TableHead>
-              <TableHead>Arr Stn</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Departure DateTime
+              </TableHead>
+
               <TableHead className="hidden md:table-cell">
                 Subscribed On
               </TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Tx Hash</TableHead>
+              <TableHead>Flight Status</TableHead>
+
               <TableHead className="w-[100px]">Actions</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -249,53 +257,6 @@ export default function UnSubscribeDataTable({
                         }
                         aria-label={`Select subscription ${subscription?.subscription?._id}`}
                       />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex gap-2 items-center">
-                        <Plane className="h-4 text-primary w-4" />
-                        {subscription?.flight?.carrierCode}{" "}
-                        {subscription?.flight?.flightNumber}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(
-                          subscription?.flight?.scheduledDepartureDate
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 items-center">
-                        <span className="font-medium">
-                          {subscription?.flight?.departureAirport}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 items-center">
-                        <span className="font-medium">
-                          {subscription?.flight?.arrivalAirport}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2 items-center">
-                        <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatDate(
-                          subscription?.subscription?.subscriptionDate
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`${getStatusBadgeColor(
-                          subscription?.flight
-                        )} p-2 px-4 text-md`}
-                      >
-                        {getStatusText(subscription?.flight)}
-                      </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {subscription?.subscription?.blockchainTxHash ? (
@@ -343,6 +304,57 @@ export default function UnSubscribeDataTable({
                         </span>
                       )}
                     </TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex gap-2 items-center">
+                        <Plane className="h-4 text-primary w-4" />
+                        {subscription?.flight?.carrierCode}{" "}
+                        {subscription?.flight?.flightNumber}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <span className="font-medium">
+                          {subscription?.flight?.departureCity} (
+                          {subscription?.flight?.departureAirport})
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 items-center">
+                        <span className="font-medium">
+                          {subscription?.flight?.arrivalCity} (
+                          {subscription?.flight?.arrivalAirport})
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Calendar className="h-4 text-muted-foreground w-4" />
+                        {formatDate(
+                          subscription?.flight?.scheduledDepartureDate
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex gap-2 items-center">
+                        <Clock className="h-4 text-muted-foreground w-4" />
+                        {formatDate(
+                          subscription?.subscription?.subscriptionDate
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`${getStatusBadgeColor(
+                          subscription?.flight
+                        )} p-2 px-4 text-md`}
+                      >
+                        {getStatusText(subscription?.flight)}
+                      </Badge>
+                    </TableCell>
+
                     <TableCell>
                       <div className="flex flex-col gap-2 sm:flex-row">
                         <Button

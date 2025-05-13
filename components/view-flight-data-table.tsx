@@ -50,6 +50,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { toast } from "sonner";
+import { mapArrivalStateCodeToText } from "@/utils/common";
 
 interface FlightDataTableProps {
   flights: FlightData[];
@@ -215,8 +216,8 @@ export default function ViewFlightDatTable({
     "Departure State": "U.S. state or region of the departure city",
     To: "Arrival airport code and city",
     "Arrival State": "U.S. state or region of the arrival city",
-    "Flt Status": "Flight status in text format (e.g., Departed)",
-    "Flt Status Cd":
+    "Flight Status": "Flight status in text format (e.g., Departed)",
+    "Flight Status Cd":
       "Abbreviated flight status (OUT = Departed, IN = Arrived, NDPT = Not Departed)",
     "Dep Gate": "Assigned departure gate at the airport",
     "Arr Gate": "Assigned arrival gate at the airport",
@@ -281,7 +282,7 @@ export default function ViewFlightDatTable({
                 {renderTableHeaderWithTooltip("Arrival State")}
               </TableHead>
               <TableHead>
-                {renderTableHeaderWithTooltip("Flt Status")}
+                {renderTableHeaderWithTooltip("Flight Status")}
               </TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -372,7 +373,9 @@ export default function ViewFlightDatTable({
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <Badge className="py-2 ">
-                          {flight?.departureState}
+                          {mapArrivalStateCodeToText(
+                            flight?.departureState || ""
+                          )}
                         </Badge>
                       </div>
                     </TableCell>
@@ -386,7 +389,12 @@ export default function ViewFlightDatTable({
 
                     <TableCell>
                       <div className="flex gap-1 items-center">
-                        <Badge className="py-2 ">{flight?.arrivalState}</Badge>
+                        <Badge className="py-2 ">
+                          {" "}
+                          {mapArrivalStateCodeToText(
+                            flight?.arrivalState || ""
+                          )}
+                        </Badge>
                       </div>
                     </TableCell>
                     <TableCell>

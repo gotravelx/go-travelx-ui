@@ -476,7 +476,7 @@ export default function UnsubscribeFlightClient() {
                     htmlFor="departure-station"
                     className="text-sm font-medium mb-1"
                   >
-                    Dep Stn
+                    From
                   </label>
                   <div>
                     <Input
@@ -507,7 +507,7 @@ export default function UnsubscribeFlightClient() {
                     htmlFor="arrival-station"
                     className="text-sm font-medium mb-1"
                   >
-                    Arr Stn
+                    To
                   </label>
                   <div>
                     <Input
@@ -534,7 +534,9 @@ export default function UnsubscribeFlightClient() {
 
                 {/* Date Picker */}
                 <div className="flex flex-col w-full md:w-auto">
-                  <label className="text-sm font-medium mb-1">Sch Dpt Dt</label>
+                  <label className="text-sm font-medium mb-1">
+                    Departure Date
+                  </label>
                   <Popover
                     open={isCalendarOpen}
                     onOpenChange={setIsCalendarOpen}
