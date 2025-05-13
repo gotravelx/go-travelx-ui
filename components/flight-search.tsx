@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { type FlightData, flightService } from "@/services/api";
 import { Toaster } from "sonner";
-import { NavBar } from "@/components/nav-bar";
 // Update the imports to point to the correct locations
 import SubscribeFlight from "@/components/subscribe-flight";
 import ViewFlight from "@/components/view-flight";
@@ -13,12 +12,16 @@ import UnsubscribeFlight from "@/components/unsubscribe-flight-client";
 import { Footer } from "@/components/footer";
 import SubscribeFlightCard from "@/components/subscribe-card";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function FlightSearch() {
   const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  ); // Set default date
+  const router = useRouter();
 
   // Separate states for different views
   const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
@@ -41,6 +44,16 @@ export default function FlightSearch() {
   const [contractCallCount, setContractCallCount] = useState(0);
 
   useEffect(() => {
+    // This ensures the component is fully client-side rendered
+    console.log("Flight search component mounted");
+
+    // Set default date on component mount
+    if (!selectedDate) {
+      setSelectedDate(new Date());
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
     if (viewFlightData) {
       console.log("view flight data ------>", viewFlightData);
     }
@@ -60,7 +73,7 @@ export default function FlightSearch() {
         if (activeTab !== "view") {
           setFlightNumber("");
           setSearchError("");
-          setSelectedDate(undefined);
+          setSelectedDate(new Date()); // Set to current date instead of undefined
           setCarrier("UA");
           setDepartureStation("");
           setViewFlightData(null);
@@ -69,7 +82,7 @@ export default function FlightSearch() {
         // Reset subscribe tab filters
         setFlightNumber("");
         setSearchError("");
-        setSelectedDate(undefined);
+        setSelectedDate(new Date()); // Set to current date instead of undefined
         setCarrier("UA");
         setDepartureStation("");
         setArrivalStation("");
@@ -106,6 +119,7 @@ export default function FlightSearch() {
     }
 
     try {
+      setIsLoading(true);
       const data = await flightService.searchFlight(
         carrier,
         flightNumber,
@@ -116,6 +130,8 @@ export default function FlightSearch() {
       setSearchError(""); // Clear any previous errors
     } catch (error) {
       setSearchError("Error fetching flight data");
+    } finally {
+      setIsLoading(false);
     }
   }, [carrier, flightNumber, departureStation, selectedDate]);
 
@@ -183,7 +199,7 @@ export default function FlightSearch() {
     } else if (subscribeFlightData) {
       await handleSearch();
     }
-  }, [activeTab, viewFlightData, subscribeFlightData, handleSearch]);
+  }, [activeTab, subscribeFlightData, handleSearch]);
 
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value);
@@ -199,16 +215,11 @@ export default function FlightSearch() {
 
   return (
     <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
-      {/* <NavBar
-        lastInteractionTime={lastInteractionTime}
-        onRefresh={handleRefresh}
-        contractCallCount={contractCallCount}
-      /> */}
       <Toaster position="top-right" />
       <main className="flex-grow">
         <Tabs
           defaultValue="view"
-          className="container mx-auto pt-24 px-4 py-8"
+          className="container mt-20 mx-auto px-4 py-4"
           onValueChange={handleTabChange}
           value={activeTab}
         >
@@ -277,6 +288,7 @@ export default function FlightSearch() {
                     onDepartureStationChange={handleDepartureStationChange}
                     onArrivalStationChange={handleArrivalStationChange}
                     onCarrierChange={handleCarrierChange}
+                    setSearchError={setSearchError}
                   />
 
                   {subscribeFlightData && (
