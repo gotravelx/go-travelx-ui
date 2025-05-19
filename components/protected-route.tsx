@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProtectedRouteProps {
@@ -13,15 +13,23 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  // This ensures we only run the protection logic on the client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    // Only run this effect on the client side
+    if (isClient && !isLoading && !isAuthenticated) {
       // Redirect to login with the current path as the redirect URL
       router.push(`/login?redirect=${encodeURIComponent(pathname || "/")}`);
     }
-  }, [isAuthenticated, isLoading, router, pathname]);
+  }, [isAuthenticated, isLoading, router, pathname, isClient]);
 
-  if (isLoading) {
+  // Don't render anything during SSR or when loading on client
+  if (!isClient || isLoading) {
     return (
       <div className="container mx-auto pt-24 px-4 py-8">
         <div className="space-y-4">
@@ -38,6 +46,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // Don't render children if not authenticated
   if (!isAuthenticated) {
     return null;
   }

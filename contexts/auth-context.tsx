@@ -34,15 +34,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
+  // Ensure we're on the client side before accessing localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    // Only run this effect on the client side
+    if (isClient) {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error("Error accessing localStorage:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [isClient]);
 
   const login = async (username: string, password: string) => {
     try {
@@ -50,7 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (username === "demo_cleaner" && password === "demo1234") {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setUser(defaultUser);
-        localStorage.setItem("user", JSON.stringify(defaultUser));
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(defaultUser));
+        }
         return Promise.resolve();
       } else {
         return Promise.reject(new Error("Invalid credentials"));
@@ -64,7 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+    }
     router.push("/login");
   };
 
