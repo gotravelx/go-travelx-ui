@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { type FlightData, flightService } from "@/services/api";
@@ -15,8 +15,8 @@ import { Footer } from "@/components/footer";
 import SubscribeFlightCard from "./components/subscribe-card";
 import { format } from "date-fns";
 
-// Create a client-side only component that uses the web3 context
-const ViewFlight = dynamic(() => import("./pages/view-flight/page"), {
+// Replace with this import that properly handles the component type
+const ViewFlight = dynamic(() => import("./components/view-flight"), {
   ssr: false,
 });
 
@@ -24,7 +24,6 @@ export default function FlightSearch() {
   const [flightNumber, setFlightNumber] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  // Separate states for different views
   const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
   const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>([]);
   const [subscribeFlightData, setSubscribeFlightData] =
@@ -32,30 +31,17 @@ export default function FlightSearch() {
 
   const [searchError, setSearchError] = useState("");
   const [carrier, setCarrier] = useState("UA");
-  // stations
   const [isLoading, setIsLoading] = useState(false);
 
   const [departureStation, setDepartureStation] = useState("");
   const [arrivalStation, setArrivalStation] = useState("");
   const [activeTab, setActiveTab] = useState("view");
 
-  useEffect(() => {
-    if (viewFlightData) {
-      console.log("view flight data ------>", viewFlightData);
-    }
-    if (subscribeFlightData) {
-      console.log("subscribe flight data ------>", subscribeFlightData);
-    }
-  }, [viewFlightData, subscribeFlightData]);
-
-  // Clear data when switching tabs
   const handleTabChange = useCallback(
     (value: string) => {
       setActiveTab(value);
 
-      // Reset filters for each tab independently
       if (value === "view") {
-        // Don't reset view tab filters when coming from other tabs
         if (activeTab !== "view") {
           setFlightNumber("");
           setSearchError("");
@@ -65,7 +51,6 @@ export default function FlightSearch() {
           setViewFlightData(null);
         }
       } else if (value === "subscribe-flight") {
-        // Reset subscribe tab filters
         setFlightNumber("");
         setSearchError("");
         setSelectedDate(undefined);
@@ -73,8 +58,6 @@ export default function FlightSearch() {
         setDepartureStation("");
         setArrivalStation("");
         setSubscribeFlightData(null);
-      } else {
-        // Reset unsubscribe tab filters if needed
       }
     },
     [activeTab]
@@ -109,10 +92,10 @@ export default function FlightSearch() {
         carrier,
         flightNumber,
         departureStation,
-        selectedDate // passing the Date object directly
+        selectedDate
       );
       setSubscribeFlightData(data);
-      setSearchError(""); // Clear any previous errors
+      setSearchError("");
     } catch (error) {
       setSearchError("Error fetching flight data");
     }
@@ -268,6 +251,7 @@ export default function FlightSearch() {
                     onDepartureStationChange={handleDepartureStationChange}
                     onArrivalStationChange={handleArrivalStationChange}
                     onCarrierChange={handleCarrierChange}
+                    setSearchError={setSearchError} // Pass setSearchError prop
                   />
 
                   {subscribeFlightData && (

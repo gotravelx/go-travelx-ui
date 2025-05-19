@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { AlertCircle, CalendarIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 
 const SubscribeFlight = memo(
   ({
@@ -57,6 +57,14 @@ const SubscribeFlight = memo(
     setSearchError?: (value: string) => void;
   }) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+    // Set default date on component mount
+    useEffect(() => {
+      if (!selectedDate) {
+        const today = new Date();
+        onDateChange(today);
+      }
+    }, [selectedDate, onDateChange]);
 
     // Add flight number validation
     const handleFlightNumberChange = (value: string) => {

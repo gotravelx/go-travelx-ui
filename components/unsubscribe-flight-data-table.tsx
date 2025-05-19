@@ -288,6 +288,7 @@ export default function UnSubscribeDataTable({
                                   rel="noopener noreferrer"
                                   className="text-primary hover:underline"
                                   onClick={(e) => e.stopPropagation()}
+                                  title="View transaction on Caminoscan"
                                 >
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
