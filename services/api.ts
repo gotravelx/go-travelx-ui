@@ -1,16 +1,12 @@
 import type { FlightData, SubscriptionDetails } from "@/types/flight"
 import { getBaseUrl } from "@/utils/base_url"
 
-// Add this constant at the top of the file
 const API_BASE_URL = getBaseUrl()
 
-// Hardcoded wallet address as requested
 const WALLET_ADDRESS = "0x876474671AEe7AC87800A0B99e9e31A625cdF95F"
 
 console.log("API BASE URL -->", API_BASE_URL)
-// Add this interface to the top of the file with other interfaces
 
-// API service for flight data
 export const flightService = {
   searchFlight: async (
     carrierCode: string,
@@ -23,10 +19,8 @@ export const flightService = {
         `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} on ${departureDate.toISOString()}`,
       )
 
-      // Use hardcoded wallet address instead of getting from localStorage
       console.log(`Using wallet address: ${WALLET_ADDRESS}`)
 
-      // Use the API to get flight data
       const response = await fetch(
         `${API_BASE_URL}/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
@@ -63,7 +57,7 @@ export const flightService = {
           flightNumber,
           scheduledDepartureDate: departureDate.toISOString().split("T")[0],
           carrierCode,
-          walletAddress: WALLET_ADDRESS, // Use hardcoded wallet address
+          walletAddress: WALLET_ADDRESS, 
         }),
       })
 
@@ -89,7 +83,6 @@ export const flightService = {
       console.log(`Subscribing to flight ${carrierCode}${flightNumber} from ${departureAirport} on ${departureDate}`)
       console.log(`Using wallet address: ${WALLET_ADDRESS}`)
 
-      // No need to validate walletAddress since we're using hardcoded one
       if (!flightNumber || !carrierCode || !departureAirport || !departureDate) {
         const missingParams = {
           flightNumber: !flightNumber,
@@ -128,7 +121,6 @@ export const flightService = {
     }
   },
 
-  // New method to fetch subscribed flights
   getSubscribedFlights: async ( ): Promise<FlightData[]> => {
     try {
       console.log(`Fetching subscribed flights for wallet: ${WALLET_ADDRESS}`)
@@ -193,7 +185,6 @@ export const flightService = {
     }
   },
 
-  // Add this method to the flightService object
   getSubscribedFlightsDetails: async ( ): Promise<SubscriptionDetails[]> => {
     try {
       console.log(`Fetching subscribed flights details for wallet: ${WALLET_ADDRESS}`)

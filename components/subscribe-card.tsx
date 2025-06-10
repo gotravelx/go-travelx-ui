@@ -347,48 +347,16 @@ export default function SubscribeFlightCard({
               </div>
 
               {/* Subscribe Buttons */}
-              <div className="flex flex-col sm:flex-row mt-[55px] justify-between w-full  gap-3">
+              <div className="flex flex-col sm:flex-row mt-[55px] justify-center w-full ">
                 {/* Secure Subscription Button with Tooltip */}
-                <TooltipProvider>
+                {/* <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="w-full sm:w-1/2">
-                        <Button
+                    <TooltipTrigger asChild> */}
+                {/* <div className="w-full sm:w-1/2"> */}
+                {/* <Button
                           className="bg-emerald-600 text-white hover:bg-emerald-700 transition-colors gap-2 w-full"
                           onClick={handleSecureSubscribeClick}
                           disabled={isSecureSubscribing || isSecureSubscribed}
-                        >
-                          {isSecureSubscribing ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <LockIcon className="h-4 w-4" />
-                          )}
-                          {isSecureSubscribed
-                            ? "Securely Subscribed"
-                            : isSecureSubscribing
-                            ? "Subscribing..."
-                            : "Private Subscription"}
-                        </Button>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        Subscribe to encrypted flight updates with enhanced
-                        security
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                {/* Standard Subscription Button with Tooltip */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="w-full sm:w-1/2">
-                        <Button
-                          className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors gap-2 w-full"
-                          onClick={handleSubscribeClick}
-                          disabled={isSubscribing || isSubscribed}
                         >
                           {isSubscribing ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -400,6 +368,38 @@ export default function SubscribeFlightCard({
                             : isSubscribing
                             ? "Subscribing..."
                             : "Public Subscription"}
+                        </Button> */}
+                {/* </div> */}
+                {/* </TooltipTrigger> */}
+                {/* <TooltipContent>
+                      <p>
+                        Subscribe to encrypted flight updates with enhanced
+                        security
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider> */}
+
+                {/* Standard Subscription Button with Tooltip */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full sm:w-1/2">
+                        <Button
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors gap-2 w-full"
+                          onClick={handleSubscribeClick}
+                          disabled={isSubscribing || flightData.isSubscribed}
+                        >
+                          {isSubscribed ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <LockIcon className="h-4 w-4" />
+                          )}
+                          {isSubscribed
+                            ? "Securely Subscribed"
+                            : isSubscribed
+                            ? "Subscribing..."
+                            : "Private Subscription"}
                         </Button>
                       </div>
                     </TooltipTrigger>
