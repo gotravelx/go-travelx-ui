@@ -1,20 +1,35 @@
-FROM artifactorycloud.ual.com/v-docker/node:22 AS build
+# Stage 1: Build the app
+FROM node:18 AS builder
+
+# Set working directory
 WORKDIR /app
 
-COPY .npmrc .npmrc
-COPY package*.json ./
-RUN npm install
+# Copy dependencies
+COPY package.json package-lock.json ./
 
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy app files and build
 COPY . .
 RUN npm run build
 
-FROM artifactorycloud.ual.com/v-docker/node:22-alpine
+# Stage 2: Production image
+FROM node:18-alpine AS runner
+
 WORKDIR /app
 
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+# Copy only necessary files from builder stage
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
 
-EXPOSE 8080
-ENV PORT=8080
-CMD ["node", "server.js"]
+# Expose port
+EXPOSE 3000
+
+# Set environment variables if needed
+ENV NODE_ENV=production
+
+# Start the app
+CMD ["npm", "start"]
