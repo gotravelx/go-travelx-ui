@@ -155,11 +155,7 @@ const ViewFlight = memo(
         hasError = true;
       }
 
-      if (viewDepartureStation && viewDepartureStation.length !== 3) {
-        errorMessage = "Departure station must be 3 characters";
-        hasError = true;
-      }
-
+ 
       if (viewArrivalStation && viewArrivalStation.length !== 3) {
         errorMessage = "Arrival station must be 3 characters";
         hasError = true;

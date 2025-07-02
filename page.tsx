@@ -77,11 +77,6 @@ export default function FlightSearch() {
       return;
     }
 
-    if (!departureStation) {
-      setSearchError("Please enter a departure station");
-      return;
-    }
-
     if (!selectedDate) {
       setSearchError("Please select a departure date");
       return;

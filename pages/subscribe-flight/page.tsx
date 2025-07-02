@@ -58,32 +58,24 @@ const SubscribeFlight = memo(
   }) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-    // Add flight number validation
     const handleFlightNumberChange = (value: string) => {
-      // Only allow numeric input and limit to 4 digits
       const numericValue = value.replace(/\D/g, "").slice(0, 4);
       onFlightNumberChange(numericValue);
     };
 
-    // Add departure station validation
     const handleDepartureStationChange = (value: string) => {
-      // Convert to uppercase and limit to 3 characters
       const formattedValue = value.toUpperCase().slice(0, 3);
       setDepartureStation(formattedValue);
       onDepartureStationChange(formattedValue);
     };
 
-    // Handle arrival station validation
     const handleArrivalStationChange = (value: string) => {
-      // Convert to uppercase and limit to 3 characters
       const formattedValue = value.toUpperCase().slice(0, 3);
       setArrivalStation(formattedValue);
       onArrivalStationChange(formattedValue);
     };
 
-    // Update the onSearch function to validate inputs before searching
     const handleSearch = () => {
-      // Validate inputs before searching
       let hasError = false;
       let errorMessage = "";
 
@@ -102,19 +94,16 @@ const SubscribeFlight = memo(
       }
 
       if (hasError) {
-        // Set error message if setSearchError is available
         if (typeof setSearchError === "function") {
           setSearchError(errorMessage);
         }
         return;
       }
 
-      // Clear any previous error if setSearchError is available
       if (searchError && typeof setSearchError === "function") {
         setSearchError("");
       }
 
-      // Proceed with search
       onSearch();
     };
 

@@ -103,12 +103,7 @@ const SubscribeFlight = memo(
         errorMessage = "Flight number must be 4 digits";
         hasError = true;
       }
-
-      if (!departureStation || departureStation.length !== 3) {
-        errorMessage = "Departure station must be 3 characters";
-        hasError = true;
-      }
-
+      
       if (hasError) {
         // Set error message if setSearchError is available
         if (typeof setSearchError === "function") {

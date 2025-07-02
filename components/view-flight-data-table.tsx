@@ -535,9 +535,7 @@ export default function ViewFlightDatTable({
                                   Delay:
                                 </div>
                                 <div>
-                                  {(flight.departureDelayMinutes ?? 0) > 0
-                                    ? `${flight.departureDelayMinutes} minutes`
-                                    : "None"}
+                                 {flight?.arrivalState || "TBD"}
                                 </div>
                                 {flight.marketedFlightSegment &&
                                   flight.marketedFlightSegment.length > 0 && (

@@ -67,22 +67,19 @@ export default function FlightSearch() {
     (value: string) => {
       setActiveTab(value);
 
-      // Reset filters for each tab independently
       if (value === "view") {
-        // Don't reset view tab filters when coming from other tabs
         if (activeTab !== "view") {
           setFlightNumber("");
           setSearchError("");
-          setSelectedDate(new Date()); // Set to current date instead of undefined
+          setSelectedDate(new Date());
           setCarrier("UA");
           setDepartureStation("");
           setViewFlightData(null);
         }
       } else if (value === "subscribe-flight") {
-        // Reset subscribe tab filters
         setFlightNumber("");
         setSearchError("");
-        setSelectedDate(new Date()); // Set to current date instead of undefined
+        setSelectedDate(new Date());
         setCarrier("UA");
         setDepartureStation("");
         setArrivalStation("");
@@ -105,11 +102,6 @@ export default function FlightSearch() {
   const handleSearch = useCallback(async () => {
     if (!flightNumber) {
       setSearchError("Please enter a flight number");
-      return;
-    }
-
-    if (!departureStation) {
-      setSearchError("Please enter a departure station");
       return;
     }
 
@@ -144,11 +136,8 @@ export default function FlightSearch() {
     try {
       setIsLoading(true);
 
-      // Instead of calling the API directly, we'll use our getSubscribedFlights method
-      // and then filter the results based on the search criteria
       const subscribedFlights = await flightService.getSubscribedFlights();
 
-      // Filter the flights based on the search criteria
       let filteredFlights = subscribedFlights;
 
       if (flightNumber) {
