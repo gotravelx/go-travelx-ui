@@ -1,29 +1,21 @@
-"use client";
+"use client"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { format } from "date-fns";
-import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react";
-import { memo, useCallback, useEffect, useState } from "react";
-import ViewFlightDatTable from "@/components/view-flight-data-table";
-import { flightService, type FlightData } from "@/services/api";
-import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { format } from "date-fns"
+import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react"
+import { memo, useCallback, useEffect, useState } from "react"
+import ViewFlightDatTable from "@/components/view-flight-data-table"
+import { flightService } from "@/services/api"
+import { toast } from "sonner"
+import type { FlightData } from "@/types/flight"
 
-const ViewFlight = memo(
+// Create a client-side only component
+const ViewFlightClient = memo(
   ({
     flightNumber,
     onFlightNumberChange,
@@ -35,181 +27,171 @@ const ViewFlight = memo(
     carrier,
     onCarrierChange,
   }: {
-    flightNumber: string;
-    onFlightNumberChange: (value: string) => void;
-    onSearch: () => void;
-    isLoading: boolean;
-    searchError: string;
-    selectedDate: Date | undefined;
-    onDateChange: (value: Date | undefined) => void;
-    carrier: string;
-    onCarrierChange: (value: string) => void;
+    flightNumber: string
+    onFlightNumberChange: (value: string) => void
+    onSearch: () => void
+    isLoading: boolean
+    searchError: string
+    selectedDate: Date | undefined
+    onDateChange: (value: Date | undefined) => void
+    carrier: string
+    onCarrierChange: (value: string) => void
   }) => {
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
     // Local filter state for View Flight tab
-    const [viewDepartureStation, setViewDepartureStation] = useState("");
-    const [viewArrivalStation, setViewArrivalStation] = useState("");
+    const [viewDepartureStation, setViewDepartureStation] = useState("")
+    const [viewArrivalStation, setViewArrivalStation] = useState("")
 
-    const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>(
-      []
-    );
-    const [filteredFlights, setFilteredFlights] = useState<FlightData[]>([]);
-    const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(false);
-    const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
-    const [localSearchError, setLocalSearchError] = useState("");
+    const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>([])
+    const [filteredFlights, setFilteredFlights] = useState<FlightData[]>([])
+    const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(false)
+    const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
+    const [localSearchError, setLocalSearchError] = useState("")
 
     // Add pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [totalItems, setTotalItems] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(5)
+    const [totalItems, setTotalItems] = useState(0)
 
-    // Fetch subscribed flights when component mounts
     useEffect(() => {
-      const fetchSubscribedFlights = async () => {
-        setIsLoadingSubscriptions(true);
-        try {
-          const flights = await flightService.getSubscribedFlights();
-          setSubscribedFlights(flights);
-          setFilteredFlights(flights);
-          setTotalItems(flights.length);
-          setHasInitiallyLoaded(true);
-        } catch (error) {
-          console.error("Error fetching subscribed flights:", error);
-          toast.error("Failed to fetch subscribed flights");
-        } finally {
-          setIsLoadingSubscriptions(false);
-        }
-      };
+      if (typeof window === "undefined") return // SSR fallback
 
-      fetchSubscribedFlights();
-    }, []);
+      const fetchSubscribedFlights = async () => {
+        setIsLoadingSubscriptions(true)
+        try {
+          const flights = await flightService.getSubscribedFlights()
+          setSubscribedFlights(flights)
+          setFilteredFlights(flights)
+          setTotalItems(flights.length)
+          setHasInitiallyLoaded(true)
+        } catch (error) {
+          console.error("Error fetching subscribed flights:", error)
+          toast.error("Failed to fetch subscribed flights")
+        } finally {
+          setIsLoadingSubscriptions(false)
+        }
+      }
+
+      fetchSubscribedFlights()
+    }, [])
 
     // Handle pagination changes
     const handlePageChange = useCallback((page: number) => {
-      setCurrentPage(page);
-    }, []);
+      setCurrentPage(page)
+    }, [])
 
     const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
-      setItemsPerPage(itemsPerPage);
-      setCurrentPage(1); // Reset to first page when changing items per page
-    }, []);
+      setItemsPerPage(itemsPerPage)
+      setCurrentPage(1) // Reset to first page when changing items per page
+    }, [])
 
     // Handle flight number validation
     const handleFlightNumberChange = useCallback(
       (value: string) => {
         // Only allow numeric input and limit to 4 digits
-        const numericValue = value.replace(/\D/g, "").slice(0, 4);
-        onFlightNumberChange(numericValue);
+        const numericValue = value.replace(/\D/g, "").slice(0, 4)
+        onFlightNumberChange(numericValue)
       },
-      [onFlightNumberChange]
-    );
+      [onFlightNumberChange],
+    )
 
     // Handle departure station validation
     const handleDepartureStationChange = useCallback((value: string) => {
       // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setViewDepartureStation(formattedValue);
-    }, []);
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setViewDepartureStation(formattedValue)
+    }, [])
 
     // Handle arrival station validation
     const handleArrivalStationChange = useCallback((value: string) => {
       // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setViewArrivalStation(formattedValue);
-    }, []);
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setViewArrivalStation(formattedValue)
+    }, [])
 
     // Reset all filters
     const resetFilters = useCallback(() => {
-      setViewDepartureStation("");
-      setViewArrivalStation("");
-      onFlightNumberChange("");
-      onCarrierChange("UA");
-      onDateChange(undefined); // Set to undefined instead of new Date()
+      setViewDepartureStation("")
+      setViewArrivalStation("")
+      onFlightNumberChange("")
+      onCarrierChange("UA")
+      onDateChange(undefined) // Set to undefined instead of new Date()
 
       // Reset to original subscribed flights
-      setFilteredFlights(subscribedFlights);
-      setTotalItems(subscribedFlights.length);
-      setLocalSearchError("");
-    }, [
-      onFlightNumberChange,
-      onCarrierChange,
-      onDateChange,
-      subscribedFlights,
-      setLocalSearchError,
-    ]);
+      setFilteredFlights(subscribedFlights)
+      setTotalItems(subscribedFlights.length)
+      setLocalSearchError("")
+    }, [onFlightNumberChange, onCarrierChange, onDateChange, subscribedFlights, setLocalSearchError])
 
     // Apply filters to subscribed flights
     const applyFilters = useCallback(() => {
-      if (subscribedFlights.length === 0) return;
+      if (subscribedFlights.length === 0) return
 
       // Validate inputs before filtering
-      let hasError = false;
-      let errorMessage = "";
+      let hasError = false
+      let errorMessage = ""
 
-      if (
-        flightNumber &&
-        (flightNumber.length !== 4 || !/^\d+$/.test(flightNumber))
-      ) {
-        errorMessage = "Flight number must be 4 digits";
-        hasError = true;
+      if (flightNumber && (flightNumber.length !== 4 || !/^\d+$/.test(flightNumber))) {
+        errorMessage = "Flight number must be 4 digits"
+        hasError = true
       }
 
- 
+      if (viewDepartureStation && viewDepartureStation.length !== 3) {
+        errorMessage = "Departure station must be 3 characters"
+        hasError = true
+      }
+
       if (viewArrivalStation && viewArrivalStation.length !== 3) {
-        errorMessage = "Arrival station must be 3 characters";
-        hasError = true;
+        errorMessage = "Arrival station must be 3 characters"
+        hasError = true
       }
 
       if (hasError) {
-        setLocalSearchError(errorMessage);
-        return;
+        setLocalSearchError(errorMessage)
+        return
       }
 
-      setLocalSearchError("");
+      setLocalSearchError("")
 
-      let filtered = [...subscribedFlights];
+      let filtered = [...subscribedFlights]
 
       // Filter by flight number if provided
       if (flightNumber) {
-        filtered = filtered.filter((flight) =>
-          flight.flightNumber.toString().includes(flightNumber)
-        );
+        filtered = filtered.filter((flight) => flight.flightNumber.toString().includes(flightNumber))
       }
 
       // Filter by carrier if provided
       if (carrier) {
-        filtered = filtered.filter((flight) => flight.carrierCode === carrier);
+        filtered = filtered.filter((flight) => {
+          // Handle cases where carrierCode might be empty, default to "UA"
+          const flightCarrier = flight.carrierCode || "UA"
+          return flightCarrier === carrier
+        })
       }
 
       // Filter by departure station if provided
       if (viewDepartureStation) {
-        filtered = filtered.filter(
-          (flight) => flight.departureAirport === viewDepartureStation
-        );
+        filtered = filtered.filter((flight) => flight.departureAirport === viewDepartureStation)
       }
 
       // Filter by arrival station if provided
       if (viewArrivalStation) {
-        filtered = filtered.filter(
-          (flight) => flight.arrivalAirport === viewArrivalStation
-        );
+        filtered = filtered.filter((flight) => flight.arrivalAirport === viewArrivalStation)
       }
 
       // Filter by date if selected (only if a date is actually selected)
       if (selectedDate) {
-        const dateString = format(selectedDate, "yyyy-MM-dd");
-        filtered = filtered.filter(
-          (flight) => flight.scheduledDepartureDate === dateString
-        );
+        const dateString = format(selectedDate, "yyyy-MM-dd")
+        filtered = filtered.filter((flight) => flight.scheduledDepartureDate === dateString)
       }
 
-      setFilteredFlights(filtered);
-      setTotalItems(filtered.length);
-      setCurrentPage(1); // Reset to first page after filtering
+      setFilteredFlights(filtered)
+      setTotalItems(filtered.length)
+      setCurrentPage(1) // Reset to first page after filtering
 
       if (filtered.length === 0) {
-        toast.info("No flights match your search criteria");
+        toast.info("No flights match your search criteria")
       }
     }, [
       subscribedFlights,
@@ -219,10 +201,16 @@ const ViewFlight = memo(
       viewArrivalStation,
       selectedDate,
       setLocalSearchError,
-    ]);
+    ])
+
+    if (!hasInitiallyLoaded) return null // SSR fallback
+
+
+     // Get departure and arrival status displays
+
 
     return (
-      <div className="w-full mx-auto">
+      <div className="w-full ">
         <style jsx global>{`
           .form-input-enhanced ::placeholder {
             color: rgba(115, 115, 115, 0.8);
@@ -231,10 +219,7 @@ const ViewFlight = memo(
         `}</style>
         <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="carrier-select"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="carrier-select" className="text-sm font-medium mb-1">
               Carrier
             </label>
             <Select value={carrier} onValueChange={onCarrierChange}>
@@ -265,15 +250,12 @@ const ViewFlight = memo(
           </div>
 
           <div className="flex flex-5 flex-col justify-center items-center">
-            <div className="pt-4">and/or </div>
+            <div className="pt-4">and </div>
           </div>
 
           {/* Departure Station */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="departure-station"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="departure-station" className="text-sm font-medium mb-1">
               From
             </label>
             <Input
@@ -288,10 +270,7 @@ const ViewFlight = memo(
 
           {/* Arrival Station */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="arrival-station"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
               To
             </label>
             <Input
@@ -322,8 +301,8 @@ const ViewFlight = memo(
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => {
-                    onDateChange(date || undefined);
-                    setIsCalendarOpen(false);
+                    onDateChange(date || undefined)
+                    setIsCalendarOpen(false)
                   }}
                   initialFocus
                 />
@@ -350,7 +329,7 @@ const ViewFlight = memo(
             <Button
               onClick={resetFilters}
               variant="outline"
-              className="h-10 w-full md:w-auto"
+              className="h-10 w-full md:w-auto bg-transparent"
               disabled={isLoading || isLoadingSubscriptions}
             >
               Clear Filters
@@ -378,17 +357,12 @@ const ViewFlight = memo(
                 <>
                   You don't have any flight subscriptions yet.
                   <br />
-                  Go to the "Add Flight Subscription" tab to subscribe to
-                  flights.
+                  Go to the "Add Flight Subscription" tab to subscribe to flights.
                 </>
               ) : (
                 <>
                   No flights match your search criteria.
-                  <Button
-                    variant="link"
-                    onClick={resetFilters}
-                    className="px-1 text-primary"
-                  >
+                  <Button variant="link" onClick={resetFilters} className="px-1 text-primary">
                     Clear all filters
                   </Button>
                 </>
@@ -407,10 +381,25 @@ const ViewFlight = memo(
           )}
         </div>
       </div>
-    );
-  }
-);
+    )
+  },
+)
 
-ViewFlight.displayName = "ViewFlight";
+ViewFlightClient.displayName = "ViewFlightClient"
 
-export default ViewFlight;
+// Server-side safe component
+export default function ViewFlightPage() {
+  return (
+    <ViewFlightClient
+      flightNumber=""
+      onFlightNumberChange={() => {}}
+      onSearch={() => {}}
+      isLoading={false}
+      searchError=""
+      selectedDate={undefined}
+      onDateChange={() => {}}
+      carrier="UA"
+      onCarrierChange={() => {}}
+    />
+  )
+}

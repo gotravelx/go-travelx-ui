@@ -116,6 +116,7 @@ export default function FlightSearch() {
         carrier,
         flightNumber,
         departureStation,
+        arrivalStation,
         selectedDate // passing the Date object directly
       );
       setSubscribeFlightData(data);
@@ -175,20 +176,6 @@ export default function FlightSearch() {
       setIsLoading(false);
     }
   }, [carrier, flightNumber, selectedDate]);
-
-  const handleRefresh = useCallback(async () => {
-    if (activeTab === "view") {
-      // Refresh subscribed flights
-      try {
-        const flights = await flightService.getSubscribedFlights();
-        setSubscribedFlights(flights);
-      } catch (error) {
-        console.error("Error refreshing subscribed flights:", error);
-      }
-    } else if (subscribeFlightData) {
-      await handleSearch();
-    }
-  }, [activeTab, subscribeFlightData, handleSearch]);
 
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value);
@@ -253,7 +240,7 @@ export default function FlightSearch() {
           {/* subscribe flight ui start --------------------  */}
           <TabsContent value="subscribe-flight">
             <motion.div
-              className="mx-auto"
+              className="mx-auto min-h-screen"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -275,23 +262,24 @@ export default function FlightSearch() {
                     arrivalStation={arrivalStation}
                     setArrivalStation={setArrivalStation}
                     onDepartureStationChange={handleDepartureStationChange}
-                    onArrivalStationChange={handleArrivalStationChange}
+                    onArrivalStationChange={handleDepartureStationChang}
                     onCarrierChange={handleCarrierChange}
                     setSearchError={setSearchError}
                   />
-
-                  {subscribeFlightData && (
-                    <motion.div
-                      className="mt-6 space-y-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div className="w-full flex items-start justify-start">
-                        <SubscribeFlightCard flightData={subscribeFlightData} />
-                      </div>
-                    </motion.div>
-                  )}
+                    {subscribeFlightData && (
+                      <motion.div
+                        className="mt-6 space-y-6"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <div className="w-full flex items-start justify-start ">
+                          <SubscribeFlightCard
+                            flightData={subscribeFlightData}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
                 </CardContent>
               </Card>
             </motion.div>

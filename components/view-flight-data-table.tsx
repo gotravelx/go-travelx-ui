@@ -249,6 +249,13 @@ export default function ViewFlightDatTable({
     </TooltipProvider>
   );
 
+  // const arrivalStatus = getStatusDisplay(
+  //   flightData.arrivalState || "ONT",
+  //   true
+  // );
+
+
+  console.log("Flight Data Table Rendered", flights, "flights");
   return (
     <>
       <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
@@ -534,9 +541,7 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">
                                   Delay:
                                 </div>
-                                <div>
-                                 {flight?.arrivalState || "TBD"}
-                                </div>
+                                <div>{flight?.arrivalState || "TBD"}</div>
                                 {flight.marketedFlightSegment &&
                                   flight.marketedFlightSegment.length > 0 && (
                                     <>

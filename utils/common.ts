@@ -143,3 +143,54 @@ export function mapStatusCodeToPhase(legStatus: string): ExtendedFlightPhase {
       return "ndpt";
   }
 }
+
+
+export const getStatusDisplay = (statusCode: string, isArrival = false) => {
+  const code = statusCode?.toUpperCase()
+
+  if (isArrival) {
+    // Arrival status mapping
+    switch (code) {
+      case "ERL":
+        return { text: "Early", color: "bg-blue-500/20 text-blue-500" }
+      case "DLY":
+        return { text: "Delayed", color: "bg-amber-500/20 text-amber-500" }
+      case "CNL":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "PND":
+        return { text: "Pending", color: "bg-yellow-500/20 text-yellow-500" }
+      case "DVT":
+        return { text: "Rerouted", color: "bg-purple-500/20 text-purple-500" }
+      case "XST":
+        return { text: "Extra Stop", color: "bg-orange-500/20 text-orange-500" }
+      case "NST":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "LCK":
+        return { text: "Unavailable", color: "bg-gray-500/20 text-gray-500" }
+      case "ONT":
+      default:
+        return { text: "On Time", color: "bg-green-500/20 text-green-500" }
+    }
+  } else {
+    // Departure status mapping
+    switch (code) {
+      case "DLY":
+        return { text: "Delayed", color: "bg-amber-500/20 text-amber-500" }
+      case "CNL":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "PND":
+        return { text: "Pending", color: "bg-yellow-500/20 text-yellow-500" }
+      case "DIV":
+        return { text: "Rerouted", color: "bg-purple-500/20 text-purple-500" }
+      case "XSP":
+        return { text: "Extra Stop", color: "bg-orange-500/20 text-orange-500" }
+      case "NSP":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "LCK":
+        return { text: "Unavailable", color: "bg-gray-500/20 text-gray-500" }
+      case "ONT":
+      default:
+        return { text: "On Time", color: "bg-green-500/20 text-green-500" }
+    }
+  }
+}

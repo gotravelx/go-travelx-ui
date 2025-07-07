@@ -1,29 +1,22 @@
-import type { AirportSearchResponse, FlightData, FlightSubscriptionRequest, SubscriptionDetails, SubscriptionResponse } from "@/types/flight";
-import { contractService } from "./contract-service";
-import { mapStatusCodeToPhase } from "@/utils/common";
+import type {
+  AirportSearchResponse,
+  FlightData,
+  FlightSubscriptionRequest,
+  SubscriptionDetails,
+} from "@/types/flight"
+import { contractService } from "./contract-service"
+import { mapStatusCodeToPhase } from "@/utils/common"
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
-const WALLET_ADDRESS = contractService.getWalletAddress();
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
+const WALLET_ADDRESS = contractService.getWalletAddress()
 
 export const flightService = {
-  // New airport search function
   searchAirportCodes: async (
-    query: string,
-    limit = 10,
-    sortBy = "code",
-    order = "asc",
-    searchType = "begins_with",
   ): Promise<AirportSearchResponse> => {
     try {
-      const params = new URLSearchParams({
-        query,
-        limit: limit.toString(),
-        sortBy,
-        order,
-        searchType,
-      })
+      
 
-      const response = await fetch(`${BASE_URL}/v1/airport-codes/search/airport-codes?${params}`, {
+      const response = await fetch(`${BASE_URL}/v1/airport-codes`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -45,19 +38,18 @@ export const flightService = {
     carrierCode: string,
     flightNumber: string,
     departureStation: string,
+    arrivalStation: string,
     departureDate: Date,
   ): Promise<FlightData> => {
     try {
       console.log(
-        `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} on ${departureDate.toISOString()}`,
+        `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} to ${arrivalStation} on ${departureDate.toISOString()}`,
       )
 
-      console.log(`Using wallet address: ${WALLET_ADDRESS}`)
-
       const response = await fetch(
-        `${BASE_URL}/flights/get-flight-status/${flightNumber}?departureDate=${
+        `${BASE_URL}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
-        }&departure=${departureStation}&walletAddress=${WALLET_ADDRESS}&includeFullData=false`,
+        }&departure=${departureStation}&arrival=${arrivalStation}&includeFullData=false`,
       )
 
       if (!response.ok) {
@@ -67,7 +59,7 @@ export const flightService = {
       const data = await response.json()
       console.log("Flight data from API:", data)
 
-      // Transform the new API response to match FlightData interface
+      // Transform the API response to match FlightData interface
       if (data.success && data.flightInfo) {
         const flightInfo = data.flightInfo
 
@@ -82,8 +74,8 @@ export const flightService = {
           departureAirport: flightInfo.departureAirport?.code || "",
           arrivalCity: flightInfo.arrivalAirport?.city || "",
           departureCity: flightInfo.departureAirport?.city || "",
-          departureGate: flightInfo.departureGate || "",
-          arrivalGate: flightInfo.arrivalGate || "",
+          departureGate: flightInfo.departureAirport?.departureGate || "",
+          arrivalGate: flightInfo.arrivalAirport?.arrivalGate || "",
           statusCode: mapStatusCodeToPhase(flightInfo.status?.legStatus || flightInfo.statusCode),
           flightStatus: flightInfo.flightStatus || flightInfo.status?.current || "",
           equipmentModel: flightInfo.equipmentModel || flightInfo.aircraft?.model || "",
@@ -151,31 +143,44 @@ export const flightService = {
   },
 
   subscribeToFlight: async (data: FlightSubscriptionRequest): Promise<any> => {
-    console.log("Subscribing to flight with data:", data)
+    try {
+      console.log("Subscribing to flight with data:", data)
 
-    const response = await fetch(`${BASE_URL}/v1/flights/subscribe`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
+      const requestBody = {
+        flightNumber: data.flightNumber,
+        departureDate: data.scheduledDepartureDate,
+        carrierCode: data.carrierCode,
+        departureAirport: data.departureAirport,
+        arrivalAirport: data.arrivalAirport,
+      }
 
-    const result = await response.json()
-    console.log("Subscription response:", result)
+      console.log("Request body:", requestBody)
 
-    if (!response.ok) {
-      throw new Error(result.message || `HTTP error! status: ${response.status}`)
+      const response = await fetch(`${BASE_URL}/v1/subscription/add-flight-subscription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      })
+
+      const result = await response.json()
+      console.log("Subscription response:", result)
+
+      if (!response.ok) {
+        throw new Error(result.message || `HTTP error! status: ${response.status}`)
+      }
+
+      return result
+    } catch (error) {
+      console.error("Error subscribing to flight:", error)
+      throw error
     }
-
-    return result
   },
 
   getSubscribedFlights: async (): Promise<FlightData[]> => {
     try {
-      console.log(`Fetching subscribed flights for wallet: ${WALLET_ADDRESS}`)
-
-      const response = await fetch(`${BASE_URL}/subscription/get-flight-subscriptions`, {
+      const response = await fetch(`${BASE_URL}/flights/get-all-flights`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -190,55 +195,52 @@ export const flightService = {
       const data = await response.json()
       console.log("Subscribed flights data:", data)
 
-      // Transform the API response to match our FlightData interface
-      return data.map((flight: any) => {
-        // Handle both old format and new format
-        const flightInfo = flight.flightInfo || flight
+      // Check if the response has the expected structure
+      if (!data.success || !data.flights || !Array.isArray(data.flights)) {
+        console.error("Invalid API response structure:", data)
+        return []
+      }
 
+      // Transform the API response to match our FlightData interface
+      return data.flights.map((flight: any) => {
         return {
-          flightNumber: (flightInfo.flightNumber || flight.flightNumber || "").toString(),
-          scheduledDepartureDate: flightInfo.departureDate || flight.scheduledDepartureDate || "",
-          carrierCode: flightInfo.airline?.code || flight.carrierCode || "",
-          operatingAirline: flightInfo.airline?.name || flight.operatingAirline || "",
-          estimatedArrivalUTC: flightInfo.times?.estimatedArrival || flight.estimatedArrivalUTC || "",
-          estimatedDepartureUTC: flightInfo.times?.estimatedDeparture || flight.estimatedDepartureUTC || "",
-          arrivalAirport: flightInfo.arrivalAirport?.code || flight.arrivalAirport || "",
-          departureAirport: flightInfo.departureAirport?.code || flight.departureAirport || "",
-          arrivalCity: flightInfo.arrivalAirport?.city || flight.arrivalCity || "",
-          departureCity: flightInfo.departureAirport?.city || flight.departureCity || "",
-          departureGate: flightInfo.departureGate || flight.departureGate || "",
-          arrivalGate: flightInfo.arrivalGate || flight.arrivalGate || "",
-          statusCode: mapStatusCodeToPhase(flightInfo.status?.legStatus || flightInfo.statusCode || flight.statusCode),
-          flightStatus:
-            flightInfo.flightStatus ||
-            flightInfo.status?.current ||
-            flight.flightStatus ||
-            flight.currentFlightStatus ||
-            "",
-          equipmentModel: flightInfo.equipmentModel || flightInfo.aircraft?.model || flight.equipmentModel || "",
-          departureTerminal: flightInfo.departureTerminal || flight.departureTerminal || "",
-          arrivalTerminal: flightInfo.arrivalTerminal || flight.arrivalTerminal || "",
-          actualDepartureUTC: flightInfo.times?.actualDeparture || flight.actualDepartureUTC || "",
-          actualArrivalUTC: flightInfo.times?.actualArrival || flight.actualArrivalUTC || "",
-          baggageClaim: flightInfo.baggageClaim || flight.baggageClaim || "",
-          departureDelayMinutes: flightInfo.delays?.estimatedDepartureDelayMinutes || flight.departureDelayMinutes || 0,
-          arrivalDelayMinutes: flightInfo.delays?.arrivalDelayMinutes || flight.arrivalDelayMinutes || 0,
-          boardingTime: flightInfo.times?.boardTime || flight.boardingTime || "",
-          isCanceled: flightInfo.isCanceled || flight.isCanceled || false,
-          scheduledArrivalUTCDateTime: flightInfo.times?.scheduledArrival || flight.scheduledArrivalUTCDateTime || "",
-          scheduledDepartureUTCDateTime:
-            flightInfo.times?.scheduledDeparture || flight.scheduledDepartureUTCDateTime || "",
-          outTimeUTC: flightInfo.times?.outTime || flight.outTimeUTC || "",
-          offTimeUTC: flightInfo.times?.offTime || flight.offTimeUTC || "",
-          onTimeUTC: flightInfo.times?.onTime || flight.onTimeUTC || "",
-          inTimeUTC: flightInfo.times?.inTime || flight.inTimeUTC || "",
-          departureState: flightInfo.departureAirport?.state || flight.departureState || "",
-          arrivalState: flightInfo.arrivalAirport?.state || flight.arrivalState || "",
-          currentFlightStatus: flightInfo.status?.current || flight.currentFlightStatus || "",
+          flightNumber: (flight.flightNumber || "").toString(),
+          scheduledDepartureDate: flight.times?.scheduledDeparture ? flight.times.scheduledDeparture.split("T")[0] : "",
+          carrierCode: flight.airline?.code || "UA", // Default to UA if not provided
+          operatingAirline: flight.airline?.name || "",
+          estimatedArrivalUTC: flight.times?.estimatedArrival || "",
+          estimatedDepartureUTC: flight.times?.estimatedDeparture || "",
+          arrivalAirport: flight.arrivalAirport?.code || "",
+          departureAirport: flight.departureAirport?.code || "",
+          arrivalCity: flight.arrivalAirport?.city || "",
+          departureCity: flight.departureAirport?.city || "",
+          departureGate: flight.departureAirport?.departureGate || "",
+          arrivalGate: flight.arrivalAirport?.arrivalGate || "",
+          statusCode: mapStatusCodeToPhase(flight.status?.legStatus || "NDPT"),
+          flightStatus: flight.status?.current || "",
+          equipmentModel: flight.aircraft?.model || flight.equipmentModel || "",
+          departureTerminal: flight.departureAirport?.departureTerminal || "",
+          arrivalTerminal: flight.arrivalAirport?.arrivalTerminal || "",
+          actualDepartureUTC: flight.times?.actualDeparture || "",
+          actualArrivalUTC: flight.times?.actualArrival || "",
+          baggageClaim: flight.baggageClaim || "",
+          departureDelayMinutes: flight.delays?.estimatedDepartureDelayMinutes || 0,
+          arrivalDelayMinutes: flight.delays?.estimatedArrivalDelayMinutes || 0,
+          boardingTime: flight.times?.boardTime || "",
+          isCanceled: flight.isCanceled || false,
+          scheduledArrivalUTCDateTime: flight.times?.scheduledArrival || "",
+          scheduledDepartureUTCDateTime: flight.times?.scheduledDeparture || "",
+          outTimeUTC: flight.times?.outTime || "",
+          offTimeUTC: flight.times?.offTime || "",
+          onTimeUTC: flight.times?.onTime || "",
+          inTimeUTC: flight.times?.inTime || "",
+          departureState: flight.status?.departureStatus || "",
+          arrivalState: flight.status?.arrivalStatus || "",
+          currentFlightStatus: flight.status?.current || "",
           isSubscribed: true,
           blockchainTxHash: flight.blockchainTxHash || "",
-          marketedFlightSegment: flightInfo.marketedFlightSegment || flight.marketedFlightSegment || [],
-          MarketedFlightSegment: flightInfo.marketedFlightSegment || flight.MarketedFlightSegment || [],
+          marketedFlightSegment: flight.marketedFlightSegment || [],
+          MarketedFlightSegment: flight.marketedFlightSegment || [],
         }
       })
     } catch (error) {
@@ -306,30 +308,4 @@ export const flightService = {
       return false
     }
   },
-  // New function to get all flight subscriptions
-  getFlightSubscriptions: async (): Promise<SubscriptionResponse> => {
-    try {
-      console.log(`Fetching all flight subscriptions for wallet: ${WALLET_ADDRESS}`)
-
-      const response = await fetch(`${BASE_URL}/v1/subscription/get-flight-subscriptions`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
-      }
-
-      const data: SubscriptionResponse = await response.json()
-      console.log("All flight subscriptions:", data)
-      return data
-    } catch (error) {
-      console.error("Error fetching all flight subscriptions:", error)
-      throw error
-    }
-  },
 }
-
-

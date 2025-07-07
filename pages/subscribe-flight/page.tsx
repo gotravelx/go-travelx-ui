@@ -1,24 +1,16 @@
-"use client";
+"use client"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { format } from "date-fns";
-import { AlertCircle, CalendarIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { format } from "date-fns"
+import { AlertCircle, CalendarIcon } from "lucide-react"
+import { memo, useState, useEffect, useRef } from "react"
+import { flightService } from "@/services/api"
+import type { AirportCode } from "@/types/flight"
 
 const SubscribeFlight = memo(
   ({
@@ -39,73 +31,163 @@ const SubscribeFlight = memo(
     onCarrierChange,
     setSearchError,
   }: {
-    flightNumber: string;
-    onFlightNumberChange: (value: string) => void;
-    onSearch: () => void;
-    isLoading: boolean;
-    searchError: string;
-    selectedDate: Date | undefined;
-    onDateChange: (value: Date) => void;
-    carrier: string;
-    departureStation: string;
-    setDepartureStation: (value: string) => void;
-    arrivalStation: string;
-    setArrivalStation: (value: string) => void;
-    onDepartureStationChange: (value: string) => void;
-    onArrivalStationChange: (value: string) => void;
-    onCarrierChange: (value: string) => void;
-    setSearchError: (value: string) => void;
+    flightNumber: string
+    onFlightNumberChange: (value: string) => void
+    onSearch: () => void
+    isLoading: boolean
+    searchError: string
+    selectedDate: Date | undefined
+    onDateChange: (value: Date) => void
+    carrier: string
+    departureStation: string
+    setDepartureStation: (value: string) => void
+    arrivalStation: string
+    setArrivalStation: (value: string) => void
+    onDepartureStationChange: (value: string) => void
+    onArrivalStationChange: (value: string) => void
+    onCarrierChange: (value: string) => void
+    setSearchError: (value: string) => void
   }) => {
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+
+    // Airport suggestions state
+    const [departureAirports, setDepartureAirports] = useState<AirportCode[]>([])
+    const [arrivalAirports, setArrivalAirports] = useState<AirportCode[]>([])
+    const [showDepartureSuggestions, setShowDepartureSuggestions] = useState(false)
+    const [showArrivalSuggestions, setShowArrivalSuggestions] = useState(false)
+    const [isLoadingAirports, setIsLoadingAirports] = useState(false)
+
+    // Refs for dropdown positioning
+    const departureInputRef = useRef<HTMLInputElement>(null)
+    const arrivalInputRef = useRef<HTMLInputElement>(null)
+    const departureSuggestionsRef = useRef<HTMLDivElement>(null)
+    const arrivalSuggestionsRef = useRef<HTMLDivElement>(null)
 
     const handleFlightNumberChange = (value: string) => {
-      const numericValue = value.replace(/\D/g, "").slice(0, 4);
-      onFlightNumberChange(numericValue);
-    };
+      const numericValue = value.replace(/\D/g, "").slice(0, 4)
+      onFlightNumberChange(numericValue)
+    }
 
-    const handleDepartureStationChange = (value: string) => {
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setDepartureStation(formattedValue);
-      onDepartureStationChange(formattedValue);
-    };
+    const fetchAirportSuggestions = async (query: string) => {
+      if (query.length < 3) return []
 
-    const handleArrivalStationChange = (value: string) => {
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setArrivalStation(formattedValue);
-      onArrivalStationChange(formattedValue);
-    };
+      try {
+        setIsLoadingAirports(true)
+        const response = await flightService.searchAirportCodes()
+
+        if (response.success && response.data) {
+          // Filter airports based on the query
+          const filtered = response.data.filter((airport) =>
+            airport.airPortCode.toLowerCase().includes(query.toLowerCase()),
+          )
+          return filtered.slice(0, 10) // Limit to 10 suggestions
+        }
+        return []
+      } catch (error) {
+        console.error("Error fetching airport suggestions:", error)
+        return []
+      } finally {
+        setIsLoadingAirports(false)
+      }
+    }
+
+    const handleDepartureStationChange = async (value: string) => {
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setDepartureStation(formattedValue)
+      onDepartureStationChange(formattedValue)
+
+      if (formattedValue.length >= 3) {
+        const suggestions = await fetchAirportSuggestions(formattedValue)
+        setDepartureAirports(suggestions)
+        setShowDepartureSuggestions(true)
+      } else {
+        setShowDepartureSuggestions(false)
+        setDepartureAirports([])
+      }
+    }
+
+    const handleArrivalStationChange = async (value: string) => {
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setArrivalStation(formattedValue)
+      onArrivalStationChange(formattedValue)
+
+      if (formattedValue.length >= 3) {
+        const suggestions = await fetchAirportSuggestions(formattedValue)
+        setArrivalAirports(suggestions)
+        setShowArrivalSuggestions(true)
+      } else {
+        setShowArrivalSuggestions(false)
+        setArrivalAirports([])
+      }
+    }
+
+    const selectDepartureAirport = (airportCode: string) => {
+      setDepartureStation(airportCode)
+      onDepartureStationChange(airportCode)
+      setShowDepartureSuggestions(false)
+      setDepartureAirports([])
+    }
+
+    const selectArrivalAirport = (airportCode: string) => {
+      setArrivalStation(airportCode)
+      onArrivalStationChange(airportCode)
+      setShowArrivalSuggestions(false)
+      setArrivalAirports([])
+    }
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          departureSuggestionsRef.current &&
+          !departureSuggestionsRef.current.contains(event.target as Node) &&
+          !departureInputRef.current?.contains(event.target as Node)
+        ) {
+          setShowDepartureSuggestions(false)
+        }
+
+        if (
+          arrivalSuggestionsRef.current &&
+          !arrivalSuggestionsRef.current.contains(event.target as Node) &&
+          !arrivalInputRef.current?.contains(event.target as Node)
+        ) {
+          setShowArrivalSuggestions(false)
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside)
+      }
+    }, [])
 
     const handleSearch = () => {
-      let hasError = false;
-      let errorMessage = "";
+      let hasError = false
+      let errorMessage = ""
 
-      if (
-        !flightNumber ||
-        flightNumber.length !== 4 ||
-        !/^\d+$/.test(flightNumber)
-      ) {
-        errorMessage = "Flight number must be 4 digits";
-        hasError = true;
+      if (!flightNumber || flightNumber.length !== 4 || !/^\d+$/.test(flightNumber)) {
+        errorMessage = "Flight number must be 4 digits"
+        hasError = true
       }
 
       if (!departureStation || departureStation.length !== 3) {
-        errorMessage = "Departure station must be 3 characters";
-        hasError = true;
+        errorMessage = "Departure station must be 3 characters"
+        hasError = true
       }
 
       if (hasError) {
         if (typeof setSearchError === "function") {
-          setSearchError(errorMessage);
+          setSearchError(errorMessage)
         }
-        return;
+        return
       }
 
       if (searchError && typeof setSearchError === "function") {
-        setSearchError("");
+        setSearchError("")
       }
 
-      onSearch();
-    };
+      onSearch()
+    }
 
     return (
       <div className="w-full mx-auto min-h-[100vh]">
@@ -117,10 +199,7 @@ const SubscribeFlight = memo(
         `}</style>
         <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="carrier-select"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="carrier-select" className="text-sm font-medium mb-1">
               Carrier
             </label>
             <Select value={carrier} onValueChange={onCarrierChange}>
@@ -152,40 +231,94 @@ const SubscribeFlight = memo(
             <div className="pt-4">and/or </div>
           </div>
 
-          {/* Departure Station */}
-          <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="departure-station"
-              className="text-sm font-medium mb-1"
-            >
+          {/* Departure Station with Autocomplete */}
+          <div className="flex flex-col w-full md:w-auto relative">
+            <label htmlFor="departure-station" className="text-sm font-medium mb-1">
               From
             </label>
             <Input
+              ref={departureInputRef}
               id="departure-station"
               placeholder="Enter Station Code"
               value={departureStation}
               onChange={(e) => handleDepartureStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
+              onFocus={() => {
+                if (departureStation.length >= 3 && departureAirports.length > 0) {
+                  setShowDepartureSuggestions(true)
+                }
+              }}
             />
+
+            {/* Departure Suggestions Dropdown */}
+            {showDepartureSuggestions && (
+              <div
+                ref={departureSuggestionsRef}
+                className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto"
+              >
+                {isLoadingAirports ? (
+                  <div className="p-2 text-sm text-muted-foreground">Loading...</div>
+                ) : departureAirports.length > 0 ? (
+                  departureAirports.map((airport) => (
+                    <div
+                      key={airport.airPortCode}
+                      className="p-2 hover:bg-accent cursor-pointer text-sm"
+                      onClick={() => selectDepartureAirport(airport.airPortCode)}
+                    >
+                      {airport.airPortCode}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-muted-foreground">No airports found</div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Arrival Station */}
-          <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="arrival-station"
-              className="text-sm font-medium mb-1"
-            >
+          {/* Arrival Station with Autocomplete */}
+          <div className="flex flex-col w-full md:w-auto relative">
+            <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
               Arr Stn
             </label>
             <Input
+              ref={arrivalInputRef}
               id="arrival-station"
               placeholder="Enter Station Code"
               value={arrivalStation}
               onChange={(e) => handleArrivalStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
+              onFocus={() => {
+                if (arrivalStation.length >= 3 && arrivalAirports.length > 0) {
+                  setShowArrivalSuggestions(true)
+                }
+              }}
             />
+
+            {/* Arrival Suggestions Dropdown */}
+            {showArrivalSuggestions && (
+              <div
+                ref={arrivalSuggestionsRef}
+                className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto"
+              >
+                {isLoadingAirports ? (
+                  <div className="p-2 text-sm text-muted-foreground">Loading...</div>
+                ) : arrivalAirports.length > 0 ? (
+                  arrivalAirports.map((airport) => (
+                    <div
+                      key={airport.airPortCode}
+                      className="p-2 hover:bg-accent cursor-pointer text-sm"
+                      onClick={() => selectArrivalAirport(airport.airPortCode)}
+                    >
+                      {airport.airPortCode}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-muted-foreground">No airports found</div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Date Picker */}
@@ -198,9 +331,7 @@ const SubscribeFlight = memo(
                   className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                 >
                   <CalendarIcon className="h-4 w-4 mr-2" />
-                  {selectedDate
-                    ? format(selectedDate, "PPP")
-                    : format(new Date(), "PPP")}
+                  {selectedDate ? format(selectedDate, "PPP") : format(new Date(), "PPP")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0 w-auto" align="start">
@@ -210,15 +341,11 @@ const SubscribeFlight = memo(
                   onSelect={(selectedDate) => {
                     if (selectedDate) {
                       const normalizedDate = new Date(
-                        Date.UTC(
-                          selectedDate.getFullYear(),
-                          selectedDate.getMonth(),
-                          selectedDate.getDate()
-                        )
-                      );
-                      onDateChange(normalizedDate);
+                        Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()),
+                      )
+                      onDateChange(normalizedDate)
                     }
-                    setIsCalendarOpen(false);
+                    setIsCalendarOpen(false)
                   }}
                   disabled={(d) => d > new Date() || d < new Date("2023-01-01")}
                   initialFocus
@@ -229,11 +356,7 @@ const SubscribeFlight = memo(
 
           {/* Search Button */}
           <div className="flex justify-end mt-auto">
-            <Button
-              onClick={handleSearch}
-              className="h-10 w-full gradient-border md:w-auto"
-              disabled={isLoading}
-            >
+            <Button onClick={handleSearch} className="h-10 w-full gradient-border md:w-auto" disabled={isLoading}>
               {isLoading ? "Searching..." : "Search"}
             </Button>
           </div>
@@ -246,10 +369,10 @@ const SubscribeFlight = memo(
           </Alert>
         )}
       </div>
-    );
-  }
-);
+    )
+  },
+)
 
-SubscribeFlight.displayName = "SubscribeFlight";
+SubscribeFlight.displayName = "SubscribeFlight"
 
-export default SubscribeFlight;
+export default SubscribeFlight

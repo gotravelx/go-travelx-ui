@@ -239,7 +239,7 @@ export interface FlightSubscriptionRequest {
   scheduledDepartureDate: string;
   carrierCode: string;
   departureAirport: string;
-  walletAddress?: string;
+  arrivalAirport: string;
 }
 
 export interface SubscriptionResponse {
