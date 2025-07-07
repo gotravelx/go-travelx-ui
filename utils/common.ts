@@ -1,11 +1,5 @@
+import { ExtendedFlightPhase } from "@/components/flight-status-view";
 import { FlightPhase } from "@/types/flight";
-
-/**
- * Converts UTC time to local time based on timezone
- * @param utcTimeString - UTC time string
- * @param timezone - Timezone to convert to
- * @returns string - Formatted local time
- */
 
 export function convertUTCToLocal(utcTimeString: string, timezone = "America/New_York"): string {
   try {
@@ -56,6 +50,7 @@ export const getStatusBadgeColor = (phase: FlightPhase) => {
     NST: "Cancelled",
     LCK: "Unavailable",
     ONT: "On Time",
+    OT:"On Time",
   };
 
   // If we have a mapping, use it
@@ -66,6 +61,16 @@ export const getStatusBadgeColor = (phase: FlightPhase) => {
   // For other values, return as is
   return code || "";
 };
+
+export function convertTo12Hour(time24: string | undefined) {
+  if (!time24) return "TBD";
+  const [hours, minutes, seconds] = time24.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const hours12 = hours % 12 || 12; // Convert 0 to 12 for midnight
+  return `${hours12.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")} ${period}`;
+}
 
 
 export const getDepartureStateColor = (state: string): string => {
@@ -114,3 +119,78 @@ export const getDepartureStateColor = (state: string): string => {
   return "bg-gray-100 text-gray-800";
 };
 
+export function mapStatusCodeToPhase(legStatus: string): ExtendedFlightPhase {
+  switch (legStatus) {
+    case "NDPT":
+    case "Scheduled":
+      return "ndpt";
+    case "OUT":
+    case "Departed":
+      return "out";
+    case "OFF":
+    case "InFlight":
+      return "off";
+    case "ON":
+    case "Landing":
+      return "on";
+    case "IN":
+    case "Arrived":
+      return "in";
+    case "CNCL":
+    case "Cancelled":
+      return "cncl";
+    default:
+      return "ndpt";
+  }
+}
+
+
+export const getStatusDisplay = (statusCode: string, isArrival = false) => {
+  const code = statusCode?.toUpperCase()
+
+  if (isArrival) {
+    // Arrival status mapping
+    switch (code) {
+      case "ERL":
+        return { text: "Early", color: "bg-blue-500/20 text-blue-500" }
+      case "DLY":
+        return { text: "Delayed", color: "bg-amber-500/20 text-amber-500" }
+      case "CNL":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "PND":
+        return { text: "Pending", color: "bg-yellow-500/20 text-yellow-500" }
+      case "DVT":
+        return { text: "Rerouted", color: "bg-purple-500/20 text-purple-500" }
+      case "XST":
+        return { text: "Extra Stop", color: "bg-orange-500/20 text-orange-500" }
+      case "NST":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "LCK":
+        return { text: "Unavailable", color: "bg-gray-500/20 text-gray-500" }
+      case "ONT":
+      default:
+        return { text: "On Time", color: "bg-green-500/20 text-green-500" }
+    }
+  } else {
+    // Departure status mapping
+    switch (code) {
+      case "DLY":
+        return { text: "Delayed", color: "bg-amber-500/20 text-amber-500" }
+      case "CNL":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "PND":
+        return { text: "Pending", color: "bg-yellow-500/20 text-yellow-500" }
+      case "DIV":
+        return { text: "Rerouted", color: "bg-purple-500/20 text-purple-500" }
+      case "XSP":
+        return { text: "Extra Stop", color: "bg-orange-500/20 text-orange-500" }
+      case "NSP":
+        return { text: "Cancelled", color: "bg-red-500/20 text-red-500" }
+      case "LCK":
+        return { text: "Unavailable", color: "bg-gray-500/20 text-gray-500" }
+      case "ONT":
+      default:
+        return { text: "On Time", color: "bg-green-500/20 text-green-500" }
+    }
+  }
+}

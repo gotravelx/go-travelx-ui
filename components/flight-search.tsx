@@ -67,22 +67,19 @@ export default function FlightSearch() {
     (value: string) => {
       setActiveTab(value);
 
-      // Reset filters for each tab independently
       if (value === "view") {
-        // Don't reset view tab filters when coming from other tabs
         if (activeTab !== "view") {
           setFlightNumber("");
           setSearchError("");
-          setSelectedDate(new Date()); // Set to current date instead of undefined
+          setSelectedDate(new Date());
           setCarrier("UA");
           setDepartureStation("");
           setViewFlightData(null);
         }
       } else if (value === "subscribe-flight") {
-        // Reset subscribe tab filters
         setFlightNumber("");
         setSearchError("");
-        setSelectedDate(new Date()); // Set to current date instead of undefined
+        setSelectedDate(new Date());
         setCarrier("UA");
         setDepartureStation("");
         setArrivalStation("");
@@ -108,11 +105,6 @@ export default function FlightSearch() {
       return;
     }
 
-    if (!departureStation) {
-      setSearchError("Please enter a departure station");
-      return;
-    }
-
     if (!selectedDate) {
       setSearchError("Please select a departure date");
       return;
@@ -124,6 +116,7 @@ export default function FlightSearch() {
         carrier,
         flightNumber,
         departureStation,
+        arrivalStation,
         selectedDate // passing the Date object directly
       );
       setSubscribeFlightData(data);
@@ -144,11 +137,8 @@ export default function FlightSearch() {
     try {
       setIsLoading(true);
 
-      // Instead of calling the API directly, we'll use our getSubscribedFlights method
-      // and then filter the results based on the search criteria
       const subscribedFlights = await flightService.getSubscribedFlights();
 
-      // Filter the flights based on the search criteria
       let filteredFlights = subscribedFlights;
 
       if (flightNumber) {
@@ -186,20 +176,6 @@ export default function FlightSearch() {
       setIsLoading(false);
     }
   }, [carrier, flightNumber, selectedDate]);
-
-  const handleRefresh = useCallback(async () => {
-    if (activeTab === "view") {
-      // Refresh subscribed flights
-      try {
-        const flights = await flightService.getSubscribedFlights();
-        setSubscribedFlights(flights);
-      } catch (error) {
-        console.error("Error refreshing subscribed flights:", error);
-      }
-    } else if (subscribeFlightData) {
-      await handleSearch();
-    }
-  }, [activeTab, subscribeFlightData, handleSearch]);
 
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value);
@@ -264,7 +240,7 @@ export default function FlightSearch() {
           {/* subscribe flight ui start --------------------  */}
           <TabsContent value="subscribe-flight">
             <motion.div
-              className="mx-auto"
+              className="mx-auto min-h-screen"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -286,23 +262,24 @@ export default function FlightSearch() {
                     arrivalStation={arrivalStation}
                     setArrivalStation={setArrivalStation}
                     onDepartureStationChange={handleDepartureStationChange}
-                    onArrivalStationChange={handleArrivalStationChange}
+                    onArrivalStationChange={handleDepartureStationChang}
                     onCarrierChange={handleCarrierChange}
                     setSearchError={setSearchError}
                   />
-
-                  {subscribeFlightData && (
-                    <motion.div
-                      className="mt-6 space-y-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div className="w-full flex items-start justify-start">
-                        <SubscribeFlightCard flightData={subscribeFlightData} />
-                      </div>
-                    </motion.div>
-                  )}
+                    {subscribeFlightData && (
+                      <motion.div
+                        className="mt-6 space-y-6"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <div className="w-full flex items-start justify-start ">
+                          <SubscribeFlightCard
+                            flightData={subscribeFlightData}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
                 </CardContent>
               </Card>
             </motion.div>

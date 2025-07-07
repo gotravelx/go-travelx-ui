@@ -1,290 +1,397 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { type FlightData, flightService } from "@/services/api";
-import { Toaster } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { format } from "date-fns"
+import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react"
+import { memo, useCallback, useEffect, useState } from "react"
+import ViewFlightDatTable from "@/components/view-flight-data-table"
+import { flightService } from "@/services/api"
+import { toast } from "sonner"
+import type { FlightData } from "@/types/flight"
 
-import SubscribeFlight from "./pages/subscribe-flight/page";
+// Create a client-side only component
+const ViewFlightClient = memo(
+  ({
+    flightNumber,
+    onFlightNumberChange,
+    onSearch,
+    isLoading,
+    searchError,
+    selectedDate,
+    onDateChange,
+    carrier,
+    onCarrierChange,
+  }: {
+    flightNumber: string
+    onFlightNumberChange: (value: string) => void
+    onSearch: () => void
+    isLoading: boolean
+    searchError: string
+    selectedDate: Date | undefined
+    onDateChange: (value: Date | undefined) => void
+    carrier: string
+    onCarrierChange: (value: string) => void
+  }) => {
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import dynamic from "next/dynamic";
-import UnsubscribeFlight from "./pages/unsubscribe-flight/pages";
-import { Footer } from "@/components/footer";
-import SubscribeFlightCard from "./components/subscribe-card";
-import { format } from "date-fns";
+    // Local filter state for View Flight tab
+    const [viewDepartureStation, setViewDepartureStation] = useState("")
+    const [viewArrivalStation, setViewArrivalStation] = useState("")
 
-// Replace with this import that properly handles the component type
-const ViewFlight = dynamic(() => import("./components/view-flight"), {
-  ssr: false,
-});
+    const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>([])
+    const [filteredFlights, setFilteredFlights] = useState<FlightData[]>([])
+    const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(false)
+    const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
+    const [localSearchError, setLocalSearchError] = useState("")
 
-export default function FlightSearch() {
-  const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+    // Add pagination state
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(5)
+    const [totalItems, setTotalItems] = useState(0)
 
-  const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
-  const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>([]);
-  const [subscribeFlightData, setSubscribeFlightData] =
-    useState<FlightData | null>(null);
+    useEffect(() => {
+      if (typeof window === "undefined") return // SSR fallback
 
-  const [searchError, setSearchError] = useState("");
-  const [carrier, setCarrier] = useState("UA");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [departureStation, setDepartureStation] = useState("");
-  const [arrivalStation, setArrivalStation] = useState("");
-  const [activeTab, setActiveTab] = useState("view");
-
-  const handleTabChange = useCallback(
-    (value: string) => {
-      setActiveTab(value);
-
-      if (value === "view") {
-        if (activeTab !== "view") {
-          setFlightNumber("");
-          setSearchError("");
-          setSelectedDate(undefined);
-          setCarrier("UA");
-          setDepartureStation("");
-          setViewFlightData(null);
+      const fetchSubscribedFlights = async () => {
+        setIsLoadingSubscriptions(true)
+        try {
+          const flights = await flightService.getSubscribedFlights()
+          setSubscribedFlights(flights)
+          setFilteredFlights(flights)
+          setTotalItems(flights.length)
+          setHasInitiallyLoaded(true)
+        } catch (error) {
+          console.error("Error fetching subscribed flights:", error)
+          toast.error("Failed to fetch subscribed flights")
+        } finally {
+          setIsLoadingSubscriptions(false)
         }
-      } else if (value === "subscribe-flight") {
-        setFlightNumber("");
-        setSearchError("");
-        setSelectedDate(undefined);
-        setCarrier("UA");
-        setDepartureStation("");
-        setArrivalStation("");
-        setSubscribeFlightData(null);
       }
-    },
-    [activeTab]
-  );
 
-  const handleDepartureStationChange = (value: string) => {
-    setDepartureStation(value);
-  };
+      fetchSubscribedFlights()
+    }, [])
 
-  const handleArrivalStationChange = (value: string) => {
-    setArrivalStation(value);
-  };
+    // Handle pagination changes
+    const handlePageChange = useCallback((page: number) => {
+      setCurrentPage(page)
+    }, [])
 
-  const handleSearch = useCallback(async () => {
-    if (!flightNumber) {
-      setSearchError("Please enter a flight number");
-      return;
-    }
+    const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
+      setItemsPerPage(itemsPerPage)
+      setCurrentPage(1) // Reset to first page when changing items per page
+    }, [])
 
-    if (!departureStation) {
-      setSearchError("Please enter a departure station");
-      return;
-    }
+    // Handle flight number validation
+    const handleFlightNumberChange = useCallback(
+      (value: string) => {
+        // Only allow numeric input and limit to 4 digits
+        const numericValue = value.replace(/\D/g, "").slice(0, 4)
+        onFlightNumberChange(numericValue)
+      },
+      [onFlightNumberChange],
+    )
 
-    if (!selectedDate) {
-      setSearchError("Please select a departure date");
-      return;
-    }
+    // Handle departure station validation
+    const handleDepartureStationChange = useCallback((value: string) => {
+      // Convert to uppercase and limit to 3 characters
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setViewDepartureStation(formattedValue)
+    }, [])
 
-    try {
-      const data = await flightService.searchFlight(
-        carrier,
-        flightNumber,
-        departureStation,
-        selectedDate
-      );
-      setSubscribeFlightData(data);
-      setSearchError("");
-    } catch (error) {
-      setSearchError("Error fetching flight data");
-    }
-  }, [carrier, flightNumber, departureStation, selectedDate]);
+    // Handle arrival station validation
+    const handleArrivalStationChange = useCallback((value: string) => {
+      // Convert to uppercase and limit to 3 characters
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setViewArrivalStation(formattedValue)
+    }, [])
 
-  const handleView = useCallback(async () => {
-    if (!flightNumber) {
-      setSearchError("Please enter a flight number");
-      return;
-    }
+    // Reset all filters
+    const resetFilters = useCallback(() => {
+      setViewDepartureStation("")
+      setViewArrivalStation("")
+      onFlightNumberChange("")
+      onCarrierChange("UA")
+      onDateChange(undefined) // Set to undefined instead of new Date()
 
-    try {
-      setIsLoading(true);
-      const subscribedFlights = await flightService.getSubscribedFlights();
-      let filteredFlights = subscribedFlights;
+      // Reset to original subscribed flights
+      setFilteredFlights(subscribedFlights)
+      setTotalItems(subscribedFlights.length)
+      setLocalSearchError("")
+    }, [onFlightNumberChange, onCarrierChange, onDateChange, subscribedFlights, setLocalSearchError])
 
+    // Apply filters to subscribed flights
+    const applyFilters = useCallback(() => {
+      if (subscribedFlights.length === 0) return
+
+      // Validate inputs before filtering
+      let hasError = false
+      let errorMessage = ""
+
+      if (flightNumber && (flightNumber.length !== 4 || !/^\d+$/.test(flightNumber))) {
+        errorMessage = "Flight number must be 4 digits"
+        hasError = true
+      }
+
+      if (viewDepartureStation && viewDepartureStation.length !== 3) {
+        errorMessage = "Departure station must be 3 characters"
+        hasError = true
+      }
+
+      if (viewArrivalStation && viewArrivalStation.length !== 3) {
+        errorMessage = "Arrival station must be 3 characters"
+        hasError = true
+      }
+
+      if (hasError) {
+        setLocalSearchError(errorMessage)
+        return
+      }
+
+      setLocalSearchError("")
+
+      let filtered = [...subscribedFlights]
+
+      // Filter by flight number if provided
       if (flightNumber) {
-        filteredFlights = filteredFlights.filter((flight) =>
-          flight.flightNumber.toString().includes(flightNumber)
-        );
+        filtered = filtered.filter((flight) => flight.flightNumber.toString().includes(flightNumber))
       }
 
+      // Filter by carrier if provided
       if (carrier) {
-        filteredFlights = filteredFlights.filter(
-          (flight) => flight.carrierCode === carrier
-        );
+        filtered = filtered.filter((flight) => flight.carrierCode === carrier)
       }
 
+      // Filter by departure station if provided
+      if (viewDepartureStation) {
+        filtered = filtered.filter((flight) => flight.departureAirport === viewDepartureStation)
+      }
+
+      // Filter by arrival station if provided
+      if (viewArrivalStation) {
+        filtered = filtered.filter((flight) => flight.arrivalAirport === viewArrivalStation)
+      }
+
+      // Filter by date if selected (only if a date is actually selected)
       if (selectedDate) {
-        const dateString = selectedDate
-          ? format(selectedDate, "yyyy-MM-dd")
-          : undefined;
-        filteredFlights = filteredFlights.filter(
-          (flight) => flight.scheduledDepartureDate === dateString
-        );
+        const dateString = format(selectedDate, "yyyy-MM-dd")
+        filtered = filtered.filter((flight) => flight.scheduledDepartureDate === dateString)
       }
 
-      setViewFlightData(filteredFlights.length > 0 ? filteredFlights[0] : null);
-      setSearchError("");
+      setFilteredFlights(filtered)
+      setTotalItems(filtered.length)
+      setCurrentPage(1) // Reset to first page after filtering
 
-      if (filteredFlights.length === 0) {
-        setSearchError("No matching flights found");
+      if (filtered.length === 0) {
+        toast.info("No flights match your search criteria")
       }
-    } catch (error) {
-      console.error("Error fetching flight details:", error);
-      setSearchError("Error fetching flight details");
-      setViewFlightData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [carrier, flightNumber, selectedDate]);
+    }, [
+      subscribedFlights,
+      flightNumber,
+      carrier,
+      viewDepartureStation,
+      viewArrivalStation,
+      selectedDate,
+      setLocalSearchError,
+    ])
 
-  const handleRefresh = useCallback(async () => {
-    if (activeTab === "view") {
-      try {
-        const flights = await flightService.getSubscribedFlights();
-        setSubscribedFlights(flights);
-      } catch (error) {
-        console.error("Error refreshing subscribed flights:", error);
-      }
-    } else if (subscribeFlightData) {
-      await handleSearch();
-    }
-  }, [activeTab, viewFlightData, subscribeFlightData, handleSearch]);
+    if (!hasInitiallyLoaded) return null // SSR fallback
 
-  const handleFlightNumberChange = useCallback((value: string) => {
-    setFlightNumber(value);
-  }, []);
+    return (
+      <div className="w-full ">
+        <style jsx global>{`
+          .form-input-enhanced ::placeholder {
+            color: rgba(115, 115, 115, 0.8);
+            font-weight: 500;
+          }
+        `}</style>
+        <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
+          <div className="flex flex-col w-full md:w-auto">
+            <label htmlFor="carrier-select" className="text-sm font-medium mb-1">
+              Carrier
+            </label>
+            <Select value={carrier} onValueChange={onCarrierChange}>
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
+                <SelectValue placeholder="Carrier" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="UA">UA</SelectItem>
+                <SelectItem value="AA">AA</SelectItem>
+                <SelectItem value="DL">DL</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-  const handleCarrierChange = useCallback((value: string) => {
-    setCarrier(value);
-  }, []);
+          <div className="flex flex-3 flex-col">
+            <label htmlFor="flight-number" className="text-sm font-medium mb-1">
+              Flight
+            </label>
+            <Input
+              id="flight-number"
+              placeholder="Enter Flight Number"
+              value={flightNumber}
+              onChange={(e) => handleFlightNumberChange(e.target.value)}
+              disabled={isLoading}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
+              maxLength={4}
+            />
+          </div>
 
-  const handleDepartureStationChang = useCallback((value: string) => {
-    setDepartureStation(value);
-  }, []);
+          <div className="flex flex-5 flex-col justify-center items-center">
+            <div className="pt-4">and </div>
+          </div>
 
-  return (
-    <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
-      <Toaster position="top-right" />
-      <main className="flex-grow">
-        <Tabs
-          defaultValue="view"
-          className=" pt-24 px-4 py-8"
-          onValueChange={handleTabChange}
-          value={activeTab}
-        >
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="view">View Flight Subscription</TabsTrigger>
-            <TabsTrigger value="subscribe-flight">
-              Add Flight Subscription
-            </TabsTrigger>
-            <TabsTrigger value="un-subscribe-flight">
-              Remove Flight Subscription
-            </TabsTrigger>
-          </TabsList>
+          {/* Departure Station */}
+          <div className="flex flex-col w-full md:w-auto">
+            <label htmlFor="departure-station" className="text-sm font-medium mb-1">
+              From
+            </label>
+            <Input
+              id="departure-station"
+              placeholder="Enter Station Code"
+              value={viewDepartureStation}
+              onChange={(e) => handleDepartureStationChange(e.target.value)}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+              maxLength={3}
+            />
+          </div>
 
-          {/* view flight ui start --------------------  */}
-          <TabsContent value="view" className="max-h-max min-h-screen">
-            <motion.div
-              className="mx-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+          {/* Arrival Station */}
+          <div className="flex flex-col w-full md:w-auto">
+            <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
+              To
+            </label>
+            <Input
+              id="arrival-station"
+              placeholder="Enter Station Code"
+              value={viewArrivalStation}
+              onChange={(e) => handleArrivalStationChange(e.target.value)}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
+              maxLength={3}
+            />
+          </div>
+
+          {/* Date Picker */}
+          <div className="flex flex-col w-full md:w-auto">
+            <label className="text-sm font-medium mb-1">Departure Date</label>
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  {selectedDate ? format(selectedDate, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-auto" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    onDateChange(date || undefined)
+                    setIsCalendarOpen(false)
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Search and Reset Buttons */}
+          <div className="flex justify-end mt-auto gap-2">
+            <Button
+              onClick={applyFilters}
+              className="h-10 w-full gradient-border md:w-auto"
+              disabled={isLoading || isLoadingSubscriptions}
             >
-              <Card>
-                <CardHeader></CardHeader>
-                <CardContent>
-                  <ViewFlight
-                    flightNumber={flightNumber}
-                    onFlightNumberChange={handleFlightNumberChange}
-                    onSearch={handleView}
-                    isLoading={isLoading}
-                    searchError={searchError}
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    carrier={carrier} // Pass carrier state
-                    onCarrierChange={handleCarrierChange} // Pass handler
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          </TabsContent>
-          {/* view flight ui end --------------------  */}
-
-          {/* subscribe flight ui start --------------------  */}
-          <TabsContent
-            value="subscribe-flight "
-            className="max-h-max min-h-screen"
-          >
-            <motion.div
-              className="mx-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                "Search"
+              )}
+            </Button>
+            <Button
+              onClick={resetFilters}
+              variant="outline"
+              className="h-10 w-full md:w-auto bg-transparent"
+              disabled={isLoading || isLoadingSubscriptions}
             >
-              <Card>
-                <CardHeader></CardHeader>
-                <CardContent>
-                  <SubscribeFlight
-                    flightNumber={flightNumber}
-                    onFlightNumberChange={handleFlightNumberChange}
-                    onSearch={handleSearch}
-                    isLoading={isLoading}
-                    searchError={searchError}
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    carrier={carrier}
-                    departureStation={departureStation}
-                    setDepartureStation={setDepartureStation}
-                    arrivalStation={arrivalStation}
-                    setArrivalStation={setArrivalStation}
-                    onDepartureStationChange={handleDepartureStationChange}
-                    onArrivalStationChange={handleArrivalStationChange}
-                    onCarrierChange={handleCarrierChange}
-                    setSearchError={setSearchError} // Pass setSearchError prop
-                  />
+              Clear Filters
+            </Button>
+          </div>
+        </div>
 
-                  {subscribeFlightData && (
-                    <motion.div
-                      className="mt-6 space-y-6"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div className="w-full flex items-start justify-start">
-                        <SubscribeFlightCard flightData={subscribeFlightData} />
-                      </div>
-                    </motion.div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </TabsContent>
-          {/* subscribe flight ui end --------------------  */}
+        {localSearchError && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{localSearchError}</AlertDescription>
+          </Alert>
+        )}
 
-          {/* un-subscribe-flight  ui start --------------------  */}
-          <TabsContent
-            value="un-subscribe-flight"
-            className="max-h-max min-h-screen"
-          >
-            <UnsubscribeFlight />
-          </TabsContent>
-          {/* un-subscribe-flight ui end --------------------  */}
-        </Tabs>
-      </main>
-      <div className="p-4 text-center mt-auto">
-        <Footer />
+        {/* Add the flight data table */}
+        <div className="mt-8">
+          {isLoadingSubscriptions ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Loading subscribed flights...</span>
+            </div>
+          ) : hasInitiallyLoaded && filteredFlights.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {subscribedFlights.length === 0 ? (
+                <>
+                  You don't have any flight subscriptions yet.
+                  <br />
+                  Go to the "Add Flight Subscription" tab to subscribe to flights.
+                </>
+              ) : (
+                <>
+                  No flights match your search criteria.
+                  <Button variant="link" onClick={resetFilters} className="px-1 text-primary">
+                    Clear all filters
+                  </Button>
+                </>
+              )}
+            </div>
+          ) : (
+            <ViewFlightDatTable
+              flights={filteredFlights}
+              isLoading={isLoading || isLoadingSubscriptions}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={totalItems}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    )
+  },
+)
+
+ViewFlightClient.displayName = "ViewFlightClient"
+
+// Server-side safe component
+export default function ViewFlightPage() {
+  return (
+    <ViewFlightClient
+      flightNumber=""
+      onFlightNumberChange={() => {}}
+      onSearch={() => {}}
+      isLoading={false}
+      searchError=""
+      selectedDate={undefined}
+      onDateChange={() => {}}
+      carrier="UA"
+      onCarrierChange={() => {}}
+    />
+  )
 }
