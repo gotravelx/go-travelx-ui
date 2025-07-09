@@ -35,7 +35,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import UnSubscribeDataTable from "./unsubscribe-flight-data-table";
-import { flightService, type SubscriptionDetails } from "@/services/api";
+import { flightService } from "@/services/api";
+import { SubscriptionDetails } from "@/types/flight";
 
 // Sample airport data
 export default function UnsubscribeFlightClient() {

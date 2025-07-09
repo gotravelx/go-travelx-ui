@@ -14,6 +14,18 @@ import { flightService } from "@/services/api"
 import { toast } from "sonner"
 import type { FlightData } from "@/types/flight"
 
+interface ViewFlightProps {
+  flightNumber: string
+  onFlightNumberChange: (value: string) => void
+  onSearch: () => void
+  isLoading: boolean
+  searchError: string
+  selectedDate: Date | undefined
+  onDateChange: (value: Date | undefined) => void
+  carrier: string
+  onCarrierChange: (value: string) => void
+}
+
 // Create a client-side only component
 const ViewFlightClient = memo(
   ({
@@ -26,17 +38,7 @@ const ViewFlightClient = memo(
     onDateChange,
     carrier,
     onCarrierChange,
-  }: {
-    flightNumber: string
-    onFlightNumberChange: (value: string) => void
-    onSearch: () => void
-    isLoading: boolean
-    searchError: string
-    selectedDate: Date | undefined
-    onDateChange: (value: Date | undefined) => void
-    carrier: string
-    onCarrierChange: (value: string) => void
-  }) => {
+  }: ViewFlightProps) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
     // Local filter state for View Flight tab
@@ -204,10 +206,6 @@ const ViewFlightClient = memo(
     ])
 
     if (!hasInitiallyLoaded) return null // SSR fallback
-
-
-     // Get departure and arrival status displays
-
 
     return (
       <div className="w-full ">
@@ -387,19 +385,7 @@ const ViewFlightClient = memo(
 
 ViewFlightClient.displayName = "ViewFlightClient"
 
-// Server-side safe component
-export default function ViewFlightPage() {
-  return (
-    <ViewFlightClient
-      flightNumber=""
-      onFlightNumberChange={() => {}}
-      onSearch={() => {}}
-      isLoading={false}
-      searchError=""
-      selectedDate={undefined}
-      onDateChange={() => {}}
-      carrier="UA"
-      onCarrierChange={() => {}}
-    />
-  )
+// Main component that accepts props
+export default function ViewFlight(props: ViewFlightProps) {
+  return <ViewFlightClient {...props} />
 }

@@ -56,6 +56,7 @@ const SubscribeFlight = memo(
     const [showDepartureSuggestions, setShowDepartureSuggestions] = useState(false)
     const [showArrivalSuggestions, setShowArrivalSuggestions] = useState(false)
     const [isLoadingAirports, setIsLoadingAirports] = useState(false)
+    const [allAirports, setAllAirports] = useState<AirportCode[]>([])
 
     // Refs for dropdown positioning
     const departureInputRef = useRef<HTMLInputElement>(null)
@@ -63,32 +64,36 @@ const SubscribeFlight = memo(
     const departureSuggestionsRef = useRef<HTMLDivElement>(null)
     const arrivalSuggestionsRef = useRef<HTMLDivElement>(null)
 
+    // Load all airports on component mount
+    useEffect(() => {
+      const loadAirports = async () => {
+        try {
+          setIsLoadingAirports(true)
+          const response = await flightService.searchAirportCodes()
+          if (response.success && response.data) {
+            setAllAirports(response.data)
+          }
+        } catch (error) {
+          console.error("Error loading airports:", error)
+        } finally {
+          setIsLoadingAirports(false)
+        }
+      }
+      loadAirports()
+    }, [])
+
     const handleFlightNumberChange = (value: string) => {
       const numericValue = value.replace(/\D/g, "").slice(0, 4)
       onFlightNumberChange(numericValue)
     }
 
-    const fetchAirportSuggestions = async (query: string) => {
-      if (query.length < 3) return []
-
-      try {
-        setIsLoadingAirports(true)
-        const response = await flightService.searchAirportCodes()
-
-        if (response.success && response.data) {
-          // Filter airports based on the query
-          const filtered = response.data.filter((airport) =>
-            airport.airPortCode.toLowerCase().includes(query.toLowerCase()),
-          )
-          return filtered.slice(0, 10) // Limit to 10 suggestions
-        }
-        return []
-      } catch (error) {
-        console.error("Error fetching airport suggestions:", error)
-        return []
-      } finally {
-        setIsLoadingAirports(false)
-      }
+    const filterAirports = (query: string): AirportCode[] => {
+      if (query.length < 1) return []
+      
+      const filtered = allAirports.filter((airport) =>
+        airport.airPortCode.toLowerCase().includes(query.toLowerCase())
+      )
+      return filtered.slice(0, 10) // Limit to 10 suggestions
     }
 
     const handleDepartureStationChange = async (value: string) => {
@@ -96,8 +101,8 @@ const SubscribeFlight = memo(
       setDepartureStation(formattedValue)
       onDepartureStationChange(formattedValue)
 
-      if (formattedValue.length >= 3) {
-        const suggestions = await fetchAirportSuggestions(formattedValue)
+      if (formattedValue.length >= 1) {
+        const suggestions = filterAirports(formattedValue)
         setDepartureAirports(suggestions)
         setShowDepartureSuggestions(true)
       } else {
@@ -111,8 +116,8 @@ const SubscribeFlight = memo(
       setArrivalStation(formattedValue)
       onArrivalStationChange(formattedValue)
 
-      if (formattedValue.length >= 3) {
-        const suggestions = await fetchAirportSuggestions(formattedValue)
+      if (formattedValue.length >= 1) {
+        const suggestions = filterAirports(formattedValue)
         setArrivalAirports(suggestions)
         setShowArrivalSuggestions(true)
       } else {
@@ -133,6 +138,22 @@ const SubscribeFlight = memo(
       onArrivalStationChange(airportCode)
       setShowArrivalSuggestions(false)
       setArrivalAirports([])
+    }
+
+    const handleDepartureInputFocus = () => {
+      if (departureStation.length >= 1) {
+        const suggestions = filterAirports(departureStation)
+        setDepartureAirports(suggestions)
+        setShowDepartureSuggestions(true)
+      }
+    }
+
+    const handleArrivalInputFocus = () => {
+      if (arrivalStation.length >= 1) {
+        const suggestions = filterAirports(arrivalStation)
+        setArrivalAirports(suggestions)
+        setShowArrivalSuggestions(true)
+      }
     }
 
     // Close suggestions when clicking outside
@@ -244,11 +265,7 @@ const SubscribeFlight = memo(
               onChange={(e) => handleDepartureStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
-              onFocus={() => {
-                if (departureStation.length >= 3 && departureAirports.length > 0) {
-                  setShowDepartureSuggestions(true)
-                }
-              }}
+              onFocus={handleDepartureInputFocus}
             />
 
             {/* Departure Suggestions Dropdown */}
@@ -256,6 +273,7 @@ const SubscribeFlight = memo(
               <div
                 ref={departureSuggestionsRef}
                 className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto"
+                style={{ minWidth: '200px' }}
               >
                 {isLoadingAirports ? (
                   <div className="p-2 text-sm text-muted-foreground">Loading...</div>
@@ -279,7 +297,7 @@ const SubscribeFlight = memo(
           {/* Arrival Station with Autocomplete */}
           <div className="flex flex-col w-full md:w-auto relative">
             <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
-              Arr Stn
+              To
             </label>
             <Input
               ref={arrivalInputRef}
@@ -289,11 +307,7 @@ const SubscribeFlight = memo(
               onChange={(e) => handleArrivalStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
-              onFocus={() => {
-                if (arrivalStation.length >= 3 && arrivalAirports.length > 0) {
-                  setShowArrivalSuggestions(true)
-                }
-              }}
+              onFocus={handleArrivalInputFocus}
             />
 
             {/* Arrival Suggestions Dropdown */}
@@ -301,6 +315,7 @@ const SubscribeFlight = memo(
               <div
                 ref={arrivalSuggestionsRef}
                 className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto"
+                style={{ minWidth: '200px' }}
               >
                 {isLoadingAirports ? (
                   <div className="p-2 text-sm text-muted-foreground">Loading...</div>
