@@ -1,9 +1,4 @@
-import type {
-  AirportSearchResponse,
-  FlightData,
-  FlightSubscriptionRequest,
-  SubscriptionDetails,
-} from "@/types/flight"
+import type { AirportSearchResponse, FlightData, FlightSubscriptionRequest, SubscriptionDetails } from "@/types/flight"
 import { contractService } from "./contract-service"
 import { mapStatusCodeToPhase } from "@/utils/common"
 
@@ -11,10 +6,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
 const WALLET_ADDRESS = contractService.getWalletAddress()
 
 export const flightService = {
-  searchAirportCodes: async (
-  ): Promise<AirportSearchResponse> => {
+  searchAirportCodes: async (): Promise<AirportSearchResponse> => {
     try {
-      
+      console.log("Fetching airport codes from:", `${BASE_URL}/v1/airport-codes`)
 
       const response = await fetch(`${BASE_URL}/v1/airport-codes`, {
         method: "GET",
@@ -23,11 +17,15 @@ export const flightService = {
         },
       })
 
+      console.log("Airport codes response status:", response.status)
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      return response.json()
+      const data = await response.json()
+      console.log("Airport codes response:", data)
+      return data
     } catch (error) {
       console.error("Error searching airport codes:", error)
       throw error
@@ -180,7 +178,7 @@ export const flightService = {
 
   getSubscribedFlights: async (): Promise<FlightData[]> => {
     try {
-      const response = await fetch(`${BASE_URL}/flights/get-all-flights`, {
+      const response = await fetch(`${BASE_URL}/v1/flights/get-all-flights`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -205,7 +203,7 @@ export const flightService = {
       return data.flights.map((flight: any) => {
         return {
           flightNumber: (flight.flightNumber || "").toString(),
-          scheduledDepartureDate: flight.times?.scheduledDeparture ? flight.times.scheduledDeparture.split("T")[0] : "",
+          scheduledDepartureDate: flight.departureDate || flight.times?.scheduledDeparture?.split("T")[0] || "",
           carrierCode: flight.airline?.code || "UA", // Default to UA if not provided
           operatingAirline: flight.airline?.name || "",
           estimatedArrivalUTC: flight.times?.estimatedArrival || "",
@@ -224,8 +222,8 @@ export const flightService = {
           actualDepartureUTC: flight.times?.actualDeparture || "",
           actualArrivalUTC: flight.times?.actualArrival || "",
           baggageClaim: flight.baggageClaim || "",
-          departureDelayMinutes: flight.delays?.estimatedDepartureDelayMinutes || 0,
-          arrivalDelayMinutes: flight.delays?.estimatedArrivalDelayMinutes || 0,
+          departureDelayMinutes: flight.delays?.departureDelayMinutes || 0,
+          arrivalDelayMinutes: flight.delays?.arrivalDelayMinutes || 0,
           boardingTime: flight.times?.boardTime || "",
           isCanceled: flight.isCanceled || false,
           scheduledArrivalUTCDateTime: flight.times?.scheduledArrival || "",
@@ -238,7 +236,7 @@ export const flightService = {
           arrivalState: flight.status?.arrivalStatus || "",
           currentFlightStatus: flight.status?.current || "",
           isSubscribed: true,
-          blockchainTxHash: flight.blockchainTxHash || "",
+          blockchainTxHash: flight.blockchainHashKey || "",
           marketedFlightSegment: flight.marketedFlightSegment || [],
           MarketedFlightSegment: flight.marketedFlightSegment || [],
         }

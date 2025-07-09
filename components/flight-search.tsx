@@ -1,193 +1,176 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { type FlightData, flightService } from "@/services/api";
-import { Toaster } from "sonner";
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { motion } from "framer-motion"
+import {  flightService } from "@/services/api"
+import { Toaster } from "sonner"
 // Update the imports to point to the correct locations
-import SubscribeFlight from "@/components/subscribe-flight";
-import ViewFlight from "@/components/view-flight";
-import UnsubscribeFlight from "@/components/unsubscribe-flight-client";
-import { Footer } from "@/components/footer";
-import SubscribeFlightCard from "@/components/subscribe-card";
-import { format } from "date-fns";
-import { useRouter } from "next/navigation";
+import SubscribeFlight from "@/components/subscribe-flight"
+import ViewFlight from "@/components/view-flight"
+import UnsubscribeFlight from "@/components/unsubscribe-flight-client"
+import { Footer } from "@/components/footer"
+import SubscribeFlightCard from "@/components/subscribe-card"
+import { format } from "date-fns"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FlightData } from "@/types/flight"
 
 export default function FlightSearch() {
-  const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  ); // Set default date
-  const router = useRouter();
+  const [flightNumber, setFlightNumber] = useState<string>("")
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()) // Set default date
 
-  // Separate states for different views
-  const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null);
-  const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>([]);
-  const [subscribeFlightData, setSubscribeFlightData] =
-    useState<FlightData | null>(null);
+  const [viewFlightData, setViewFlightData] = useState<FlightData | null>(null)
+  const [subscribeFlightData, setSubscribeFlightData] = useState<FlightData | null>(null)
 
-  const [searchError, setSearchError] = useState("");
-  const [carrier, setCarrier] = useState("UA");
-  // stations
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState("")
+  const [carrier, setCarrier] = useState("UA")
 
-  const [departureStation, setDepartureStation] = useState("");
-  const [arrivalStation, setArrivalStation] = useState("");
-  const [activeTab, setActiveTab] = useState("view");
+  const [isLoading, setIsLoading] = useState(false)
 
-  const [lastInteractionTime, setLastInteractionTime] = useState<
-    number | undefined
-  >();
-  const [contractCallCount, setContractCallCount] = useState(0);
+  const [departureStation, setDepartureStation] = useState("")
+  const [arrivalStation, setArrivalStation] = useState("")
+  const [activeTab, setActiveTab] = useState("view")
 
   useEffect(() => {
     // This ensures the component is fully client-side rendered
-    console.log("Flight search component mounted");
+    console.log("Flight search component mounted")
 
     // Set default date on component mount
     if (!selectedDate) {
-      setSelectedDate(new Date());
+      setSelectedDate(new Date())
     }
-  }, [selectedDate]);
+  }, [selectedDate])
 
   useEffect(() => {
     if (viewFlightData) {
-      console.log("view flight data ------>", viewFlightData);
+      console.log("view flight data ------>", viewFlightData)
     }
     if (subscribeFlightData) {
-      console.log("subscribe flight data ------>", subscribeFlightData);
+      console.log("subscribe flight data ------>", subscribeFlightData)
     }
-  }, [viewFlightData, subscribeFlightData]);
+  }, [viewFlightData, subscribeFlightData])
 
   // Clear data when switching tabs
   const handleTabChange = useCallback(
     (value: string) => {
-      setActiveTab(value);
+      setActiveTab(value)
 
       if (value === "view") {
         if (activeTab !== "view") {
-          setFlightNumber("");
-          setSearchError("");
-          setSelectedDate(new Date());
-          setCarrier("UA");
-          setDepartureStation("");
-          setViewFlightData(null);
+          setFlightNumber("")
+          setSearchError("")
+          setSelectedDate(new Date())
+          setCarrier("UA")
+          setDepartureStation("")
+          setViewFlightData(null)
         }
       } else if (value === "subscribe-flight") {
-        setFlightNumber("");
-        setSearchError("");
-        setSelectedDate(new Date());
-        setCarrier("UA");
-        setDepartureStation("");
-        setArrivalStation("");
-        setSubscribeFlightData(null);
+        setFlightNumber("")
+        setSearchError("")
+        setSelectedDate(new Date())
+        setCarrier("UA")
+        setDepartureStation("")
+        setArrivalStation("")
+        setSubscribeFlightData(null)
       } else {
         // Reset unsubscribe tab filters if needed
       }
     },
-    [activeTab]
-  );
+    [activeTab],
+  )
 
   const handleDepartureStationChange = (value: string) => {
-    setDepartureStation(value);
-  };
+    setDepartureStation(value)
+  }
 
   const handleArrivalStationChange = (value: string) => {
-    setArrivalStation(value);
-  };
+    setArrivalStation(value)
+  }
 
   const handleSearch = useCallback(async () => {
     if (!flightNumber) {
-      setSearchError("Please enter a flight number");
-      return;
+      setSearchError("Please enter a flight number")
+      return
     }
 
     if (!selectedDate) {
-      setSearchError("Please select a departure date");
-      return;
+      setSearchError("Please select a departure date")
+      return
     }
 
     try {
-      setIsLoading(true);
+      setIsLoading(true)
       const data = await flightService.searchFlight(
         carrier,
-        flightNumber,
+        flightNumber as string,
         departureStation,
         arrivalStation,
-        selectedDate // passing the Date object directly
-      );
-      setSubscribeFlightData(data);
-      setSearchError(""); // Clear any previous errors
+        selectedDate, // passing the Date object directly
+      )
+      setSubscribeFlightData(data)
+      setSearchError("") // Clear any previous errors
     } catch (error) {
-      setSearchError("Error fetching flight data");
+      setSearchError("Error fetching flight data")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [carrier, flightNumber, departureStation, selectedDate]);
+  }, [carrier, flightNumber, departureStation, selectedDate])
 
   const handleView = useCallback(async () => {
     if (!flightNumber) {
-      setSearchError("Please enter a flight number");
-      return;
+      setSearchError("Please enter a flight number")
+      return
     }
 
     try {
-      setIsLoading(true);
+      setIsLoading(true)
 
-      const subscribedFlights = await flightService.getSubscribedFlights();
+      const subscribedFlights = await flightService.getSubscribedFlights()
 
-      let filteredFlights = subscribedFlights;
+      let filteredFlights = subscribedFlights
 
       if (flightNumber) {
         filteredFlights = filteredFlights.filter((flight) =>
-          flight.flightNumber.toString().includes(flightNumber)
-        );
+          flight.flightNumber.toString().includes(flightNumber as string),
+        )
       }
 
       if (carrier) {
-        filteredFlights = filteredFlights.filter(
-          (flight) => flight.carrierCode === carrier
-        );
+        filteredFlights = filteredFlights.filter((flight) => flight.carrierCode === carrier)
       }
 
       if (selectedDate) {
-        const dateString = selectedDate
-          ? format(selectedDate, "yyyy-MM-dd")
-          : undefined;
-        filteredFlights = filteredFlights.filter(
-          (flight) => flight.scheduledDepartureDate === dateString
-        );
+        const dateString = selectedDate ? format(selectedDate, "yyyy-MM-dd") : undefined
+        filteredFlights = filteredFlights.filter((flight) => flight.scheduledDepartureDate === dateString)
       }
 
-      setViewFlightData(filteredFlights.length > 0 ? filteredFlights[0] : null);
-      setSearchError("");
+      setViewFlightData(filteredFlights.length > 0 ? filteredFlights[0] : null)
+      setSearchError("")
 
       if (filteredFlights.length === 0) {
-        setSearchError("No matching flights found");
+        setSearchError("No matching flights found")
       }
     } catch (error) {
-      console.error("Error fetching flight details:", error);
-      setSearchError("Error fetching flight details");
-      setViewFlightData(null);
+      console.error("Error fetching flight details:", error)
+      setSearchError("Error fetching flight details")
+      setViewFlightData(null)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [carrier, flightNumber, selectedDate]);
+  }, [carrier, flightNumber, selectedDate])
 
   const handleFlightNumberChange = useCallback((value: string) => {
-    setFlightNumber(value);
-  }, []);
+    setFlightNumber(value)
+  }, [])
 
   const handleCarrierChange = useCallback((value: string) => {
-    setCarrier(value);
-  }, []);
+    setCarrier(value)
+  }, [])
 
   const handleDepartureStationChang = useCallback((value: string) => {
-    setDepartureStation(value);
-  }, []);
+    setDepartureStation(value)
+  }, [])
 
   return (
     <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
@@ -201,12 +184,8 @@ export default function FlightSearch() {
         >
           <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="view">View Flight Subscription</TabsTrigger>
-            <TabsTrigger value="subscribe-flight">
-              Add Flight Subscription
-            </TabsTrigger>
-            <TabsTrigger value="un-subscribe-flight">
-              Remove Flight Subscription
-            </TabsTrigger>
+            <TabsTrigger value="subscribe-flight">Add Flight Subscription</TabsTrigger>
+            <TabsTrigger value="un-subscribe-flight">Remove Flight Subscription</TabsTrigger>
           </TabsList>
 
           {/* view flight ui start --------------------  */}
@@ -262,24 +241,22 @@ export default function FlightSearch() {
                     arrivalStation={arrivalStation}
                     setArrivalStation={setArrivalStation}
                     onDepartureStationChange={handleDepartureStationChange}
-                    onArrivalStationChange={handleDepartureStationChang}
+                    onArrivalStationChange={handleArrivalStationChange}
                     onCarrierChange={handleCarrierChange}
                     setSearchError={setSearchError}
                   />
-                    {subscribeFlightData && (
-                      <motion.div
-                        className="mt-6 space-y-6"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <div className="w-full flex items-start justify-start ">
-                          <SubscribeFlightCard
-                            flightData={subscribeFlightData}
-                          />
-                        </div>
-                      </motion.div>
-                    )}
+                  {subscribeFlightData && (
+                    <motion.div
+                      className="mt-6 space-y-6"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div className="w-full flex items-start justify-start ">
+                        <SubscribeFlightCard flightData={subscribeFlightData} />
+                      </div>
+                    </motion.div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -297,5 +274,5 @@ export default function FlightSearch() {
         <Footer />
       </div>
     </div>
-  );
+  )
 }
