@@ -27,7 +27,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import FlightStatusView from "@/components/flight-status-view";
-import type { FlightData } from "@/services/api";
 import {
   Pagination,
   PaginationContent,
@@ -51,6 +50,7 @@ import {
 } from "./ui/tooltip";
 import { toast } from "sonner";
 import { mapArrivalStateCodeToText } from "@/utils/common";
+import { FlightData } from "@/types/flight";
 
 interface FlightDataTableProps {
   flights: FlightData[];

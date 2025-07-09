@@ -33,13 +33,14 @@ import FlightStatusView from "@/components/flight-status-view";
 import { toast } from "sonner";
 import { Checkbox } from "./ui/checkbox";
 import { format } from "date-fns";
-import { type SubscriptionDetails, flightService } from "@/services/api";
+import { flightService } from "@/services/api";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { SubscriptionDetails } from "@/types/flight";
 
 interface UnSubscribeDataTableProps {
   subscriptions: SubscriptionDetails[];
