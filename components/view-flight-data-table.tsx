@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react"
 import {
   Table,
   TableBody,
@@ -8,26 +8,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  ChevronDown,
-  ChevronRight,
-  Plane,
-  Calendar,
-  Clock,
-  Copy,
-  ExternalLink,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import FlightStatusView from "@/components/flight-status-view";
-import type { FlightData } from "@/services/api";
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ChevronDown, ChevronRight, Plane, Calendar, Clock, Copy, ExternalLink } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import FlightStatusView from "@/components/flight-status-view"
+
 import {
   Pagination,
   PaginationContent,
@@ -35,31 +22,27 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationLink,
-} from "@/components/ui/pagination";
+} from "@/components/ui/pagination"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { toast } from "sonner";
-import { mapArrivalStateCodeToText } from "@/utils/common";
+} from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
+import { toast } from "sonner"
+import { mapArrivalStateCodeToText } from "@/utils/common"
+import { FlightData } from "@/types/flight"
 
 interface FlightDataTableProps {
-  flights: FlightData[];
-  isLoading?: boolean;
-  currentPage?: number;
-  itemsPerPage?: number;
-  totalItems?: number;
-  onPageChange?: (page: number) => void;
-  onItemsPerPageChange?: (itemsPerPage: number) => void;
+  flights: FlightData[]
+  isLoading?: boolean
+  currentPage?: number
+  itemsPerPage?: number
+  totalItems?: number
+  onPageChange?: (page: number) => void
+  onItemsPerPageChange?: (itemsPerPage: number) => void
 }
 
 export default function ViewFlightDatTable({
@@ -71,145 +54,143 @@ export default function ViewFlightDatTable({
   onPageChange = () => {},
   onItemsPerPageChange = () => {},
 }: FlightDataTableProps) {
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [localCurrentPage, setLocalCurrentPage] = useState(currentPage);
-  const [localItemsPerPage, setLocalItemsPerPage] = useState(itemsPerPage);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null)
+  const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [localCurrentPage, setLocalCurrentPage] = useState(currentPage)
+  const [localItemsPerPage, setLocalItemsPerPage] = useState(itemsPerPage)
 
   useEffect(() => {
-    setLocalCurrentPage(currentPage);
-  }, [currentPage]);
+    setLocalCurrentPage(currentPage)
+  }, [currentPage])
 
   useEffect(() => {
-    setLocalItemsPerPage(itemsPerPage);
-  }, [itemsPerPage]);
+    setLocalItemsPerPage(itemsPerPage)
+  }, [itemsPerPage])
 
-  const totalPages = Math.ceil(totalItems / localItemsPerPage);
+  const totalPages = Math.ceil(totalItems / localItemsPerPage)
 
   const handlePageChange = (page: number) => {
-    setLocalCurrentPage(page);
-    onPageChange(page);
-  };
+    setLocalCurrentPage(page)
+    onPageChange(page)
+  }
 
   const handleItemsPerPageChange = (value: string) => {
-    const newItemsPerPage = Number.parseInt(value, 10);
-    setLocalItemsPerPage(newItemsPerPage);
-    onItemsPerPageChange(newItemsPerPage);
-  };
+    const newItemsPerPage = Number.parseInt(value, 10)
+    setLocalItemsPerPage(newItemsPerPage)
+    onItemsPerPageChange(newItemsPerPage)
+  }
 
-  const startIndex = (localCurrentPage - 1) * localItemsPerPage;
-  const endIndex = Math.min(startIndex + localItemsPerPage, totalItems);
-  const paginatedFlights = flights.slice(startIndex, endIndex);
+  const startIndex = (localCurrentPage - 1) * localItemsPerPage
+  const endIndex = Math.min(startIndex + localItemsPerPage, totalItems)
+  const paginatedFlights = flights.slice(startIndex, endIndex)
 
   const toggleRow = (flightNumber: string) => {
-    setExpandedRow(expandedRow === flightNumber ? null : flightNumber);
-  };
+    setExpandedRow(expandedRow === flightNumber ? null : flightNumber)
+  }
 
   const openFlightDetails = (flight: FlightData) => {
-    setSelectedFlight(flight);
-    setIsDialogOpen(true);
-  };
+    setSelectedFlight(flight)
+    setIsDialogOpen(true)
+  }
 
   const getStatusBadgeColor = (flight: any) => {
-    if (flight.isCanceled) return "bg-red-500/20 text-red-500";
-    if ((flight.departureDelayMinutes ?? 0) > 0)
-      return "bg-yellow-500/20 text-yellow-500";
+    if (flight.isCanceled) return "bg-red-500/20 text-red-500"
+    if ((flight.departureDelayMinutes ?? 0) > 0) return "bg-yellow-500/20 text-yellow-500"
 
     switch (flight.statusCode) {
       case "NDPT":
-        return "bg-blue-500/20 text-blue-500";
+        return "bg-blue-500/20 text-blue-500"
       case "OUT":
-        return "bg-yellow-500/20 text-yellow-500";
+        return "bg-yellow-500/20 text-yellow-500"
       case "OFF":
-        return "bg-blue-500/20 text-blue-500";
+        return "bg-blue-500/20 text-blue-500"
       case "ON":
-        return "bg-purple-500/20 text-purple-500";
+        return "bg-purple-500/20 text-purple-500"
       case "IN":
-        return "bg-green-500/20 text-green-500";
+        return "bg-green-500/20 text-green-500"
       default:
-        return "bg-muted/20 text-muted-foreground";
+        return "bg-muted/20 text-muted-foreground"
     }
-  };
+  }
 
   const getStatusText = (flight: FlightData) => {
-    if (flight.isCanceled) return "CNCL";
+    if (flight.isCanceled) return "CNCL"
     if ((flight.departureDelayMinutes ?? 0) > 0)
-      return `DELAYED ${flight.departureDelayMinutes} min`;
+      return `DELAYED ${flight.departureDelayMinutes} min`
 
     // Use currentFlightStatus if available, otherwise use statusCode
     if (flight.currentFlightStatus) {
-      return flight.currentFlightStatus.toUpperCase();
+      return flight.currentFlightStatus.toUpperCase()
     }
 
     switch (flight.statusCode) {
       case "ndpt":
-        return "NDPT";
+        return "NDPT"
       case "out":
-        return "OUT";
+        return "OUT"
       case "off":
-        return "OFF";
+        return "OFF"
       case "on":
-        return "ON";
+        return "ON"
       case "in":
-        return "IN";
+        return "IN"
       default:
-        return "UNKNOWN";
+        return "UNKNOWN"
     }
-  };
+  }
 
   const copyTxHash = async (hash: string) => {
-    if (!hash) return;
+    if (!hash) return
 
-    await navigator.clipboard.writeText(hash);
-    toast.success("Transaction hash copied to clipboard");
-  };
+    await navigator.clipboard.writeText(hash)
+    toast.success("Transaction hash copied to clipboard")
+  }
 
   const formatTxHash = (hash: string) => {
-    if (!hash) return "N/A";
-    return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
-  };
+    if (!hash) return "N/A"
+    return `${hash.slice(0, 6)}...${hash.slice(-4)}`
+  }
 
   const formatTime = (dateString: string) => {
     try {
-      if (!dateString) return "N/A";
-      const date = new Date(dateString);
+      if (!dateString) return "N/A"
+      const date = new Date(dateString)
       return new Intl.DateTimeFormat("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
-      }).format(date);
+      }).format(date)
     } catch (error) {
-      return "Invalid time";
+      return "Invalid time"
     }
-  };
+  }
 
   const formatDate = (dateString: string) => {
     try {
-      if (!dateString) return "N/A";
-      const date = new Date(dateString);
+      if (!dateString) return "N/A"
+      const date = new Date(dateString)
       return new Intl.DateTimeFormat("en-US", {
         year: "numeric",
         month: "short",
         day: "numeric",
-      }).format(date);
+      }).format(date)
     } catch (error) {
-      return "Invalid date";
+      return "Invalid date"
     }
-  };
+  }
 
   if (isLoading) {
     return (
       <div className="flex justify-center p-8 items-center">
         <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"></div>
       </div>
-    );
+    )
   }
 
   const columnDescriptions = {
     "Txn DTM": "Timestamp of when the transaction was recorded (in UTC/GMT)",
-    "Transaction ID":
-      "Unique transaction hash (likely from a blockchain ledger)",
+    "Transaction ID": "Unique transaction hash (likely from a blockchain ledger)",
     Carrier: "Airline code (e.g., UA for United Airlines)",
     "Flt Nbr": "Flight number",
     From: "Departure airport code and city",
@@ -226,17 +207,14 @@ export default function ViewFlightDatTable({
     "Est Dep DTM": "Estimated departure date and time based on current data",
     "Est Arr DTM": "Estimated arrival date and time based on current data",
     "Actual Dep DTM": "Actual time the flight departed (when it left the gate)",
-    "Actual Arr DTM":
-      "Actual time the flight arrived (when it reached the gate)",
+    "Actual Arr DTM": "Actual time the flight arrived (when it reached the gate)",
     Bagclaim: "Baggage claim carousel/area for the arriving flight",
     Action: "Options to process flight data",
     "Sch Dep Dt": "Scheduled departure date (in UTC/GMT)",
     Flight: "Carrier code and flight number eg. UA 1234",
-  };
+  }
 
-  const renderTableHeaderWithTooltip = (
-    label: keyof typeof columnDescriptions
-  ) => (
+  const renderTableHeaderWithTooltip = (label: keyof typeof columnDescriptions) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -247,15 +225,14 @@ export default function ViewFlightDatTable({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
+  )
 
   // const arrivalStatus = getStatusDisplay(
   //   flightData.arrivalState || "ONT",
   //   true
   // );
 
-
-  console.log("Flight Data Table Rendered", flights, "flights");
+  console.log("Flight Data Table Rendered", flights, "flights")
   return (
     <>
       <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
@@ -277,27 +254,21 @@ export default function ViewFlightDatTable({
                 {renderTableHeaderWithTooltip("Departure DateTime")}
               </TableHead>
 
-              <TableHead>
-                {renderTableHeaderWithTooltip("Departure State")}
-              </TableHead>
+              <TableHead>{renderTableHeaderWithTooltip("Departure State")}</TableHead>
 
               <TableHead className="hidden md:table-cell">
                 {renderTableHeaderWithTooltip("Arrival DateTime")}
               </TableHead>
 
-              <TableHead>
-                {renderTableHeaderWithTooltip("Arrival State")}
-              </TableHead>
-              <TableHead>
-                {renderTableHeaderWithTooltip("Flight Status")}
-              </TableHead>
+              <TableHead>{renderTableHeaderWithTooltip("Arrival State")}</TableHead>
+              <TableHead>{renderTableHeaderWithTooltip("Flight Status")}</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedFlights.length > 0 ? (
-              paginatedFlights.map((flight) => (
+              paginatedFlights.map(flight => (
                 <>
                   <TableRow
                     key={`${flight.flightNumber}-${flight.scheduledDepartureDate}`}
@@ -316,9 +287,9 @@ export default function ViewFlightDatTable({
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    copyTxHash(flight.blockchainTxHash || "");
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    copyTxHash(flight.blockchainTxHash || "")
                                   }}
                                 >
                                   <Copy className="h-3 w-3" />
@@ -328,7 +299,7 @@ export default function ViewFlightDatTable({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-primary hover:underline"
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={e => e.stopPropagation()}
                                   title="View transaction on Caminoscan"
                                 >
                                   <ExternalLink className="h-3 w-3" />
@@ -341,9 +312,7 @@ export default function ViewFlightDatTable({
                           </Tooltip>
                         </TooltipProvider>
                       ) : (
-                        <span className="text-muted-foreground text-xs">
-                          N/A
-                        </span>
+                        <span className="text-muted-foreground text-xs">N/A</span>
                       )}
                     </TableCell>
 
@@ -380,9 +349,7 @@ export default function ViewFlightDatTable({
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <Badge className="py-2 ">
-                          {mapArrivalStateCodeToText(
-                            flight?.departureState || ""
-                          )}
+                          {mapArrivalStateCodeToText(flight?.departureState || "")}
                         </Badge>
                       </div>
                     </TableCell>
@@ -398,28 +365,20 @@ export default function ViewFlightDatTable({
                       <div className="flex gap-1 items-center">
                         <Badge className="py-2 ">
                           {" "}
-                          {mapArrivalStateCodeToText(
-                            flight?.arrivalState || ""
-                          )}
+                          {mapArrivalStateCodeToText(flight?.arrivalState || "")}
                         </Badge>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={`${getStatusBadgeColor(
-                          flight
-                        )} p-2 px-4 text-md`}
+                        className={`${getStatusBadgeColor(flight)} p-2 px-4 text-md`}
                       >
                         {getStatusText(flight)}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openFlightDetails(flight)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => openFlightDetails(flight)}>
                         Details
                       </Button>
                     </TableCell>
@@ -445,37 +404,21 @@ export default function ViewFlightDatTable({
                         <div className="p-4">
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div className="space-y-2">
-                              <h4 className="text-sm font-semibold">
-                                Departure
-                              </h4>
+                              <h4 className="text-sm font-semibold">Departure</h4>
                               <div className="grid grid-cols-2 text-sm gap-2">
-                                <div className="text-muted-foreground">
-                                  Airport:
-                                </div>
+                                <div className="text-muted-foreground">Airport:</div>
                                 <div>{flight.departureAirport || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  City:
-                                </div>
+                                <div className="text-muted-foreground">City:</div>
                                 <div>{flight.departureCity || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Terminal:
-                                </div>
+                                <div className="text-muted-foreground">Terminal:</div>
                                 <div>{flight.departureTerminal || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Gate:
-                                </div>
+                                <div className="text-muted-foreground">Gate:</div>
                                 <div>{flight.departureGate || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Scheduled:
-                                </div>
+                                <div className="text-muted-foreground">Scheduled:</div>
                                 <div>
-                                  {formatTime(
-                                    flight.scheduledDepartureUTCDateTime
-                                  ) || "TBD"}
+                                  {formatTime(flight.scheduledDepartureUTCDateTime) || "TBD"}
                                 </div>
-                                <div className="text-muted-foreground">
-                                  Status:
-                                </div>
+                                <div className="text-muted-foreground">Status:</div>
                                 <div>{flight.departureState || "TBD"}</div>
                               </div>
                             </div>
@@ -483,53 +426,29 @@ export default function ViewFlightDatTable({
                             <div className="space-y-2">
                               <h4 className="text-sm font-semibold">Arrival</h4>
                               <div className="grid grid-cols-2 text-sm gap-2">
-                                <div className="text-muted-foreground">
-                                  Airport:
-                                </div>
+                                <div className="text-muted-foreground">Airport:</div>
                                 <div>{flight.arrivalAirport || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  City:
-                                </div>
+                                <div className="text-muted-foreground">City:</div>
                                 <div>{flight.arrivalCity || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Terminal:
-                                </div>
+                                <div className="text-muted-foreground">Terminal:</div>
                                 <div>{flight.arrivalTerminal || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Gate:
-                                </div>
+                                <div className="text-muted-foreground">Gate:</div>
                                 <div>{flight.arrivalGate || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Scheduled:
-                                </div>
-                                <div>
-                                  {formatTime(
-                                    flight.scheduledArrivalUTCDateTime
-                                  ) || "TBD"}
-                                </div>
-                                <div className="text-muted-foreground">
-                                  Status:
-                                </div>
+                                <div className="text-muted-foreground">Scheduled:</div>
+                                <div>{formatTime(flight.scheduledArrivalUTCDateTime) || "TBD"}</div>
+                                <div className="text-muted-foreground">Status:</div>
                                 <div>{flight.arrivalState || "TBD"}</div>
                               </div>
                             </div>
 
                             <div className="space-y-2">
-                              <h4 className="text-sm font-semibold">
-                                Flight Details
-                              </h4>
+                              <h4 className="text-sm font-semibold">Flight Details</h4>
                               <div className="grid grid-cols-2 text-sm gap-2">
-                                <div className="text-muted-foreground">
-                                  Carrier:
-                                </div>
+                                <div className="text-muted-foreground">Carrier:</div>
                                 <div>{flight.operatingAirline || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Aircraft:
-                                </div>
+                                <div className="text-muted-foreground">Aircraft:</div>
                                 <div>{flight.equipmentModel || "TBD"}</div>
-                                <div className="text-muted-foreground">
-                                  Status:
-                                </div>
+                                <div className="text-muted-foreground">Status:</div>
                                 <div>
                                   <Badge
                                     variant="outline"
@@ -538,29 +457,30 @@ export default function ViewFlightDatTable({
                                     {getStatusText(flight)}
                                   </Badge>
                                 </div>
-                                <div className="text-muted-foreground">
-                                  Delay:
-                                </div>
+                                <div className="text-muted-foreground">Delay:</div>
                                 <div>{flight?.arrivalState || "TBD"}</div>
                                 {flight.marketedFlightSegment &&
                                   flight.marketedFlightSegment.length > 0 && (
                                     <>
                                       <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
-                                        Codeshare Details:
+                                      Codeshare Details:
                                       </div>
                                       {flight.marketedFlightSegment.map(
-                                        (segment, idx) => (
-                                          <Fragment key={idx}>
-                                            <div className="text-muted-foreground pl-2">
-                                              Airline:
-                                            </div>
-                                            <div>
-                                              {segment.MarketingAirlineCode ||
-                                                "TBD"}{" "}
-                                              {segment.FlightNumber || "TBD"}
-                                            </div>
-                                          </Fragment>
-                                        )
+                                      (
+                                        segment: {
+                                        MarketingAirlineCode?: string
+                                        FlightNumber?: string
+                                        },
+                                        idx: number
+                                      ) => (
+                                        <Fragment key={idx}>
+                                        <div className="text-muted-foreground pl-2">Airline:</div>
+                                        <div>
+                                          {segment.MarketingAirlineCode || "TBD"}{" "}
+                                          {segment.FlightNumber || "TBD"}
+                                        </div>
+                                        </Fragment>
+                                      )
                                       )}
                                     </>
                                   )}
@@ -597,19 +517,12 @@ export default function ViewFlightDatTable({
       {totalPages > 0 && (
         <div className="flex justify-between items-center mt-4">
           <div className="text-muted-foreground text-sm">
-            Showing{" "}
-            {totalItems === 0
-              ? 0
-              : (localCurrentPage - 1) * localItemsPerPage + 1}
-            -{Math.min(localCurrentPage * localItemsPerPage, totalItems)} of{" "}
-            {totalItems} flights
+            Showing {totalItems === 0 ? 0 : (localCurrentPage - 1) * localItemsPerPage + 1}-
+            {Math.min(localCurrentPage * localItemsPerPage, totalItems)} of {totalItems} flights
           </div>
 
           <div className="flex justify-end gap-4 items-center">
-            <Select
-              value={localItemsPerPage.toString()}
-              onValueChange={handleItemsPerPageChange}
-            >
+            <Select value={localItemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
               <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-[80px] focus:border-primary">
                 <SelectValue placeholder="5" />
               </SelectTrigger>
@@ -628,9 +541,9 @@ export default function ViewFlightDatTable({
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(1);
+                      onClick={e => {
+                        e.preventDefault()
+                        handlePageChange(1)
                       }}
                       disabled={localCurrentPage === 1}
                       className="bg-background/90 border-2 border-primary/50 h-9 shadow-sm w-9 focus:border-primary"
@@ -643,10 +556,10 @@ export default function ViewFlightDatTable({
                   <PaginationItem>
                     <PaginationPrevious
                       href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
+                      onClick={e => {
+                        e.preventDefault()
                         if (localCurrentPage > 1) {
-                          handlePageChange(Math.max(localCurrentPage - 1, 1));
+                          handlePageChange(Math.max(localCurrentPage - 1, 1))
                         }
                       }}
                       className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
@@ -666,12 +579,10 @@ export default function ViewFlightDatTable({
                   <PaginationItem>
                     <PaginationNext
                       href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
+                      onClick={e => {
+                        e.preventDefault()
                         if (localCurrentPage < totalPages) {
-                          handlePageChange(
-                            Math.min(localCurrentPage + 1, totalPages)
-                          );
+                          handlePageChange(Math.min(localCurrentPage + 1, totalPages))
                         }
                       }}
                       className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
@@ -682,9 +593,9 @@ export default function ViewFlightDatTable({
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(totalPages);
+                      onClick={e => {
+                        e.preventDefault()
+                        handlePageChange(totalPages)
                       }}
                       disabled={localCurrentPage === totalPages}
                       className="bg-background/90 border-2 border-primary/50 h-9 shadow-sm w-9 focus:border-primary"
@@ -706,13 +617,12 @@ export default function ViewFlightDatTable({
           <DialogHeader>
             <DialogTitle className="flex gap-2 items-center">
               <Plane className="h-5 w-5" />
-              Flight {selectedFlight?.carrierCode}{" "}
-              {selectedFlight?.flightNumber} Status
+              Flight {selectedFlight?.carrierCode} {selectedFlight?.flightNumber} Status
             </DialogTitle>
           </DialogHeader>
           {selectedFlight && <FlightStatusView flightData={selectedFlight} />}
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }

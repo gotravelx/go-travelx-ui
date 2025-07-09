@@ -1,23 +1,9 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Plane,
-  Shield,
-  Globe,
-  Zap,
-  Users,
-  Building,
-  ArrowRight,
-} from "lucide-react";
-import { Footer } from "@/components/footer";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Plane, Shield, Globe, Zap, Users, Building, ArrowRight } from "lucide-react"
+import { Footer } from "@/components/footer"
 
 export default function MarketingPage() {
   return (
@@ -35,9 +21,8 @@ export default function MarketingPage() {
                   Revolutionizing Flight Information with Blockchain
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  GoTravelX is a collaboration between leading airlines to
-                  provide secure, transparent, and reliable flight information
-                  using blockchain technology.
+                  GoTravelX is a collaboration between leading airlines to provide secure,
+                  transparent, and reliable flight information using blockchain technology.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link href="/flifo">
@@ -63,8 +48,8 @@ export default function MarketingPage() {
                       </div>
                       <h3 className="text-2xl font-bold mb-2">FLIFO</h3>
                       <p className="text-muted-foreground">
-                        Blockchain-powered flight information for the next
-                        generation of travel technology
+                        Blockchain-powered flight information for the next generation of travel
+                        technology
                       </p>
                     </div>
                   </div>
@@ -82,9 +67,8 @@ export default function MarketingPage() {
                 About Our Platform
               </h2>
               <p className="mx-auto mt-4 max-w-[700px] text-muted-foreground md:text-xl">
-                GoTravelX combines the power of blockchain with flight
-                information to create a secure and transparent ecosystem for
-                travelers and airlines.
+                GoTravelX combines the power of blockchain with flight information to create a
+                secure and transparent ecosystem for travelers and airlines.
               </p>
             </div>
 
@@ -97,23 +81,19 @@ export default function MarketingPage() {
               <TabsContent value="platform" className="p-4">
                 <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-start">
                   <div className="space-y-4">
-                    <h3 className="text-2xl font-bold">
-                      Flight Information Oracle
-                    </h3>
+                    <h3 className="text-2xl font-bold">Flight Information Oracle</h3>
                     <p className="text-muted-foreground">
-                      Our FLIFO (Flight Information Oracle) provides real-time,
-                      verified flight data directly from airlines to the
-                      blockchain. This creates a single source of truth that can
-                      be accessed by travelers, airlines, and third-party
+                      Our FLIFO (Flight Information Oracle) provides real-time, verified flight data
+                      directly from airlines to the blockchain. This creates a single source of
+                      truth that can be accessed by travelers, airlines, and third-party
                       applications.
                     </p>
                     <h3 className="text-2xl font-bold">Subscription Service</h3>
                     <p className="text-muted-foreground">
-                      Users can subscribe to specific flights and receive
-                      real-time updates about delays, gate changes, and other
-                      important information. Our subscription service offers
-                      both standard and secure encrypted options to meet
-                      different privacy needs.
+                      Users can subscribe to specific flights and receive real-time updates about
+                      delays, gate changes, and other important information. Our subscription
+                      service offers both standard and secure encrypted options to meet different
+                      privacy needs.
                     </p>
                   </div>
                   <Card>
@@ -128,36 +108,30 @@ export default function MarketingPage() {
                         <li className="flex items-start gap-3">
                           <Shield className="h-5 w-5 text-primary mt-0.5" />
                           <div>
-                            <span className="font-medium">
-                              Enhanced Security
-                            </span>
+                            <span className="font-medium">Enhanced Security</span>
                             <p className="text-sm text-muted-foreground">
-                              Immutable records and encrypted data transmission
-                              protect sensitive flight information.
+                              Immutable records and encrypted data transmission protect sensitive
+                              flight information.
                             </p>
                           </div>
                         </li>
                         <li className="flex items-start gap-3">
                           <Globe className="h-5 w-5 text-primary mt-0.5" />
                           <div>
-                            <span className="font-medium">
-                              Global Accessibility
-                            </span>
+                            <span className="font-medium">Global Accessibility</span>
                             <p className="text-sm text-muted-foreground">
-                              Decentralized architecture ensures flight data is
-                              available anywhere, anytime.
+                              Decentralized architecture ensures flight data is available anywhere,
+                              anytime.
                             </p>
                           </div>
                         </li>
                         <li className="flex items-start gap-3">
                           <Zap className="h-5 w-5 text-primary mt-0.5" />
                           <div>
-                            <span className="font-medium">
-                              Real-Time Updates
-                            </span>
+                            <span className="font-medium">Real-Time Updates</span>
                             <p className="text-sm text-muted-foreground">
-                              Smart contracts automatically trigger
-                              notifications when flight status changes.
+                              Smart contracts automatically trigger notifications when flight status
+                              changes.
                             </p>
                           </div>
                         </li>
@@ -169,38 +143,29 @@ export default function MarketingPage() {
               <TabsContent value="technology" className="p-4">
                 <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-start">
                   <div className="space-y-4">
-                    <h3 className="text-2xl font-bold">
-                      Blockchain Infrastructure
-                    </h3>
+                    <h3 className="text-2xl font-bold">Blockchain Infrastructure</h3>
                     <p className="text-muted-foreground">
-                      GoTravelX is built on the Camino blockchain, a
-                      high-performance blockchain specifically designed for the
-                      travel industry. This provides the perfect foundation for
-                      our flight information services.
+                      GoTravelX is built on the Camino blockchain, a high-performance blockchain
+                      specifically designed for the travel industry. This provides the perfect
+                      foundation for our flight information services.
                     </p>
                     <h3 className="text-2xl font-bold">Smart Contracts</h3>
                     <p className="text-muted-foreground">
-                      Our platform utilizes advanced smart contracts to automate
-                      flight subscriptions, notifications, and data
-                      verification. These contracts ensure that all parties
-                      receive accurate and timely information.
+                      Our platform utilizes advanced smart contracts to automate flight
+                      subscriptions, notifications, and data verification. These contracts ensure
+                      that all parties receive accurate and timely information.
                     </p>
-                    <h3 className="text-2xl font-bold">
-                      End-to-End Encryption
-                    </h3>
+                    <h3 className="text-2xl font-bold">End-to-End Encryption</h3>
                     <p className="text-muted-foreground">
-                      For users who choose secure subscriptions, we implement
-                      end-to-end encryption to ensure that sensitive flight
-                      details remain private and can only be accessed by the
-                      intended recipient.
+                      For users who choose secure subscriptions, we implement end-to-end encryption
+                      to ensure that sensitive flight details remain private and can only be
+                      accessed by the intended recipient.
                     </p>
                   </div>
                   <Card>
                     <CardHeader>
                       <CardTitle>Technical Stack</CardTitle>
-                      <CardDescription>
-                        The technologies powering GoTravelX
-                      </CardDescription>
+                      <CardDescription>The technologies powering GoTravelX</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2">
@@ -248,13 +213,11 @@ export default function MarketingPage() {
               <TabsContent value="team" className="p-4">
                 <div className="space-y-8">
                   <div className="text-center">
-                    <h3 className="text-2xl font-bold">
-                      Meet the Team Behind GoTravelX
-                    </h3>
+                    <h3 className="text-2xl font-bold">Meet the Team Behind GoTravelX</h3>
                     <p className="mx-auto mt-2 max-w-[700px] text-muted-foreground">
-                      Our team combines expertise in blockchain technology,
-                      travel industry knowledge, and software development to
-                      create the next generation of flight information services.
+                      Our team combines expertise in blockchain technology, travel industry
+                      knowledge, and software development to create the next generation of flight
+                      information services.
                     </p>
                   </div>
 
@@ -288,9 +251,8 @@ export default function MarketingPage() {
                       </CardHeader>
                       <CardContent className="text-center">
                         <p className="text-sm text-muted-foreground">
-                          Major airlines providing real-time flight data and
-                          collaborating on the development of the FLIFO
-                          platform.
+                          Major airlines providing real-time flight data and collaborating on the
+                          development of the FLIFO platform.
                         </p>
                       </CardContent>
                     </Card>
@@ -306,8 +268,8 @@ export default function MarketingPage() {
                       </CardHeader>
                       <CardContent className="text-center">
                         <p className="text-sm text-muted-foreground">
-                          Software engineers and UX designers creating an
-                          intuitive and powerful flight information platform.
+                          Software engineers and UX designers creating an intuitive and powerful
+                          flight information platform.
                         </p>
                       </CardContent>
                     </Card>
@@ -327,8 +289,8 @@ export default function MarketingPage() {
                   Experience GoTravelX Today
                 </h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                  Connect your wallet and start tracking flights with blockchain
-                  security and reliability.
+                  Connect your wallet and start tracking flights with blockchain security and
+                  reliability.
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -352,5 +314,5 @@ export default function MarketingPage() {
         <Footer />
       </div>
     </div>
-  );
+  )
 }

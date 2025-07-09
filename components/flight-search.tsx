@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import {  flightService } from "@/services/api"
+import { flightService } from "@/services/api"
 import { Toaster } from "sonner"
 // Update the imports to point to the correct locations
 import SubscribeFlight from "@/components/subscribe-flight"
@@ -77,7 +77,7 @@ export default function FlightSearch() {
         // Reset unsubscribe tab filters if needed
       }
     },
-    [activeTab],
+    [activeTab]
   )
 
   const handleDepartureStationChange = (value: string) => {
@@ -106,7 +106,7 @@ export default function FlightSearch() {
         flightNumber as string,
         departureStation,
         arrivalStation,
-        selectedDate, // passing the Date object directly
+        selectedDate // passing the Date object directly
       )
       setSubscribeFlightData(data)
       setSearchError("") // Clear any previous errors
@@ -131,18 +131,20 @@ export default function FlightSearch() {
       let filteredFlights = subscribedFlights
 
       if (flightNumber) {
-        filteredFlights = filteredFlights.filter((flight) =>
-          flight.flightNumber.toString().includes(flightNumber as string),
+        filteredFlights = filteredFlights.filter(flight =>
+          flight.flightNumber.toString().includes(flightNumber as string)
         )
       }
 
       if (carrier) {
-        filteredFlights = filteredFlights.filter((flight) => flight.carrierCode === carrier)
+        filteredFlights = filteredFlights.filter(flight => flight.carrierCode === carrier)
       }
 
       if (selectedDate) {
         const dateString = selectedDate ? format(selectedDate, "yyyy-MM-dd") : undefined
-        filteredFlights = filteredFlights.filter((flight) => flight.scheduledDepartureDate === dateString)
+        filteredFlights = filteredFlights.filter(
+          flight => flight.scheduledDepartureDate === dateString
+        )
       }
 
       setViewFlightData(filteredFlights.length > 0 ? filteredFlights[0] : null)

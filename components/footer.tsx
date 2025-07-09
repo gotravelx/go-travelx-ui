@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState } from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useState } from "react"
+import Link from "next/link"
+import { motion } from "framer-motion"
 import {
   Plane,
   Mail,
@@ -17,28 +17,28 @@ import {
   Github,
   ChevronUp,
   ArrowRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { toast } from "sonner"
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [email, setEmail] = useState("")
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      toast.error("Please enter a valid email address");
-      return;
+      toast.error("Please enter a valid email address")
+      return
     }
 
-    toast.success("Thanks for subscribing to our newsletter!");
-    setEmail("");
-  };
+    toast.success("Thanks for subscribing to our newsletter!")
+    setEmail("")
+  }
 
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
 
   return (
     <footer className="bg-background/80 backdrop-blur-sm border-t border-border/50 pt-12 pb-6 mt-auto">
@@ -53,42 +53,27 @@ export function Footer() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground text-left">
-              Revolutionizing flight tracking with blockchain technology. Get
-              real-time updates and subscribe to your favorite flights.
+              Revolutionizing flight tracking with blockchain technology. Get real-time updates and
+              subscribe to your favorite flights.
             </p>
             <div className="flex items-center gap-4">
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Facebook size={18} />
                 <span className="sr-only">Facebook</span>
               </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter size={18} />
                 <span className="sr-only">Twitter</span>
               </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Instagram size={18} />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Linkedin size={18} />
                 <span className="sr-only">LinkedIn</span>
               </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
                 <Github size={18} />
                 <span className="sr-only">GitHub</span>
               </Link>
@@ -168,30 +153,22 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={18} className="text-primary shrink-0" />
-                <span className="text-sm text-muted-foreground text-left">
-                  +1 (708) 247-1764
-                </span>
+                <span className="text-sm text-muted-foreground text-left">+1 (708) 247-1764</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={18} className="text-primary shrink-0" />
-                <span className="text-sm text-muted-foreground text-left">
-                  sales@gotravelx.com
-                </span>
+                <span className="text-sm text-muted-foreground text-left">sales@gotravelx.com</span>
               </li>
             </ul>
             <div className="pt-2">
-              <h4 className="text-sm font-medium mb-2 text-left">
-                Business Hours
-              </h4>
+              <h4 className="text-sm font-medium mb-2 text-left">Business Hours</h4>
               <p className="text-sm text-muted-foreground text-left">
                 Monday - Friday: 9:00 AM - 6:00 PM
               </p>
               <p className="text-sm text-muted-foreground text-left">
                 Saturday: 10:00 AM - 4:00 PM
               </p>
-              <p className="text-sm text-muted-foreground text-left">
-                Sunday: Closed
-              </p>
+              <p className="text-sm text-muted-foreground text-left">Sunday: Closed</p>
             </div>
           </div>
 
@@ -199,8 +176,7 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-left">Newsletter</h3>
             <p className="text-sm text-muted-foreground text-left">
-              Subscribe to our newsletter to receive updates on new features and
-              promotions.
+              Subscribe to our newsletter to receive updates on new features and promotions.
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <div className="flex gap-2">
@@ -208,7 +184,7 @@ export function Footer() {
                   type="email"
                   placeholder="Your email address"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="h-9"
                 />
                 <Button type="submit" size="sm" className="shrink-0">
@@ -224,9 +200,7 @@ export function Footer() {
               >
                 {isExpanded ? "Hide Details" : "More About GoTravelX"}
                 <ChevronUp
-                  className={`ml-1 h-4 w-4 transition-transform ${
-                    isExpanded ? "rotate-180" : ""
-                  }`}
+                  className={`ml-1 h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                 />
               </Button>
 
@@ -239,14 +213,12 @@ export function Footer() {
                   className="mt-2 text-sm text-muted-foreground space-y-2"
                 >
                   <p className="text-left">
-                    GoTravelX is a cutting-edge flight tracking platform that
-                    leverages blockchain technology to provide secure,
-                    transparent, and reliable flight information.
+                    GoTravelX is a cutting-edge flight tracking platform that leverages blockchain
+                    technology to provide secure, transparent, and reliable flight information.
                   </p>
                   <p className="text-left">
-                    Our mission is to revolutionize the way travelers access and
-                    interact with flight data, offering real-time updates and
-                    personalized notifications.
+                    Our mission is to revolutionize the way travelers access and interact with
+                    flight data, offering real-time updates and personalized notifications.
                   </p>
                 </motion.div>
               )}
@@ -262,33 +234,21 @@ export function Footer() {
             © {currentYear} GoTravelX. All rights reserved.
           </p>
           <div className="flex flex-col md:flex-row gap-4 text-sm">
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
+            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
               Privacy Policy
             </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
+            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
               Terms of Service
             </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
+            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
               Cookie Policy
             </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
+            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
               FAQ
             </Link>
           </div>
         </div>
       </div>
     </footer>
-  );
+  )
 }

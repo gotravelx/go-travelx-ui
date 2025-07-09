@@ -1,16 +1,11 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect, useCallback } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { CalendarIcon, AlertCircle, Loader2 } from "lucide-react"
+import { toast } from "sonner"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Pagination,
   PaginationContent,
@@ -18,363 +13,332 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationLink,
-} from "@/components/ui/pagination";
+} from "@/components/ui/pagination"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import UnSubscribeDataTable from "./unsubscribe-flight-data-table";
-import { flightService } from "@/services/api";
-import { SubscriptionDetails } from "@/types/flight";
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
+import UnSubscribeDataTable from "./unsubscribe-flight-data-table"
+import { flightService } from "@/services/api"
+import { SubscriptionDetails } from "@/types/flight"
 
 // Sample airport data
 export default function UnsubscribeFlightClient() {
-  const [isUnsubscribeDialogOpen, setIsUnsubscribeDialogOpen] = useState(false);
-  const [subscriptionDetails, setSubscriptionDetails] = useState<
-    SubscriptionDetails[]
-  >([]);
-  const [filteredSubscriptions, setFilteredSubscriptions] = useState<
-    SubscriptionDetails[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedSubscriptions, setSelectedSubscriptions] = useState<
-    Set<string>
-  >(new Set());
-  const [selectAll, setSelectAll] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [flightNumber, setFlightNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [searchError, setSearchError] = useState("");
-  const [carrier, setCarrier] = useState("UA");
-  const [departureStation, setDepartureStation] = useState("");
-  const [arrivalStation, setArrivalStation] = useState("");
-  const [departureStationError, setDepartureStationError] = useState("");
-  const [arrivalStationError, setArrivalStationError] = useState("");
-  const [flightNumberError, setFlightNumberError] = useState("");
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+  const [isUnsubscribeDialogOpen, setIsUnsubscribeDialogOpen] = useState(false)
+  const [subscriptionDetails, setSubscriptionDetails] = useState<SubscriptionDetails[]>([])
+  const [filteredSubscriptions, setFilteredSubscriptions] = useState<SubscriptionDetails[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedSubscriptions, setSelectedSubscriptions] = useState<Set<string>>(new Set())
+  const [selectAll, setSelectAll] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
+  const [flightNumber, setFlightNumber] = useState("")
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [searchError, setSearchError] = useState("")
+  const [carrier, setCarrier] = useState("UA")
+  const [departureStation, setDepartureStation] = useState("")
+  const [arrivalStation, setArrivalStation] = useState("")
+  const [departureStationError, setDepartureStationError] = useState("")
+  const [arrivalStationError, setArrivalStationError] = useState("")
+  const [flightNumberError, setFlightNumberError] = useState("")
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
 
   // Fetch subscription details when component mounts
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const details = await flightService.getSubscribedFlightsDetails();
-        setSubscriptionDetails(details);
-        setFilteredSubscriptions(details);
-        setHasInitiallyLoaded(true);
+        const details = await flightService.getSubscribedFlightsDetails()
+        setSubscriptionDetails(details)
+        setFilteredSubscriptions(details)
+        setHasInitiallyLoaded(true)
       } catch (error) {
-        console.error("Error fetching subscription details:", error);
-        setError("Failed to fetch subscription details");
+        console.error("Error fetching subscription details:", error)
+        setError("Failed to fetch subscription details")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchSubscriptionDetails();
-  }, []);
+    fetchSubscriptionDetails()
+  }, [])
 
   // Handle checkbox selection
   const handleSubscriptionSelect = useCallback((subscriptionId: string) => {
-    setSelectedSubscriptions((prev) => {
-      const newSelected = new Set(prev);
+    setSelectedSubscriptions(prev => {
+      const newSelected = new Set(prev)
       if (newSelected.has(subscriptionId)) {
-        newSelected.delete(subscriptionId);
+        newSelected.delete(subscriptionId)
       } else {
-        newSelected.add(subscriptionId);
+        newSelected.add(subscriptionId)
       }
-      return newSelected;
-    });
-  }, []);
+      return newSelected
+    })
+  }, [])
 
   // Reset selections when filters change
   useEffect(() => {
-    setSelectedSubscriptions(new Set());
-    setSelectAll(false);
-  }, [filteredSubscriptions]);
+    setSelectedSubscriptions(new Set())
+    setSelectAll(false)
+  }, [filteredSubscriptions])
 
   // Handlers for filter changes
   const handleCarrierChange = useCallback((value: string) => {
-    setCarrier(value);
-  }, []);
+    setCarrier(value)
+  }, [])
 
   // Handle flight number validation
   const handleFlightNumberChange = useCallback((value: string) => {
     // Only allow numeric input and limit to 4 digits
-    const numericValue = value.replace(/\D/g, "").slice(0, 4);
-    setFlightNumber(numericValue);
+    const numericValue = value.replace(/\D/g, "").slice(0, 4)
+    setFlightNumber(numericValue)
 
     // Validate
     if (numericValue && numericValue.length !== 4) {
-      setFlightNumberError("Flight number must be 4 digits");
+      setFlightNumberError("Flight number must be 4 digits")
     } else {
-      setFlightNumberError("");
+      setFlightNumberError("")
     }
-  }, []);
+  }, [])
 
   // Handle departure station validation
   const handleDepartureStationChange = useCallback((value: string) => {
     // Convert to uppercase and limit to 3 characters
-    const formattedValue = value.toUpperCase().slice(0, 3);
-    setDepartureStation(formattedValue);
+    const formattedValue = value.toUpperCase().slice(0, 3)
+    setDepartureStation(formattedValue)
 
     // Validate
     if (formattedValue && formattedValue.length !== 3) {
-      setDepartureStationError("Station code must be 3 characters");
+      setDepartureStationError("Station code must be 3 characters")
     } else {
-      setDepartureStationError("");
+      setDepartureStationError("")
     }
-  }, []);
+  }, [])
 
   // Handle arrival station validation
   const handleArrivalStationChange = useCallback((value: string) => {
     // Convert to uppercase and limit to 3 characters
-    const formattedValue = value.toUpperCase().slice(0, 3);
-    setArrivalStation(formattedValue);
+    const formattedValue = value.toUpperCase().slice(0, 3)
+    setArrivalStation(formattedValue)
 
     // Validate
     if (formattedValue && formattedValue.length !== 3) {
-      setArrivalStationError("Station code must be 3 characters");
+      setArrivalStationError("Station code must be 3 characters")
     } else {
-      setArrivalStationError("");
+      setArrivalStationError("")
     }
-  }, []);
+  }, [])
 
   // Add a reset filters function
   const resetFilters = useCallback(() => {
-    setFlightNumber("");
-    setCarrier("");
-    setDepartureStation("");
-    setArrivalStation("");
-    setSelectedDate(null);
-    setFilteredSubscriptions(subscriptionDetails);
-    setSearchError("");
-    setSelectedSubscriptions(new Set());
-    setSelectAll(false);
-    setFlightNumberError("");
-    setDepartureStationError("");
-    setArrivalStationError("");
-  }, [subscriptionDetails]);
+    setFlightNumber("")
+    setCarrier("")
+    setDepartureStation("")
+    setArrivalStation("")
+    setSelectedDate(null)
+    setFilteredSubscriptions(subscriptionDetails)
+    setSearchError("")
+    setSelectedSubscriptions(new Set())
+    setSelectAll(false)
+    setFlightNumberError("")
+    setDepartureStationError("")
+    setArrivalStationError("")
+  }, [subscriptionDetails])
 
   // Apply filters to subscriptions
   const applyFilters = useCallback(() => {
-    setIsSearching(true);
-    setSearchError("");
+    setIsSearching(true)
+    setSearchError("")
 
     // Validate inputs
-    let hasError = false;
+    let hasError = false
 
     if (flightNumber && flightNumber.length !== 4) {
-      setFlightNumberError("Flight number must be 4 digits");
-      hasError = true;
+      setFlightNumberError("Flight number must be 4 digits")
+      hasError = true
     }
 
     if (departureStation && departureStation.length !== 3) {
-      setDepartureStationError("Station code must be 3 characters");
-      hasError = true;
+      setDepartureStationError("Station code must be 3 characters")
+      hasError = true
     }
 
     if (arrivalStation && arrivalStation.length !== 3) {
-      setArrivalStationError("Station code must be 3 characters");
-      hasError = true;
+      setArrivalStationError("Station code must be 3 characters")
+      hasError = true
     }
 
     if (hasError) {
-      setIsSearching(false);
-      return;
+      setIsSearching(false)
+      return
     }
 
     try {
-      let filtered = [...subscriptionDetails];
+      let filtered = [...subscriptionDetails]
 
       // Filter by flight number if provided
       if (flightNumber) {
-        filtered = filtered.filter((item) =>
+        filtered = filtered.filter(item =>
           item.flight.flightNumber.toString().includes(flightNumber)
-        );
+        )
       }
 
       // Filter by carrier if provided
       if (carrier) {
-        filtered = filtered.filter(
-          (item) => item.flight.carrierCode === carrier
-        );
+        filtered = filtered.filter(item => item.flight.carrierCode === carrier)
       }
 
       // Filter by departure station if provided
       if (departureStation) {
-        filtered = filtered.filter(
-          (item) => item.flight.departureAirport === departureStation
-        );
+        filtered = filtered.filter(item => item.flight.departureAirport === departureStation)
       }
 
       // Filter by arrival station if provided
       if (arrivalStation) {
-        filtered = filtered.filter(
-          (item) => item.flight.arrivalAirport === arrivalStation
-        );
+        filtered = filtered.filter(item => item.flight.arrivalAirport === arrivalStation)
       }
 
       // Filter by date if selected
       if (selectedDate) {
-        const dateString = format(selectedDate, "yyyy-MM-dd");
-        filtered = filtered.filter(
-          (item) => item.flight.scheduledDepartureDate === dateString
-        );
+        const dateString = format(selectedDate, "yyyy-MM-dd")
+        filtered = filtered.filter(item => item.flight.scheduledDepartureDate === dateString)
       }
 
-      setFilteredSubscriptions(filtered);
-      setCurrentPage(1); // Reset to first page after filtering
+      setFilteredSubscriptions(filtered)
+      setCurrentPage(1) // Reset to first page after filtering
 
       if (
         filtered.length === 0 &&
-        (flightNumber ||
-          carrier ||
-          departureStation ||
-          arrivalStation ||
-          selectedDate)
+        (flightNumber || carrier || departureStation || arrivalStation || selectedDate)
       ) {
-        toast.info("No subscriptions match your search criteria");
+        toast.info("No subscriptions match your search criteria")
       }
     } catch (error) {
-      console.error("Error applying filters:", error);
-      setSearchError("Error applying filters");
+      console.error("Error applying filters:", error)
+      setSearchError("Error applying filters")
     } finally {
-      setIsSearching(false);
+      setIsSearching(false)
     }
-  }, [
-    subscriptionDetails,
-    flightNumber,
-    carrier,
-    departureStation,
-    arrivalStation,
-    selectedDate,
-  ]);
+  }, [subscriptionDetails, flightNumber, carrier, departureStation, arrivalStation, selectedDate])
 
   // Reset to first page when rows per page changes
   useEffect(() => {
-    setCurrentPage(1);
-  }, [itemsPerPage]);
+    setCurrentPage(1)
+  }, [itemsPerPage])
 
   // Calculate pagination
-  const indexOfLastSubscription = currentPage * itemsPerPage;
-  const indexOfFirstSubscription = indexOfLastSubscription - itemsPerPage;
+  const indexOfLastSubscription = currentPage * itemsPerPage
+  const indexOfFirstSubscription = indexOfLastSubscription - itemsPerPage
   const currentSubscriptions = filteredSubscriptions.slice(
     indexOfFirstSubscription,
     indexOfLastSubscription
-  );
-  const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage);
+  )
+  const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage)
 
   // Handle select all checkbox
   const handleSelectAll = useCallback(
     (checked: boolean) => {
-      setSelectAll(checked);
+      setSelectAll(checked)
       if (checked) {
-        const allSubscriptionIds = currentSubscriptions.map(
-          (sub) => sub.subscription._id
-        );
-        setSelectedSubscriptions(new Set(allSubscriptionIds));
+        const allSubscriptionIds = currentSubscriptions.map(sub => sub.subscription._id)
+        setSelectedSubscriptions(new Set(allSubscriptionIds))
       } else {
-        setSelectedSubscriptions(new Set());
+        setSelectedSubscriptions(new Set())
       }
     },
     [currentSubscriptions]
-  );
+  )
 
   // Update the handleBulkUnsubscribe function to refresh the list after unsubscribing
   const handleBulkUnsubscribe = useCallback(async () => {
     if (selectedSubscriptions.size === 0) {
-      toast.error("Please select at least one subscription to unsubscribe");
-      return;
+      toast.error("Please select at least one subscription to unsubscribe")
+      return
     }
 
-    setIsUnsubscribing(true);
+    setIsUnsubscribing(true)
 
     try {
       // Collect the data for all selected subscriptions
-      const flightNumbers: string[] = [];
-      const carrierCodes: string[] = [];
-      const departureAirports: string[] = [];
+      const flightNumbers: string[] = []
+      const carrierCodes: string[] = []
+      const departureAirports: string[] = []
 
       // Process each selected subscription
-      Array.from(selectedSubscriptions).forEach((subscriptionId) => {
+      Array.from(selectedSubscriptions).forEach(subscriptionId => {
         const subscription = subscriptionDetails.find(
-          (sub) => sub.subscription._id === subscriptionId
-        );
+          sub => sub.subscription._id === subscriptionId
+        )
         if (subscription) {
-          flightNumbers.push(subscription.subscription.flightNumber);
-          carrierCodes.push(subscription.flight.carrierCode);
-          departureAirports.push(subscription.subscription.departureAirport);
+          flightNumbers.push(subscription.subscription.flightNumber)
+          carrierCodes.push(subscription.flight.carrierCode)
+          departureAirports.push(subscription.subscription.departureAirport)
         }
-      });
+      })
 
       // Call the consolidated API method
       const success = await flightService.unsubscribeFlights(
         flightNumbers,
         carrierCodes,
         departureAirports
-      );
+      )
 
       if (success) {
         toast.success(
           `Successfully unsubscribed from ${flightNumbers.length} flight${
             flightNumbers.length > 1 ? "s" : ""
           }`
-        );
+        )
 
         // Refresh subscription list
-        await refreshSubscriptions();
+        await refreshSubscriptions()
       } else {
-        toast.error("Failed to unsubscribe from selected flights");
+        toast.error("Failed to unsubscribe from selected flights")
       }
     } catch (error) {
-      console.error("Error unsubscribing from flights:", error);
-      toast.error("An error occurred while unsubscribing");
+      console.error("Error unsubscribing from flights:", error)
+      toast.error("An error occurred while unsubscribing")
     } finally {
-      setIsUnsubscribing(false);
-      setIsUnsubscribeDialogOpen(false);
+      setIsUnsubscribing(false)
+      setIsUnsubscribeDialogOpen(false)
     }
-  }, [selectedSubscriptions, subscriptionDetails]);
+  }, [selectedSubscriptions, subscriptionDetails])
 
   // Add a function to refresh subscriptions
   const refreshSubscriptions = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const details = await flightService.getSubscribedFlightsDetails();
-      setSubscriptionDetails(details);
-      setFilteredSubscriptions(details);
-      setSelectedSubscriptions(new Set());
-      setSelectAll(false);
+      const details = await flightService.getSubscribedFlightsDetails()
+      setSubscriptionDetails(details)
+      setFilteredSubscriptions(details)
+      setSelectedSubscriptions(new Set())
+      setSelectAll(false)
     } catch (error) {
-      console.error("Error refreshing subscription details:", error);
-      setError("Failed to refresh subscription details");
+      console.error("Error refreshing subscription details:", error)
+      setError("Failed to refresh subscription details")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, []);
+  }, [])
 
   const handleUnsubscribe = () => {
     if (selectedSubscriptions.size === 0) {
-      toast.error("Please select at least one subscription to unsubscribe");
-      return;
+      toast.error("Please select at least one subscription to unsubscribe")
+      return
     }
-    setIsUnsubscribeDialogOpen(true);
-  };
+    setIsUnsubscribeDialogOpen(true)
+  }
 
   return (
     <>
@@ -422,10 +386,7 @@ export default function UnsubscribeFlightClient() {
               `}</style>
               <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
                 <div className="flex flex-col w-full md:w-auto">
-                  <label
-                    htmlFor="carrier-select"
-                    className="text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="carrier-select" className="text-sm font-medium mb-1">
                     Carrier
                   </label>
                   <Select value={carrier} onValueChange={handleCarrierChange}>
@@ -439,10 +400,7 @@ export default function UnsubscribeFlightClient() {
                 </div>
 
                 <div className="flex flex-col">
-                  <label
-                    htmlFor="flight-number"
-                    className="text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="flight-number" className="text-sm font-medium mb-1">
                     Flight
                   </label>
                   <div>
@@ -450,19 +408,15 @@ export default function UnsubscribeFlightClient() {
                       id="flight-number"
                       placeholder="Enter Flight Number"
                       value={flightNumber}
-                      onChange={(e) => handleFlightNumberChange(e.target.value)}
+                      onChange={e => handleFlightNumberChange(e.target.value)}
                       disabled={isLoading || isSearching}
                       className={`bg-background/90 border-2 ${
-                        flightNumberError
-                          ? "border-red-500"
-                          : "border-primary/50"
+                        flightNumberError ? "border-red-500" : "border-primary/50"
                       } shadow-sm w-full focus-visible:border-primary`}
                       maxLength={4}
                     />
                     {flightNumberError && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {flightNumberError}
-                      </p>
+                      <p className="text-xs text-red-500 mt-1">{flightNumberError}</p>
                     )}
                   </div>
                 </div>
@@ -473,10 +427,7 @@ export default function UnsubscribeFlightClient() {
 
                 {/* Departure Station */}
                 <div className="flex flex-col w-full md:w-auto">
-                  <label
-                    htmlFor="departure-station"
-                    className="text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="departure-station" className="text-sm font-medium mb-1">
                     From
                   </label>
                   <div>
@@ -484,30 +435,21 @@ export default function UnsubscribeFlightClient() {
                       id="departure-station"
                       placeholder="Enter Station Code"
                       value={departureStation}
-                      onChange={(e) =>
-                        handleDepartureStationChange(e.target.value)
-                      }
+                      onChange={e => handleDepartureStationChange(e.target.value)}
                       className={`bg-background/90 border-2 ${
-                        departureStationError
-                          ? "border-red-500"
-                          : "border-primary/50"
+                        departureStationError ? "border-red-500" : "border-primary/50"
                       } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
                       maxLength={3}
                     />
                     {departureStationError && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {departureStationError}
-                      </p>
+                      <p className="text-xs text-red-500 mt-1">{departureStationError}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Arrival Station */}
                 <div className="flex flex-col w-full md:w-auto">
-                  <label
-                    htmlFor="arrival-station"
-                    className="text-sm font-medium mb-1"
-                  >
+                  <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
                     To
                   </label>
                   <div>
@@ -515,42 +457,29 @@ export default function UnsubscribeFlightClient() {
                       id="arrival-station"
                       placeholder="Enter Station Code"
                       value={arrivalStation}
-                      onChange={(e) =>
-                        handleArrivalStationChange(e.target.value)
-                      }
+                      onChange={e => handleArrivalStationChange(e.target.value)}
                       className={`bg-background/90 border-2 ${
-                        arrivalStationError
-                          ? "border-red-500"
-                          : "border-primary/50"
+                        arrivalStationError ? "border-red-500" : "border-primary/50"
                       } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
                       maxLength={3}
                     />
                     {arrivalStationError && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {arrivalStationError}
-                      </p>
+                      <p className="text-xs text-red-500 mt-1">{arrivalStationError}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Date Picker */}
                 <div className="flex flex-col w-full md:w-auto">
-                  <label className="text-sm font-medium mb-1">
-                    Departure Date
-                  </label>
-                  <Popover
-                    open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
+                  <label className="text-sm font-medium mb-1">Departure Date</label>
+                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                       >
                         <CalendarIcon className="h-4 w-4 mr-2" />
-                        {selectedDate
-                          ? format(selectedDate, "PPP")
-                          : "Select Date"}
+                        {selectedDate ? format(selectedDate, "PPP") : "Select Date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="p-0 w-auto" align="start">
@@ -558,8 +487,8 @@ export default function UnsubscribeFlightClient() {
                         mode="single"
                         selected={selectedDate || undefined}
                         onSelect={(date: Date | undefined) => {
-                          setSelectedDate(date || null);
-                          setIsCalendarOpen(false);
+                          setSelectedDate(date || null)
+                          setIsCalendarOpen(false)
                         }}
                         initialFocus
                       />
@@ -614,17 +543,12 @@ export default function UnsubscribeFlightClient() {
                     <>
                       You don't have any flight subscriptions yet.
                       <br />
-                      Go to the "Add Flight Subscription" tab to subscribe to
-                      flights.
+                      Go to the "Add Flight Subscription" tab to subscribe to flights.
                     </>
                   ) : (
                     <>
                       No subscriptions match your search criteria.
-                      <Button
-                        variant="link"
-                        onClick={resetFilters}
-                        className="px-1 text-primary"
-                      >
+                      <Button variant="link" onClick={resetFilters} className="px-1 text-primary">
                         Clear all filters
                       </Button>
                     </>
@@ -650,24 +574,15 @@ export default function UnsubscribeFlightClient() {
               {/* Pagination controls */}
               <div className="flex justify-between w-full items-center">
                 <div className="text-muted-foreground text-sm">
-                  Showing{" "}
-                  {filteredSubscriptions.length === 0
-                    ? 0
-                    : indexOfFirstSubscription + 1}
-                  -
-                  {Math.min(
-                    indexOfLastSubscription,
-                    filteredSubscriptions.length
-                  )}{" "}
-                  of {filteredSubscriptions.length} subscriptions
+                  Showing {filteredSubscriptions.length === 0 ? 0 : indexOfFirstSubscription + 1}-
+                  {Math.min(indexOfLastSubscription, filteredSubscriptions.length)} of{" "}
+                  {filteredSubscriptions.length} subscriptions
                 </div>
 
                 <div className="flex justify-end gap-4 items-center">
                   <Select
                     value={itemsPerPage.toString()}
-                    onValueChange={(value) =>
-                      setItemsPerPage(Number.parseInt(value))
-                    }
+                    onValueChange={value => setItemsPerPage(Number.parseInt(value))}
                   >
                     <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-[80px] focus:border-primary">
                       <SelectValue placeholder="5" />
@@ -701,12 +616,10 @@ export default function UnsubscribeFlightClient() {
                           <PaginationItem>
                             <PaginationPrevious
                               href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
+                              onClick={e => {
+                                e.preventDefault()
                                 if (currentPage > 1) {
-                                  setCurrentPage((prev) =>
-                                    Math.max(prev - 1, 1)
-                                  );
+                                  setCurrentPage(prev => Math.max(prev - 1, 1))
                                 }
                               }}
                               className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
@@ -728,12 +641,10 @@ export default function UnsubscribeFlightClient() {
                           <PaginationItem>
                             <PaginationNext
                               href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
+                              onClick={e => {
+                                e.preventDefault()
                                 if (currentPage < totalPages) {
-                                  setCurrentPage((prev) =>
-                                    Math.min(prev + 1, totalPages)
-                                  );
+                                  setCurrentPage(prev => Math.min(prev + 1, totalPages))
                                 }
                               }}
                               className="bg-background/90 border-2 border-primary/50 shadow-sm focus:border-primary"
@@ -771,8 +682,7 @@ export default function UnsubscribeFlightClient() {
           <div className="bg-background rounded-lg shadow-lg p-6 max-w-md w-full">
             <h3 className="text-lg font-medium mb-4">Confirm Unsubscription</h3>
             <p className="text-muted-foreground mb-6">
-              Are you sure you want to unsubscribe from{" "}
-              {selectedSubscriptions.size} selected flight
+              Are you sure you want to unsubscribe from {selectedSubscriptions.size} selected flight
               {selectedSubscriptions.size > 1 ? "s" : ""}?
             </p>
             <div className="flex justify-end gap-3">
@@ -802,5 +712,5 @@ export default function UnsubscribeFlightClient() {
         </div>
       )}
     </>
-  );
+  )
 }

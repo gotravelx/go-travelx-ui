@@ -2,7 +2,17 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Plane, Bell, MapPin, Info, AlertCircle, Loader2, LockIcon, ShieldCheck, ShieldAlert } from "lucide-react"
+import {
+  Plane,
+  Bell,
+  MapPin,
+  Info,
+  AlertCircle,
+  Loader2,
+  LockIcon,
+  ShieldCheck,
+  ShieldAlert,
+} from "lucide-react"
 import { Badge } from "./ui/badge"
 import { useState, useEffect } from "react"
 import { flightService } from "@/services/api"
@@ -23,8 +33,6 @@ import { getStatusDisplay } from "@/utils/common"
 export interface FlightStatusViewProps {
   flightData: FlightData
 }
-
-
 
 export default function SubscribeFlightCard({ flightData }: FlightStatusViewProps) {
   const [isSubscribing, setIsSubscribing] = useState(false)
@@ -60,7 +68,7 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         departureDate: flightData.scheduledDepartureDate,
       })
 
@@ -68,7 +76,7 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       })
 
@@ -90,7 +98,7 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
       console.log("Flight data:", {
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         departureAirport: flightData.departureAirport,
         departureDate: flightData.scheduledDepartureDate,
       })
@@ -100,7 +108,7 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       })
 
@@ -180,7 +188,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
   }
 
   // Format boarding time with error handling
-  const boardingTimeFormatted = flightData.boardingTime ? formatTime(flightData.boardingTime) : "Not available"
+  const boardingTimeFormatted = flightData.boardingTime
+    ? formatTime(flightData.boardingTime)
+    : "Not available"
 
   // Get flight status badge
   const getFlightStatusBadge = () => {
@@ -249,12 +259,18 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                 <div className="flex-1 text-left pr-12">
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground tracking-wider">DEPARTURE</p>
+                      <p className="text-sm font-medium text-muted-foreground tracking-wider">
+                        DEPARTURE
+                      </p>
                       <p className="text-2xl font-bold mt-1">{departureTime}</p>
                     </div>
                     <div>
-                      <span className="text-2xl font-bold text-primary">{flightData.departureAirport}</span>
-                      <p className="text-sm text-muted-foreground mt-2">{flightData.departureCity}</p>
+                      <span className="text-2xl font-bold text-primary">
+                        {flightData.departureAirport}
+                      </span>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {flightData.departureCity}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -277,11 +293,15 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                 <div className="flex-1 text-right pl-12">
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground tracking-wider">ARRIVAL</p>
+                      <p className="text-sm font-medium text-muted-foreground tracking-wider">
+                        ARRIVAL
+                      </p>
                       <p className="text-2xl font-bold mt-1">{arrivalTime}</p>
                     </div>
                     <div>
-                      <span className="text-2xl font-bold text-primary">{flightData.arrivalAirport}</span>
+                      <span className="text-2xl font-bold text-primary">
+                        {flightData.arrivalAirport}
+                      </span>
                       <p className="text-sm text-muted-foreground mt-2">{flightData.arrivalCity}</p>
                     </div>
                   </div>
@@ -308,8 +328,8 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                           {isSubscribed
                             ? "Securely Subscribed"
                             : isSubscribed
-                              ? "Subscribing..."
-                              : "Private Subscription"}
+                            ? "Subscribing..."
+                            : "Private Subscription"}
                         </Button>
                       </div>
                     </TooltipTrigger>
@@ -346,7 +366,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Scheduled Departure:</span>
-                      <span className="font-medium">{formatTime(flightData.scheduledDepartureUTCDateTime)}</span>
+                      <span className="font-medium">
+                        {formatTime(flightData.scheduledDepartureUTCDateTime)}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Actual Departure:</span>
@@ -374,7 +396,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                       <span className="text-muted-foreground">Delay:</span>
                       <span
                         className={`font-medium ${
-                          (flightData.departureDelayMinutes ?? 0) > 0 ? "text-destructive" : "text-emerald-500"
+                          (flightData.departureDelayMinutes ?? 0) > 0
+                            ? "text-destructive"
+                            : "text-emerald-500"
                         }`}
                       >
                         {(flightData.departureDelayMinutes ?? 0) > 0
@@ -400,7 +424,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Scheduled Arrival:</span>
-                      <span className="font-medium">{formatTime(flightData.scheduledArrivalUTCDateTime)}</span>
+                      <span className="font-medium">
+                        {formatTime(flightData.scheduledArrivalUTCDateTime)}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Actual Arrival:</span>
@@ -430,7 +456,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                       <span className="text-muted-foreground">Delay:</span>
                       <span
                         className={`font-medium ${
-                          (flightData.arrivalDelayMinutes ?? 0) > 0 ? "text-destructive" : "text-emerald-500"
+                          (flightData.arrivalDelayMinutes ?? 0) > 0
+                            ? "text-destructive"
+                            : "text-emerald-500"
                         }`}
                       >
                         {(flightData.arrivalDelayMinutes ?? 0) > 0
@@ -457,11 +485,16 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                       </tr>
                     </thead>
                     <tbody>
-                      {flightData.marketedFlightSegment && flightData.marketedFlightSegment.length > 0 ? (
+                      {flightData.marketedFlightSegment &&
+                      flightData.marketedFlightSegment.length > 0 ? (
                         flightData.marketedFlightSegment.map((segment, index) => (
                           <tr key={index} className="hover:bg-muted/30">
-                            <td className="border border-border p-2">{segment.MarketingAirlineCode || "TBD"}</td>
-                            <td className="border border-border p-2">{segment.FlightNumber || "TBD"}</td>
+                            <td className="border border-border p-2">
+                              {segment.MarketingAirlineCode || "TBD"}
+                            </td>
+                            <td className="border border-border p-2">
+                              {segment.FlightNumber || "TBD"}
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -531,8 +564,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
 
             <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
               <p className="text-xs text-amber-800 dark:text-amber-300">
-                By subscribing, you agree to receive flight updates through the blockchain network. Standard
-                subscriptions are not encrypted and may be visible to other network participants.
+                By subscribing, you agree to receive flight updates through the blockchain network.
+                Standard subscriptions are not encrypted and may be visible to other network
+                participants.
               </p>
             </div>
           </div>
@@ -564,8 +598,8 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
               Confirm Secure Subscription
             </DialogTitle>
             <DialogDescription>
-              You are about to subscribe to secure encrypted flight updates for {flightData.carrierCode}{" "}
-              {flightData.flightNumber}.
+              You are about to subscribe to secure encrypted flight updates for{" "}
+              {flightData.carrierCode} {flightData.flightNumber}.
             </DialogDescription>
           </DialogHeader>
 
@@ -606,9 +640,9 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
 
             <div className="bg-emerald-50 dark:bg-emerald-950/20 p-3 rounded-md border border-emerald-200 dark:border-emerald-800">
               <p className="text-xs text-emerald-800 dark:text-emerald-300">
-                Secure subscriptions use encryption to protect your flight data. Only you will be able to decrypt and
-                view the detailed flight information. This subscription type requires slightly higher gas fees due to
-                the encryption overhead.
+                Secure subscriptions use encryption to protect your flight data. Only you will be
+                able to decrypt and view the detailed flight information. This subscription type
+                requires slightly higher gas fees due to the encryption overhead.
               </p>
             </div>
           </div>

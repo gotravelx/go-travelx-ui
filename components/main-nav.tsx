@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Plane, BookOpen, Home, Menu, X, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-switcher";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { Plane, BookOpen, Home, Menu, X, LogOut } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-switcher"
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/auth-context"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,35 +16,35 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function MainNav() {
-  const pathname = usePathname();
-  const [isMounted, setIsMounted] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isAuthenticated, logout } = useAuth();
+  const pathname = usePathname()
+  const [isMounted, setIsMounted] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { user, isAuthenticated, logout } = useAuth()
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMounted(true)
+  }, [])
 
   // Close mobile menu when route changes
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
+    setIsMenuOpen(false)
+  }, [pathname])
 
-  if (!isMounted) return null;
+  if (!isMounted) return null
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => pathname === path
 
   const getInitials = (name: string) => {
     return name
       .split(" ")
-      .map((n) => n[0])
+      .map(n => n[0])
       .join("")
-      .toUpperCase();
-  };
+      .toUpperCase()
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
@@ -87,9 +87,7 @@ export function MainNav() {
               href="/marketing"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-primary",
-                isActive("/marketing")
-                  ? "text-primary"
-                  : "text-muted-foreground"
+                isActive("/marketing") ? "text-primary" : "text-muted-foreground"
               )}
             >
               Marketing
@@ -98,20 +96,14 @@ export function MainNav() {
             {isAuthenticated ? (
               <>
                 <Link href="/flifo">
-                  <Button
-                    className="gap-2"
-                    variant={isActive("/flifo") ? "default" : "outline"}
-                  >
+                  <Button className="gap-2" variant={isActive("/flifo") ? "default" : "outline"}>
                     <Plane className="h-4 w-4" />
                     Flight Info
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-8 w-8 rounded-full"
-                    >
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="bg-primary/10 text-primary">
                           {user ? getInitials(user.name) : "U"}
@@ -122,19 +114,14 @@ export function MainNav() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user?.name}
-                        </p>
+                        <p className="text-sm font-medium leading-none">{user?.name}</p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user?.username}
                         </p>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={logout}
-                      className="cursor-pointer"
-                    >
+                    <DropdownMenuItem onClick={logout} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -152,16 +139,8 @@ export function MainNav() {
           {/* Mobile Navigation */}
           <div className="flex md:hidden items-center gap-4">
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+            <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
@@ -208,8 +187,7 @@ export function MainNav() {
                   href="/flifo"
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                    isActive("/flifo") &&
-                      "bg-primary text-primary-foreground hover:bg-primary/90"
+                    isActive("/flifo") && "bg-primary text-primary-foreground hover:bg-primary/90"
                   )}
                 >
                   <Plane className="h-4 w-4" />
@@ -224,9 +202,7 @@ export function MainNav() {
                     </Avatar>
                     <div>
                       <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {user?.username}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{user?.username}</p>
                     </div>
                   </div>
                   <Button
@@ -251,5 +227,5 @@ export function MainNav() {
         </div>
       )}
     </header>
-  );
+  )
 }

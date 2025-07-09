@@ -17,7 +17,10 @@ export function FlightUpdatesView({ updates }: FlightUpdatesProps) {
       <CardContent>
         <div className="space-y-4">
           {updates.updates.map((update, index) => (
-            <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <div
+              key={index}
+              className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+            >
               <div>
                 <p className="text-sm font-medium">{update.field}</p>
                 <p className="text-xs text-muted-foreground">Updated to: {update.newValue}</p>

@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/auth-context";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
@@ -15,48 +15,46 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+} from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, isAuthenticated } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams?.get("redirect") || "/";
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { login, isAuthenticated } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams?.get("redirect") || "/"
 
   useEffect(() => {
     // If already authenticated, redirect to the intended destination
     if (isAuthenticated) {
-      router.push(redirectUrl);
+      router.push(redirectUrl)
     }
-  }, [isAuthenticated, redirectUrl, router]);
+  }, [isAuthenticated, redirectUrl, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+    e.preventDefault()
+    setError("")
+    setIsSubmitting(true)
 
     try {
-      await login(username, password);
+      await login(username, password)
       // Successful login will trigger the useEffect above
     } catch (err) {
-      setError("Invalid username or password. Please try again.");
-      setIsSubmitting(false);
+      setError("Invalid username or password. Please try again.")
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Welcome to GoTravelX
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Welcome to GoTravelX</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access the flight information system
           </CardDescription>
@@ -74,7 +72,7 @@ export default function LoginPage() {
                 id="username"
                 placeholder="Enter your username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
                 required
               />
             </div>
@@ -85,7 +83,7 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -112,5 +110,5 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }

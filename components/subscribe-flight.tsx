@@ -1,24 +1,20 @@
-"use client";
+"use client"
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { format } from "date-fns";
-import { AlertCircle, CalendarIcon } from "lucide-react";
-import { memo, useState, useEffect } from "react";
+} from "@/components/ui/select"
+import { format } from "date-fns"
+import { AlertCircle, CalendarIcon } from "lucide-react"
+import { memo, useState, useEffect } from "react"
 
 const SubscribeFlight = memo(
   ({
@@ -39,87 +35,83 @@ const SubscribeFlight = memo(
     onCarrierChange,
     setSearchError,
   }: {
-    flightNumber: string;
-    onFlightNumberChange: (value: string) => void;
-    onSearch: () => void;
-    isLoading: boolean;
-    searchError: string;
-    selectedDate: Date | undefined;
-    onDateChange: (value: Date) => void;
-    carrier: string;
-    departureStation: string;
-    setDepartureStation: (value: string) => void;
-    arrivalStation: string;
-    setArrivalStation: (value: string) => void;
-    onDepartureStationChange: (value: string) => void;
-    onArrivalStationChange: (value: string) => void;
-    onCarrierChange: (value: string) => void;
-    setSearchError?: (value: string) => void;
+    flightNumber: string
+    onFlightNumberChange: (value: string) => void
+    onSearch: () => void
+    isLoading: boolean
+    searchError: string
+    selectedDate: Date | undefined
+    onDateChange: (value: Date) => void
+    carrier: string
+    departureStation: string
+    setDepartureStation: (value: string) => void
+    arrivalStation: string
+    setArrivalStation: (value: string) => void
+    onDepartureStationChange: (value: string) => void
+    onArrivalStationChange: (value: string) => void
+    onCarrierChange: (value: string) => void
+    setSearchError?: (value: string) => void
   }) => {
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
     // Set default date on component mount
     useEffect(() => {
       if (!selectedDate) {
-        const today = new Date();
-        onDateChange(today);
+        const today = new Date()
+        onDateChange(today)
       }
-    }, [selectedDate, onDateChange]);
+    }, [selectedDate, onDateChange])
 
     // Add flight number validation
     const handleFlightNumberChange = (value: string) => {
       // Only allow numeric input and limit to 4 digits
-      const numericValue = value.replace(/\D/g, "").slice(0, 4);
-      onFlightNumberChange(numericValue);
-    };
+      const numericValue = value.replace(/\D/g, "").slice(0, 4)
+      onFlightNumberChange(numericValue)
+    }
 
     // Add departure station validation
     const handleDepartureStationChange = (value: string) => {
       // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setDepartureStation(formattedValue);
-      onDepartureStationChange(formattedValue);
-    };
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setDepartureStation(formattedValue)
+      onDepartureStationChange(formattedValue)
+    }
 
     // Handle arrival station validation
     const handleArrivalStationChange = (value: string) => {
       // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setArrivalStation(formattedValue);
-      onArrivalStationChange(formattedValue);
-    };
+      const formattedValue = value.toUpperCase().slice(0, 3)
+      setArrivalStation(formattedValue)
+      onArrivalStationChange(formattedValue)
+    }
 
     // Update the onSearch function to validate inputs before searching
     const handleSearch = () => {
       // Validate inputs before searching
-      let hasError = false;
-      let errorMessage = "";
+      let hasError = false
+      let errorMessage = ""
 
-      if (
-        !flightNumber ||
-        flightNumber.length !== 4 ||
-        !/^\d+$/.test(flightNumber)
-      ) {
-        errorMessage = "Flight number must be 4 digits";
-        hasError = true;
+      if (!flightNumber || flightNumber.length !== 4 || !/^\d+$/.test(flightNumber)) {
+        errorMessage = "Flight number must be 4 digits"
+        hasError = true
       }
-      
+
       if (hasError) {
         // Set error message if setSearchError is available
         if (typeof setSearchError === "function") {
-          setSearchError(errorMessage);
+          setSearchError(errorMessage)
         }
-        return;
+        return
       }
 
       // Clear any previous error if setSearchError is available
       if (searchError && typeof setSearchError === "function") {
-        setSearchError("");
+        setSearchError("")
       }
 
       // Proceed with search
-      onSearch();
-    };
+      onSearch()
+    }
 
     return (
       <div className="w-full mx-auto">
@@ -131,10 +123,7 @@ const SubscribeFlight = memo(
         `}</style>
         <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="carrier-select"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="carrier-select" className="text-sm font-medium mb-1">
               Carrier
             </label>
             <Select value={carrier} onValueChange={onCarrierChange}>
@@ -155,7 +144,7 @@ const SubscribeFlight = memo(
               id="flight-number"
               placeholder="Enter Flight Number"
               value={flightNumber}
-              onChange={(e) => handleFlightNumberChange(e.target.value)}
+              onChange={e => handleFlightNumberChange(e.target.value)}
               disabled={isLoading}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
               maxLength={4}
@@ -168,17 +157,14 @@ const SubscribeFlight = memo(
 
           {/* Departure Station */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="departure-station"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="departure-station" className="text-sm font-medium mb-1">
               From
             </label>
             <Input
               id="departure-station"
               placeholder="Enter Station Code"
               value={departureStation}
-              onChange={(e) => handleDepartureStationChange(e.target.value)}
+              onChange={e => handleDepartureStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
             />
@@ -186,17 +172,14 @@ const SubscribeFlight = memo(
 
           {/* Arrival Station */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="arrival-station"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
               To
             </label>
             <Input
               id="arrival-station"
               placeholder="Enter Station Code"
               value={arrivalStation}
-              onChange={(e) => handleArrivalStationChange(e.target.value)}
+              onChange={e => handleArrivalStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
             />
@@ -212,16 +195,14 @@ const SubscribeFlight = memo(
                   className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                 >
                   <CalendarIcon className="h-4 w-4 mr-2" />
-                  {selectedDate
-                    ? format(selectedDate, "PPP")
-                    : format(new Date(), "PPP")}
+                  {selectedDate ? format(selectedDate, "PPP") : format(new Date(), "PPP")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0 w-auto" align="start">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(selectedDate) => {
+                  onSelect={selectedDate => {
                     if (selectedDate) {
                       const normalizedDate = new Date(
                         Date.UTC(
@@ -229,12 +210,12 @@ const SubscribeFlight = memo(
                           selectedDate.getMonth(),
                           selectedDate.getDate()
                         )
-                      );
-                      onDateChange(normalizedDate);
+                      )
+                      onDateChange(normalizedDate)
                     }
-                    setIsCalendarOpen(false);
+                    setIsCalendarOpen(false)
                   }}
-                  disabled={(d) => d > new Date() || d < new Date("2023-01-01")}
+                  disabled={d => d > new Date() || d < new Date("2023-01-01")}
                   initialFocus
                 />
               </PopoverContent>
@@ -260,10 +241,10 @@ const SubscribeFlight = memo(
           </Alert>
         )}
       </div>
-    );
+    )
   }
-);
+)
 
-SubscribeFlight.displayName = "SubscribeFlight";
+SubscribeFlight.displayName = "SubscribeFlight"
 
-export default SubscribeFlight;
+export default SubscribeFlight

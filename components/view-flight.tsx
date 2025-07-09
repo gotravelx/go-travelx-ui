@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { format } from "date-fns"
 import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react"
 import { memo, useCallback, useEffect, useState } from "react"
@@ -95,7 +101,7 @@ const ViewFlightClient = memo(
         const numericValue = value.replace(/\D/g, "").slice(0, 4)
         onFlightNumberChange(numericValue)
       },
-      [onFlightNumberChange],
+      [onFlightNumberChange]
     )
 
     // Handle departure station validation
@@ -124,7 +130,13 @@ const ViewFlightClient = memo(
       setFilteredFlights(subscribedFlights)
       setTotalItems(subscribedFlights.length)
       setLocalSearchError("")
-    }, [onFlightNumberChange, onCarrierChange, onDateChange, subscribedFlights, setLocalSearchError])
+    }, [
+      onFlightNumberChange,
+      onCarrierChange,
+      onDateChange,
+      subscribedFlights,
+      setLocalSearchError,
+    ])
 
     // Apply filters to subscribed flights
     const applyFilters = useCallback(() => {
@@ -160,12 +172,12 @@ const ViewFlightClient = memo(
 
       // Filter by flight number if provided
       if (flightNumber) {
-        filtered = filtered.filter((flight) => flight.flightNumber.toString().includes(flightNumber))
+        filtered = filtered.filter(flight => flight.flightNumber.toString().includes(flightNumber))
       }
 
       // Filter by carrier if provided
       if (carrier) {
-        filtered = filtered.filter((flight) => {
+        filtered = filtered.filter(flight => {
           // Handle cases where carrierCode might be empty, default to "UA"
           const flightCarrier = flight.carrierCode || "UA"
           return flightCarrier === carrier
@@ -174,18 +186,18 @@ const ViewFlightClient = memo(
 
       // Filter by departure station if provided
       if (viewDepartureStation) {
-        filtered = filtered.filter((flight) => flight.departureAirport === viewDepartureStation)
+        filtered = filtered.filter(flight => flight.departureAirport === viewDepartureStation)
       }
 
       // Filter by arrival station if provided
       if (viewArrivalStation) {
-        filtered = filtered.filter((flight) => flight.arrivalAirport === viewArrivalStation)
+        filtered = filtered.filter(flight => flight.arrivalAirport === viewArrivalStation)
       }
 
       // Filter by date if selected (only if a date is actually selected)
       if (selectedDate) {
         const dateString = format(selectedDate, "yyyy-MM-dd")
-        filtered = filtered.filter((flight) => flight.scheduledDepartureDate === dateString)
+        filtered = filtered.filter(flight => flight.scheduledDepartureDate === dateString)
       }
 
       setFilteredFlights(filtered)
@@ -240,7 +252,7 @@ const ViewFlightClient = memo(
               id="flight-number"
               placeholder="Enter Flight Number"
               value={flightNumber}
-              onChange={(e) => handleFlightNumberChange(e.target.value)}
+              onChange={e => handleFlightNumberChange(e.target.value)}
               disabled={isLoading}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
               maxLength={4}
@@ -260,7 +272,7 @@ const ViewFlightClient = memo(
               id="departure-station"
               placeholder="Enter Station Code"
               value={viewDepartureStation}
-              onChange={(e) => handleDepartureStationChange(e.target.value)}
+              onChange={e => handleDepartureStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
             />
@@ -275,7 +287,7 @@ const ViewFlightClient = memo(
               id="arrival-station"
               placeholder="Enter Station Code"
               value={viewArrivalStation}
-              onChange={(e) => handleArrivalStationChange(e.target.value)}
+              onChange={e => handleArrivalStationChange(e.target.value)}
               className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
               maxLength={3}
             />
@@ -298,7 +310,7 @@ const ViewFlightClient = memo(
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(date) => {
+                  onSelect={date => {
                     onDateChange(date || undefined)
                     setIsCalendarOpen(false)
                   }}
@@ -380,7 +392,7 @@ const ViewFlightClient = memo(
         </div>
       </div>
     )
-  },
+  }
 )
 
 ViewFlightClient.displayName = "ViewFlightClient"

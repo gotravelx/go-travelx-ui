@@ -1,16 +1,16 @@
-import log from "loglevel";
+import log from "loglevel"
 
 if (process.env.NODE_ENV === "development") {
-  log.setLevel("debug");
+  log.setLevel("debug")
 } else {
-  log.setLevel("warn");
+  log.setLevel("warn")
 }
 
 interface Logger {
-  info: (message: string) => void;
-  warn: (message: string) => void;
-  error: (message: string) => void;
-  debug: (message: string) => void;
+  info: (message: string) => void
+  warn: (message: string) => void
+  error: (message: string) => void
+  debug: (message: string) => void
 }
 
 const logger: Logger = {
@@ -18,6 +18,6 @@ const logger: Logger = {
   warn: (message: string) => log.warn(`[WARN]: ${message}`),
   error: (message: string) => log.error(`[ERROR]: ${message}`),
   debug: (message: string) => log.debug(`[DEBUG]: ${message}`),
-};
+}
 
-export default logger;
+export default logger
