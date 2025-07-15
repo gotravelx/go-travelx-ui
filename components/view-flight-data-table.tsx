@@ -184,19 +184,6 @@ export default function ViewFlightDatTable({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      if (!dateString) return "N/A";
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }).format(date);
-    } catch (error) {
-      return "Invalid date";
-    }
-  };
 
   if (isLoading) {
     return (
@@ -373,7 +360,7 @@ export default function ViewFlightDatTable({
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(flight?.scheduledDepartureUTCDateTime)}
+                        {flight?.scheduledDepartureUTCDateTime}
                       </div>
                     </TableCell>
 
@@ -390,7 +377,7 @@ export default function ViewFlightDatTable({
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(flight?.scheduledArrivalUTCDateTime)}
+                        {flight?.scheduledArrivalUTCDateTime}
                       </div>
                     </TableCell>
 
@@ -469,9 +456,9 @@ export default function ViewFlightDatTable({
                                   Scheduled:
                                 </div>
                                 <div>
-                                  {formatTime(
+                                  {
                                     flight.scheduledDepartureUTCDateTime
-                                  ) || "TBD"}
+                                   || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:
@@ -503,9 +490,9 @@ export default function ViewFlightDatTable({
                                   Scheduled:
                                 </div>
                                 <div>
-                                  {formatTime(
-                                    flight.scheduledArrivalUTCDateTime
-                                  ) || "TBD"}
+                                  {
+                                    flight?.scheduledArrivalUTCDateTime
+                                   || "TBD"}
                                 </div>
                                 <div className="text-muted-foreground">
                                   Status:

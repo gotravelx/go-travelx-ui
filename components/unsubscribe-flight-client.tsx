@@ -468,7 +468,7 @@ export default function UnsubscribeFlightClient() {
                 </div>
 
                 <div className="flex flex-5 flex-col justify-center items-center">
-                  <div className="pt-4">and/or </div>
+                  <div className="pt-4">and </div>
                 </div>
 
                 {/* Departure Station */}
