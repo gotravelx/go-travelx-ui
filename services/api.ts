@@ -1,16 +1,27 @@
-import type { AirportSearchResponse, FlightData, FlightSubscriptionRequest, SubscriptionDetails } from "@/types/flight"
-import { contractService } from "./contract-service"
+import type {
+  AirportSearchResponse,
+  FlightData,
+  FlightSubscriptionRequest,
+  SubscriptionDetails,
+  GetFlightSubscriptionsApiResponse,
+} from "@/types/flight"
 import { mapStatusCodeToPhase } from "@/utils/common"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
-const WALLET_ADDRESS = contractService.getWalletAddress()
 
-export const flightService = {
-  searchAirportCodes: async (): Promise<AirportSearchResponse> => {
+
+class FlightService {
+  private baseUrl: string
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl
+  }
+
+  searchAirportCodes = async (): Promise<AirportSearchResponse> => {
     try {
-      console.log("Fetching airport codes from:", `${BASE_URL}/v1/airport-codes`)
+      console.log("Fetching airport codes from:", `${this.baseUrl}/v1/airport-codes`)
 
-      const response = await fetch(`${BASE_URL}/v1/airport-codes`, {
+      const response = await fetch(`${this.baseUrl}/v1/airport-codes`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -30,9 +41,9 @@ export const flightService = {
       console.error("Error searching airport codes:", error)
       throw error
     }
-  },
+  }
 
-  searchFlight: async (
+  searchFlight = async (
     carrierCode: string,
     flightNumber: string,
     departureStation: string,
@@ -45,7 +56,7 @@ export const flightService = {
       )
 
       const response = await fetch(
-        `${BASE_URL}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
+        `${this.baseUrl}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&arrival=${arrivalStation}&includeFullData=false`,
       )
@@ -109,38 +120,9 @@ export const flightService = {
       console.error("Error fetching flight details:", error)
       throw error
     }
-  },
+  }
 
-  viewFlightDetails: async (carrierCode: string, flightNumber: string, departureDate: Date): Promise<FlightData> => {
-    try {
-      console.log(`Fetching flight details for ${carrierCode} ${flightNumber} on ${departureDate.toISOString()}`)
-
-      const response = await fetch(`${BASE_URL}/flights/get-flight-details`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          flightNumber,
-          scheduledDepartureDate: departureDate.toISOString().split("T")[0],
-          carrierCode,
-          walletAddress: WALLET_ADDRESS,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
-      }
-
-      const data = await response.json()
-      return data.response
-    } catch (error) {
-      console.error("Error fetching flight details:", error)
-      throw error
-    }
-  },
-
-  subscribeToFlight: async (data: FlightSubscriptionRequest): Promise<any> => {
+  subscribeToFlight = async (data: FlightSubscriptionRequest): Promise<any> => {
     try {
       console.log("Subscribing to flight with data:", data)
 
@@ -154,7 +136,7 @@ export const flightService = {
 
       console.log("Request body:", requestBody)
 
-      const response = await fetch(`${BASE_URL}/v1/subscription/add-flight-subscription`, {
+      const response = await fetch(`${this.baseUrl}/v1/subscription/add-flight-subscription`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -174,11 +156,11 @@ export const flightService = {
       console.error("Error subscribing to flight:", error)
       throw error
     }
-  },
+  }
 
-  getSubscribedFlights: async (): Promise<FlightData[]> => {
+  getSubscribedFlights = async (): Promise<FlightData[]> => {
     try {
-      const response = await fetch(`${BASE_URL}/v1/flights/get-all-flights`, {
+      const response = await fetch(`${this.baseUrl}/v1/flights/get-all-flights`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -245,50 +227,103 @@ export const flightService = {
       console.error("Error fetching subscribed flights:", error)
       return []
     }
-  },
+  }
 
-  getSubscribedFlightsDetails: async (): Promise<SubscriptionDetails[]> => {
+  getSubscribedFlightsDetails = async (walletAddress: string): Promise<SubscriptionDetails[]> => {
     try {
-      console.log(`Fetching subscribed flights details for wallet: ${WALLET_ADDRESS}`)
+      console.log(`Fetching subscribed flights details for wallet: ${walletAddress}`)
 
-      const response = await fetch(`${BASE_URL}/flights/subscribed-flights-details/${WALLET_ADDRESS}`)
+      const response = await fetch(`${this.baseUrl}/v1/subscription/get-flight-subscriptions`, {
+        
+      })
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to fetch subscribed flights")
       }
 
-      const data = await response.json()
-      console.log("Subscribed flights details:", data)
+      const data: GetFlightSubscriptionsApiResponse = await response.json()
+      console.log("Subscribed flights details API response:", data)
 
-      if (!data.success || !data.data) {
-        console.error("API returned unsuccessful response or no data")
-        return []
+      if (data.success && data.subscriptions) {
+        return data.subscriptions.map((apiSub: any) => {
+          // Map the flat API response object into the nested SubscriptionDetails structure
+          const flightData: FlightData = {
+            flightNumber: apiSub.flightNumber,
+            scheduledDepartureDate: apiSub.departureDate,
+            carrierCode: apiSub.airline.code,
+            operatingAirline: apiSub.airline.name,
+            estimatedArrivalUTC: apiSub.times.estimatedArrival,
+            estimatedDepartureUTC: apiSub.times.estimatedDeparture,
+            arrivalAirport: apiSub.arrivalAirport.code,
+            departureAirport: apiSub.departureAirport.code,
+            arrivalCity: apiSub.departureAirport.city,
+            departureCity: apiSub.arrivalAirport.city,
+            departureGate: apiSub.departureAirport.departureGate,
+            arrivalGate: apiSub.arrivalAirport.arrivalGate,
+            statusCode: mapStatusCodeToPhase(apiSub.status.legStatus || apiSub.status.code),
+            flightStatus: apiSub.status.current,
+            equipmentModel: apiSub.aircraft.model,
+            departureTerminal: apiSub.departureAirport.departureTerminal,
+            arrivalTerminal: apiSub.arrivalAirport.arrivalTerminal,
+            actualDepartureUTC: apiSub.times.actualDeparture,
+            actualArrivalUTC: apiSub.times.actualArrival,
+            outTimeUTC: apiSub.times.outTime,
+            offTimeUTC: apiSub.times.offTime,
+            onTimeUTC: apiSub.times.onTime,
+            inTimeUTC: apiSub.times.inTime,
+            baggageClaim: apiSub.baggageClaim,
+            departureDelayMinutes: apiSub.delays.departureDelayMinutes,
+            arrivalDelayMinutes: apiSub.delays.arrivalDelayMinutes,
+            boardingTime: apiSub.times.boardTime,
+            isCanceled: apiSub.isCanceled,
+            scheduledArrivalUTCDateTime: apiSub.times.scheduledArrival,
+            scheduledDepartureUTCDateTime: apiSub.times.scheduledDeparture,
+            departureState: apiSub.status.departureStatus,
+            arrivalState: apiSub.status.arrivalStatus,
+            marketedFlightSegment: apiSub.MarketedFlightSegment || [],
+            currentFlightStatus: apiSub.status.current,
+            isSubscribed: true, // Assuming if it's in this list, it's subscribed
+            blockchainTxHash: apiSub.blockchainHashKey,
+            MarketedFlightSegment: apiSub.MarketedFlightSegment || [],
+          }
+
+          return {
+            subscription: {
+              _id: apiSub._id || "", // Add _id from apiSub, fallback to empty string if missing
+              walletAddress: data.walletAddress, // From top-level response
+              flightNumber: apiSub.flightNumber,
+              departureAirport: apiSub.departureAirport.code, // Just the code
+              arrivalAirport: apiSub.arrivalAirport.code, // Just the code
+              blockchainTxHash: apiSub.blockchainTxHash,
+              flightSubscriptionStatus: apiSub.status.current, // Assuming this maps
+              isSubscriptionActive: true, // Assuming active if returned
+              subscriptionDate: apiSub.subscriptionDate,
+              createdAt: apiSub.subscriptionDate, // Using subscriptionDate as placeholder
+              updatedAt: apiSub.subscriptionDate, // Using subscriptionDate as placeholder
+            },
+            flight: flightData,
+          }
+        })
       }
-
-      return data.data
-    } catch (error) {
-      console.error("Error fetching subscribed flights details:", error)
       return []
+    } catch (error) {
+      console.error("Error in getSubscribedFlightsDetails:", error)
+      throw error
     }
-  },
+  }
 
-  unsubscribeFlights: async (
-    flightNumbers: string[],
-    carrierCodes: string[],
-    departureAirports: string[],
-  ): Promise<boolean> => {
+  unsubscribeFlights = async (flightNumbers: string[], departureAirports: string[]): Promise<boolean> => {
     try {
-      console.log(`Unsubscribing from ${flightNumbers.length} flights for wallet: ${WALLET_ADDRESS}`)
+      console.log(`Unsubscribing from ${flightNumbers.length} flights`)
 
-      const response = await fetch(`${BASE_URL}/flights/subscriptions/unsubscribe`, {
+      const response = await fetch(`${this.baseUrl}/v1/subscription/unsubscribe-flight`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          walletAddress: WALLET_ADDRESS,
           flightNumbers,
-          carrierCodes,
           departureAirports,
         }),
       })
@@ -305,5 +340,7 @@ export const flightService = {
       console.error("Error unsubscribing from flights:", error)
       return false
     }
-  },
+  }
 }
+
+export const flightService = new FlightService(BASE_URL)

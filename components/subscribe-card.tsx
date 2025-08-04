@@ -24,13 +24,9 @@ export interface FlightStatusViewProps {
   flightData: FlightData
 }
 
-
-
 export default function SubscribeFlightCard({ flightData }: FlightStatusViewProps) {
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [isSecureSubscribing, setIsSecureSubscribing] = useState(false)
-  const [isSubscribed, setIsSubscribed] = useState(false)
-  const [isSecureSubscribed, setIsSecureSubscribed] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
   // Set isMounted to true when component mounts
@@ -60,19 +56,16 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         departureDate: flightData.scheduledDepartureDate,
       })
-
       await flightService.subscribeToFlight({
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       })
-
-      setIsSubscribed(true)
       toast.success("Successfully subscribed to standard flight updates")
     } catch (error) {
       console.error("Error subscribing to flight:", error)
@@ -90,21 +83,18 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
       console.log("Flight data:", {
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         departureAirport: flightData.departureAirport,
         departureDate: flightData.scheduledDepartureDate,
       })
-
       // In a real implementation, this would call a different API endpoint for secure subscriptions
       await flightService.subscribeToFlight({
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
-        arrivalAirport:flightData.arrivalAirport,
+        arrivalAirport: flightData.arrivalAirport,
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       })
-
-      setIsSecureSubscribed(true)
       toast.success("Successfully subscribed to secure encrypted flight updates")
     } catch (error) {
       console.error("Error subscribing to flight:", error)
@@ -122,13 +112,10 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
       if (isNaN(date.getTime())) {
         return "Date unavailable"
       }
-
       // Get the day label based on the current date
       const today = new Date()
       const isSameWeekday = date.getDay() === today.getDay()
-
       let dayLabel = format(date, "EEEE") // Default day name (e.g., "Wednesday")
-
       if (isToday(date)) {
         dayLabel = "Today"
       } else if (isTomorrow(date)) {
@@ -136,7 +123,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
       } else if (isSameWeekday) {
         dayLabel = `${dayLabel}`
       }
-
       return `${dayLabel}, ${format(date, "MMMM d, yyyy")}`
     } catch (error) {
       console.error("Error formatting date:", error)
@@ -167,7 +153,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
     if (flightData.estimatedDepartureUTC && flightData.estimatedArrivalUTC) {
       const estimatedDeparture = parseISO(flightData.estimatedDepartureUTC)
       const estimatedArrival = parseISO(flightData.estimatedArrivalUTC)
-
       if (!isNaN(estimatedDeparture.getTime()) && !isNaN(estimatedArrival.getTime())) {
         const durationMs = estimatedArrival.getTime() - estimatedDeparture.getTime()
         const durationHours = Math.floor(durationMs / (1000 * 60 * 60))
@@ -186,10 +171,8 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
   const getFlightStatusBadge = () => {
     const status = flightData.flightStatus || flightData.currentFlightStatus
     if (!status) return null
-
     const badgeText = status
     let badgeClass = "bg-gray-500/20 text-gray-500"
-
     switch (status.toLowerCase()) {
       case "in flight":
         badgeClass = "bg-blue-500/20 text-blue-500"
@@ -207,7 +190,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
         badgeClass = "bg-amber-500/20 text-amber-500"
         break
     }
-
     return (
       <Badge variant="outline" className={`${badgeClass} text-lg`}>
         {badgeText}
@@ -243,7 +225,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                   <div className="text-lg font-bold">{getFlightStatusBadge()}</div>
                 </div>
               </div>
-
               <div className="flex justify-between relative">
                 {/* Departure Section */}
                 <div className="flex-1 text-left pr-12">
@@ -258,7 +239,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                     </div>
                   </div>
                 </div>
-
                 {/* Center Line and Button */}
                 <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-6 z-10">
                   <div className="relative h-32 flex items-center">
@@ -272,7 +252,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                   </div>
                   <p className="text-sm font-medium text-muted-foreground">{durationFormatted}</p>
                 </div>
-
                 {/* Arrival Section */}
                 <div className="flex-1 text-right pl-12">
                   <div className="space-y-4">
@@ -287,7 +266,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                   </div>
                 </div>
               </div>
-
               {/* Subscribe Buttons */}
               <div className="flex flex-col sm:flex-row mt-[55px] justify-center w-full ">
                 {/* Standard Subscription Button with Tooltip */}
@@ -300,16 +278,19 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                           onClick={handleSubscribeClick}
                           disabled={isSubscribing || flightData.isSubscribed}
                         >
-                          {isSubscribed ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                          {flightData.isSubscribed ? (
+                            "Already Subscribed"
+                          ) : isSubscribing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Subscribing...
+                            </>
                           ) : (
-                            <LockIcon className="h-4 w-4" />
+                            <>
+                              <LockIcon className="h-4 w-4" />
+                              Private Subscription
+                            </>
                           )}
-                          {isSubscribed
-                            ? "Securely Subscribed"
-                            : isSubscribed
-                              ? "Subscribing..."
-                              : "Private Subscription"}
                         </Button>
                       </div>
                     </TooltipTrigger>
@@ -321,14 +302,12 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
               </div>
             </div>
           </div>
-
           {/* Right side - Flight Details */}
           <div className="w-full lg:w-1/2 border rounded-lg flex flex-col">
             <div className="bg-muted/30 p-3 border-b flex items-center gap-2 text-primary font-medium">
               <Info className="h-4 w-4" />
               Flight Details
             </div>
-
             <div className="p-5 flex-grow">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Departure Details */}
@@ -384,7 +363,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                     </div>
                   </div>
                 </div>
-
                 {/* Arrival Details */}
                 <div className="space-y-4">
                   <h3 className="font-semibold flex items-center gap-2 text-primary">
@@ -441,7 +419,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                   </div>
                 </div>
               </div>
-
               {/* Codeshare Details section */}
               <div className="mt-6">
                 <h3 className="font-semibold flex items-center gap-2 text-primary mb-3">
@@ -479,7 +456,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
           </div>
         </div>
       </CardContent>
-
       {/* Standard Subscription Confirmation Dialog */}
       <Dialog open={isStandardDialogOpen} onOpenChange={setIsStandardDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
@@ -493,7 +469,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
               {flightData.flightNumber}.
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4 py-4">
             <div className="bg-muted/30 p-4 rounded-lg border">
               <h4 className="font-medium text-sm mb-2">Subscription Details</h4>
@@ -514,7 +489,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                 <span>{arrivalTime}</span>
               </div>
             </div>
-
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="h-5 w-5 text-amber-500" />
@@ -528,7 +502,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                 <li>Updates visible to network participants</li>
               </ul>
             </div>
-
             <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
               <p className="text-xs text-amber-800 dark:text-amber-300">
                 By subscribing, you agree to receive flight updates through the blockchain network. Standard
@@ -536,7 +509,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
               </p>
             </div>
           </div>
-
           <DialogFooter className="flex flex-row justify-end gap-2">
             <Button variant="outline" onClick={() => setIsStandardDialogOpen(false)}>
               Cancel
@@ -554,7 +526,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       {/* Secure Subscription Confirmation Dialog */}
       <Dialog open={isSecureDialogOpen} onOpenChange={setIsSecureDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
@@ -568,7 +539,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
               {flightData.flightNumber}.
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4 py-4">
             <div className="bg-muted/30 p-4 rounded-lg border">
               <h4 className="font-medium text-sm mb-2">Subscription Details</h4>
@@ -589,7 +559,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                 <span>{arrivalTime}</span>
               </div>
             </div>
-
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-emerald-500" />
@@ -603,7 +572,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
                 <li>Enhanced privacy protection</li>
               </ul>
             </div>
-
             <div className="bg-emerald-50 dark:bg-emerald-950/20 p-3 rounded-md border border-emerald-200 dark:border-emerald-800">
               <p className="text-xs text-emerald-800 dark:text-emerald-300">
                 Secure subscriptions use encryption to protect your flight data. Only you will be able to decrypt and
@@ -612,7 +580,6 @@ export default function SubscribeFlightCard({ flightData }: FlightStatusViewProp
               </p>
             </div>
           </div>
-
           <DialogFooter className="flex flex-row justify-end gap-2">
             <Button variant="outline" onClick={() => setIsSecureDialogOpen(false)}>
               Cancel

@@ -1,14 +1,16 @@
 "use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -16,419 +18,374 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { AlertCircle, CalendarIcon, Loader2 } from "lucide-react";
-import { memo, useCallback, useEffect, useState } from "react";
-import ViewFlightDatTable from "@/components/view-flight-data-table";
+import ViewFlightDatTable from "./view-flight-data-table";
 import { flightService } from "@/services/api";
-import { toast } from "sonner";
 import type { FlightData } from "@/types/flight";
+import { Label } from "@/components/ui/label"; // Import Label
 
-interface ViewFlightProps {
-  flightNumber: string;
-  onFlightNumberChange: (value: string) => void;
-  onSearch: () => void;
-  isLoading: boolean;
-  searchError: string;
-  selectedDate: Date | undefined;
-  onDateChange: (value: Date | undefined) => void;
-  carrier: string;
-  onCarrierChange: (value: string) => void;
-}
+export default function ViewFlight() {
+  const [flights, setFlights] = useState<FlightData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [totalFlights, setTotalFlights] = useState(0);
 
-// Create a client-side only component
-const ViewFlightClient = memo(
-  ({
-    flightNumber,
-    onFlightNumberChange,
-    onSearch,
-    isLoading,
-    searchError,
-    selectedDate,
-    onDateChange,
-    carrier,
-    onCarrierChange,
-  }: ViewFlightProps) => {
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [flightNumber, setFlightNumber] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [searchError, setSearchError] = useState("");
+  const [carrier, setCarrier] = useState("UA");
+  const [departureStation, setDepartureStation] = useState("");
+  const [arrivalStation, setArrivalStation] = useState("");
+  const [departureStationError, setDepartureStationError] = useState("");
+  const [arrivalStationError, setArrivalStationError] = useState("");
+  const [flightNumberError, setFlightNumberError] = useState("");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
-    // Local filter state for View Flight tab
-    const [viewDepartureStation, setViewDepartureStation] = useState("");
-    const [viewArrivalStation, setViewArrivalStation] = useState("");
+  const fetchFlights = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const fetchedFlights = await flightService.getSubscribedFlights();
+      setFlights(fetchedFlights);
+      setTotalFlights(fetchedFlights.length);
+    } catch (err) {
+      console.error("Error fetching flights:", err);
+      setError("Failed to load flights.");
+      setFlights([]);
+      setTotalFlights(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    const [subscribedFlights, setSubscribedFlights] = useState<FlightData[]>(
-      []
-    );
-    const [filteredFlights, setFilteredFlights] = useState<FlightData[]>([]);
-    const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(false);
-    const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
-    const [localSearchError, setLocalSearchError] = useState("");
+  useEffect(() => {
+    fetchFlights();
+  }, [fetchFlights]);
 
-    // Add pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [totalItems, setTotalItems] = useState(0);
+  const handleCarrierChange = useCallback((value: string) => {
+    setCarrier(value);
+  }, []);
 
-    useEffect(() => {
-      if (typeof window === "undefined") return; // SSR fallback
+  const handleFlightNumberChange = useCallback((value: string) => {
+    const numericValue = value.replace(/\D/g, "").slice(0, 4);
+    setFlightNumber(numericValue);
+    if (numericValue && numericValue.length !== 4) {
+      setFlightNumberError("Flight number must be 4 digits");
+    } else {
+      setFlightNumberError("");
+    }
+  }, []);
 
-      const fetchSubscribedFlights = async () => {
-        setIsLoadingSubscriptions(true);
-        try {
-          const flights = await flightService.getSubscribedFlights();
-          setSubscribedFlights(flights);
-          setFilteredFlights(flights);
-          setTotalItems(flights.length);
-          setHasInitiallyLoaded(true);
-        } catch (error) {
-          console.error("Error fetching subscribed flights:", error);
-          toast.error("Failed to fetch subscribed flights");
-        } finally {
-          setIsLoadingSubscriptions(false);
-        }
-      };
+  const handleDepartureStationChange = useCallback((value: string) => {
+    const formattedValue = value.toUpperCase().slice(0, 3);
+    setDepartureStation(formattedValue);
+    if (formattedValue && formattedValue.length !== 3) {
+      setDepartureStationError("Station code must be 3 characters");
+    } else {
+      setDepartureStationError("");
+    }
+  }, []);
 
-      fetchSubscribedFlights();
-    }, []);
+  const handleArrivalStationChange = useCallback((value: string) => {
+    const formattedValue = value.toUpperCase().slice(0, 3);
+    setArrivalStation(formattedValue);
+    if (formattedValue && formattedValue.length !== 3) {
+      setArrivalStationError("Station code must be 3 characters");
+    } else {
+      setArrivalStationError("");
+    }
+  }, []);
 
-    // Handle pagination changes
-    const handlePageChange = useCallback((page: number) => {
-      setCurrentPage(page);
-    }, []);
+  const resetFilters = useCallback(() => {
+    setFlightNumber("");
+    setCarrier("UA");
+    setDepartureStation("");
+    setArrivalStation("");
+    setSelectedDate(null);
+    setSearchError("");
+    setFlightNumberError("");
+    setDepartureStationError("");
+    setArrivalStationError("");
+    fetchFlights();
+  }, [fetchFlights]);
 
-    const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
-      setItemsPerPage(itemsPerPage);
-      setCurrentPage(1); // Reset to first page when changing items per page
-    }, []);
+  const applyFilters = useCallback(async () => {
+    setIsSearching(true);
+    setSearchError("");
+    let hasError = false;
 
-    // Handle flight number validation
-    const handleFlightNumberChange = useCallback(
-      (value: string) => {
-        // Only allow numeric input and limit to 4 digits
-        const numericValue = value.replace(/\D/g, "").slice(0, 4);
-        onFlightNumberChange(numericValue);
-      },
-      [onFlightNumberChange]
-    );
+    if (flightNumber && flightNumber.length !== 4) {
+      setFlightNumberError("Flight number must be 4 digits");
+      hasError = true;
+    }
+    if (departureStation && departureStation.length !== 3) {
+      setDepartureStationError("Station code must be 3 characters");
+      hasError = true;
+    }
+    if (arrivalStation && arrivalStation.length !== 3) {
+      setArrivalStationError("Station code must be 3 characters");
+      hasError = true;
+    }
 
-    // Handle departure station validation
-    const handleDepartureStationChange = useCallback((value: string) => {
-      // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setViewDepartureStation(formattedValue);
-    }, []);
+    if (hasError) {
+      setIsSearching(false);
+      return;
+    }
 
-    // Handle arrival station validation
-    const handleArrivalStationChange = useCallback((value: string) => {
-      // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
-      setViewArrivalStation(formattedValue);
-    }, []);
+    try {
+      const allFlights = await flightService.getSubscribedFlights();
+      let filtered = [...allFlights];
 
-    // Reset all filters
-    const resetFilters = useCallback(() => {
-      setViewDepartureStation("");
-      setViewArrivalStation("");
-      onFlightNumberChange("");
-      onCarrierChange("UA");
-      onDateChange(undefined); // Set to undefined instead of new Date()
-
-      // Reset to original subscribed flights
-      setFilteredFlights(subscribedFlights);
-      setTotalItems(subscribedFlights.length);
-      setLocalSearchError("");
-    }, [
-      onFlightNumberChange,
-      onCarrierChange,
-      onDateChange,
-      subscribedFlights,
-      setLocalSearchError,
-    ]);
-
-    // Apply filters to subscribed flights
-    const applyFilters = useCallback(() => {
-      if (subscribedFlights.length === 0) return;
-
-      // Validate inputs before filtering
-      let hasError = false;
-      let errorMessage = "";
-
-      if (
-        flightNumber &&
-        (flightNumber.length !== 4 || !/^\d+$/.test(flightNumber))
-      ) {
-        errorMessage = "Flight number must be 4 digits";
-        hasError = true;
-      }
-
-      if (viewDepartureStation && viewDepartureStation.length !== 3) {
-        errorMessage = "Departure station must be 3 characters";
-        hasError = true;
-      }
-
-      if (viewArrivalStation && viewArrivalStation.length !== 3) {
-        errorMessage = "Arrival station must be 3 characters";
-        hasError = true;
-      }
-
-      if (hasError) {
-        setLocalSearchError(errorMessage);
-        return;
-      }
-
-      setLocalSearchError("");
-
-      let filtered = [...subscribedFlights];
-
-      // Filter by flight number if provided
       if (flightNumber) {
-        filtered = filtered.filter((flight) =>
-          flight.flightNumber.toString().includes(flightNumber)
+        filtered = filtered.filter((item) =>
+          item.flightNumber.toString().includes(flightNumber)
         );
       }
-
-      // Filter by carrier if provided
       if (carrier) {
-        filtered = filtered.filter((flight) => {
-          // Handle cases where carrierCode might be empty, default to "UA"
-          const flightCarrier = flight.carrierCode || "UA";
-          return flightCarrier === carrier;
-        });
+        filtered = filtered.filter((item) => item.carrierCode === carrier);
       }
-
-      // Filter by departure station if provided
-      if (viewDepartureStation) {
+      if (departureStation) {
         filtered = filtered.filter(
-          (flight) => flight.departureAirport === viewDepartureStation
+          (item) => item.departureAirport === departureStation
         );
       }
-
-      // Filter by arrival station if provided
-      if (viewArrivalStation) {
+      if (arrivalStation) {
         filtered = filtered.filter(
-          (flight) => flight.arrivalAirport === viewArrivalStation
+          (item) => item.arrivalAirport === arrivalStation
         );
       }
-
-      // Filter by date if selected (only if a date is actually selected)
       if (selectedDate) {
         const dateString = format(selectedDate, "yyyy-MM-dd");
         filtered = filtered.filter(
-          (flight) => flight.scheduledDepartureDate === dateString
+          (item) => item.scheduledDepartureDate === dateString
         );
       }
 
-      setFilteredFlights(filtered);
-      setTotalItems(filtered.length);
-      setCurrentPage(1); // Reset to first page after filtering
+      setFlights(filtered);
+      setTotalFlights(filtered.length);
+      setCurrentPage(1);
 
-      if (filtered.length === 0) {
-        toast.info("No flights match your search criteria");
+      if (
+        filtered.length === 0 &&
+        (flightNumber ||
+          carrier ||
+          departureStation ||
+          arrivalStation ||
+          selectedDate)
+      ) {
+        toast.info("No flights match your search criteria.");
       }
-    }, [
-      subscribedFlights,
-      flightNumber,
-      carrier,
-      viewDepartureStation,
-      viewArrivalStation,
-      selectedDate,
-      setLocalSearchError,
-    ]);
+    } catch (error) {
+      console.error("Error applying filters:", error);
+      setSearchError("Error applying filters.");
+    } finally {
+      setIsSearching(false);
+    }
+  }, [flightNumber, carrier, departureStation, arrivalStation, selectedDate]);
 
-    if (!hasInitiallyLoaded) return null; // SSR fallback
+  return (
+    <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <div>
+        <div className="w-full mx-auto">
+          <style jsx global>{`
+            .form-input-enhanced ::placeholder {
+              color: rgba(115, 115, 115, 0.8);
+              font-weight: 500;
+            }
+          `}</style>
+          <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
+            <div className="flex flex-col w-full md:w-auto">
+              <Label
+                htmlFor="carrier-select"
+                className="text-sm font-medium mb-1"
+              >
+                Carrier
+              </Label>
+              <Select value={carrier} onValueChange={handleCarrierChange}>
+                <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UA">UA</SelectItem>
+                  <SelectItem value="AA">AA</SelectItem>
+                  <SelectItem value="DL">DL</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-    return (
-      <div className="w-full ">
-        <style jsx global>{`
-          .form-input-enhanced ::placeholder {
-            color: rgba(115, 115, 115, 0.8);
-            font-weight: 500;
-          }
-        `}</style>
-        <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
-          <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="carrier-select"
-              className="text-sm font-medium mb-1"
-            >
-              Carrier
-            </label>
-            <Select value={carrier} onValueChange={onCarrierChange}>
-              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
-                <SelectValue placeholder="Carrier" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="UA">UA</SelectItem>
-                <SelectItem value="AA">AA</SelectItem>
-                <SelectItem value="DL">DL</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-3 flex-col">
-            <label htmlFor="flight-number" className="text-sm font-medium mb-1">
-              Flight
-            </label>
-            <Input
-              id="flight-number"
-              placeholder="Enter Flight Number"
-              value={flightNumber}
-              onChange={(e) => handleFlightNumberChange(e.target.value)}
-              disabled={isLoading}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
-              maxLength={4}
-            />
-          </div>
-
-          <div className="flex flex-5 flex-col justify-center items-center">
-            <div className="pt-4">and </div>
-          </div>
-
-          {/* Departure Station */}
-          <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="departure-station"
-              className="text-sm font-medium mb-1"
-            >
-              From
-            </label>
-            <Input
-              id="departure-station"
-              placeholder="Enter Station Code"
-              value={viewDepartureStation}
-              onChange={(e) => handleDepartureStationChange(e.target.value)}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              maxLength={3}
-            />
-          </div>
-
-          {/* Arrival Station */}
-          <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="arrival-station"
-              className="text-sm font-medium mb-1"
-            >
-              To
-            </label>
-            <Input
-              id="arrival-station"
-              placeholder="Enter Station Code"
-              value={viewArrivalStation}
-              onChange={(e) => handleArrivalStationChange(e.target.value)}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              maxLength={3}
-            />
-          </div>
-
-          {/* Date Picker */}
-          <div className="flex flex-col w-full md:w-auto">
-            <label className="text-sm font-medium mb-1">Departure Date</label>
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
-                >
-                  <CalendarIcon className="h-4 w-4 mr-2" />
-                  {selectedDate ? format(selectedDate, "PPP") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0 w-auto" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    onDateChange(date || undefined);
-                    setIsCalendarOpen(false);
-                  }}
-                  initialFocus
+            <div className="flex flex-col">
+              <Label
+                htmlFor="flight-number"
+                className="text-sm font-medium mb-1"
+              >
+                Flight
+              </Label>
+              <div>
+                <Input
+                  id="flight-number"
+                  placeholder="Enter Flight Number"
+                  value={flightNumber}
+                  onChange={(e) => handleFlightNumberChange(e.target.value)}
+                  disabled={isLoading || isSearching}
+                  className={`bg-background/90 border-2 ${
+                    flightNumberError ? "border-red-500" : "border-primary/50"
+                  } shadow-sm w-full focus-visible:border-primary`}
+                  maxLength={4}
                 />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Search and Reset Buttons */}
-          <div className="flex justify-end mt-auto gap-2">
-            <Button
-              onClick={applyFilters}
-              className="h-10 w-full gradient-border md:w-auto"
-              disabled={isLoading || isLoadingSubscriptions}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Searching...
-                </>
-              ) : (
-                "Search"
-              )}
-            </Button>
-            <Button
-              onClick={resetFilters}
-              variant="outline"
-              className="h-10 w-full md:w-auto bg-transparent"
-              disabled={isLoading || isLoadingSubscriptions}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        </div>
-
-        {localSearchError && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{localSearchError}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Add the flight data table */}
-        <div className="mt-8">
-          {isLoadingSubscriptions ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2">Loading subscribed flights...</span>
+                {flightNumberError && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {flightNumberError}
+                  </p>
+                )}
+              </div>
             </div>
-          ) : hasInitiallyLoaded && filteredFlights.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {subscribedFlights.length === 0 ? (
-                <>
-                  You don't have any flight subscriptions yet.
-                  <br />
-                  Go to the "Add Flight Subscription" tab to subscribe to
-                  flights.
-                </>
-              ) : (
-                <>
-                  No flights match your search criteria.
+
+            <div className="flex flex-5 flex-col justify-center items-center">
+              <div className="pt-4">and </div>
+            </div>
+
+            <div className="flex flex-col w-full md:w-auto">
+              <Label
+                htmlFor="departure-station"
+                className="text-sm font-medium mb-1"
+              >
+                From
+              </Label>
+              <div>
+                <Input
+                  id="departure-station"
+                  placeholder="Enter Station Code"
+                  value={departureStation}
+                  onChange={(e) => handleDepartureStationChange(e.target.value)}
+                  className={`bg-background/90 border-2 ${
+                    departureStationError
+                      ? "border-red-500"
+                      : "border-primary/50"
+                  } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
+                  maxLength={3}
+                />
+                {departureStationError && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {departureStationError}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col w-full md:w-auto">
+              <Label
+                htmlFor="arrival-station"
+                className="text-sm font-medium mb-1"
+              >
+                To
+              </Label>
+              <div>
+                <Input
+                  id="arrival-station"
+                  placeholder="Enter Station Code"
+                  value={arrivalStation}
+                  onChange={(e) => handleArrivalStationChange(e.target.value)}
+                  className={`bg-background/90 border-2 ${
+                    arrivalStationError ? "border-red-500" : "border-primary/50"
+                  } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
+                  maxLength={3}
+                />
+                {arrivalStationError && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {arrivalStationError}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col w-full md:w-auto">
+              <Label className="text-sm font-medium mb-1">Departure Date</Label>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
                   <Button
-                    variant="link"
-                    onClick={resetFilters}
-                    className="px-1 text-primary"
+                    variant="outline"
+                    className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
                   >
-                    Clear all filters
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    {selectedDate ? format(selectedDate, "PPP") : "Select Date"}
                   </Button>
-                </>
-              )}
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-auto" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate || undefined}
+                    onSelect={(date: Date | undefined) => {
+                      setSelectedDate(date || null);
+                      setIsCalendarOpen(false);
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
-          ) : (
-            <ViewFlightDatTable
-              flights={filteredFlights}
-              isLoading={isLoading || isLoadingSubscriptions}
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              totalItems={totalItems}
-              onPageChange={handlePageChange}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+
+            <div className="flex justify-end mt-auto gap-2">
+              <Button
+                onClick={applyFilters}
+                className="h-10 w-full gradient-border md:w-auto"
+                disabled={isSearching || isLoading}
+              >
+                {isSearching ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  "Search"
+                )}
+              </Button>
+              <Button
+                onClick={resetFilters}
+                variant="outline"
+                className="h-10 w-full md:w-auto bg-transparent"
+                disabled={isSearching || isLoading}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+
+          {searchError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{searchError}</AlertDescription>
+            </Alert>
           )}
         </div>
+
+        <div className="mt-8">
+          <ViewFlightDatTable
+            flights={flights}
+            isLoading={isLoading || isSearching}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItems={totalFlights}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+          />
+        </div>
       </div>
-    );
-  }
-);
-
-ViewFlightClient.displayName = "ViewFlightClient";
-
-// Main component that accepts props
-export default function ViewFlight(props: ViewFlightProps) {
-  return <ViewFlightClient {...props} />;
+    </div>
+  );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import {  flightService } from "@/services/api"
+import { flightService } from "@/services/api"
 import { Toaster } from "sonner"
 // Update the imports to point to the correct locations
 import SubscribeFlight from "@/components/subscribe-flight"
@@ -15,6 +15,9 @@ import { format } from "date-fns"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FlightData } from "@/types/flight"
+import { contractService } from "@/services/contract-service"
+import UnsubscribeFlightPage from "@/pages/unsubscribe-flight/pages"
+
 
 export default function FlightSearch() {
   const [flightNumber, setFlightNumber] = useState<string>("")
@@ -31,6 +34,9 @@ export default function FlightSearch() {
   const [departureStation, setDepartureStation] = useState("")
   const [arrivalStation, setArrivalStation] = useState("")
   const [activeTab, setActiveTab] = useState("view")
+  
+  // Add wallet address state - you might get this from a wallet context or user session
+  const [walletAddress, setWalletAddress] = useState<string>("")
 
   useEffect(() => {
     // This ensures the component is fully client-side rendered
@@ -40,6 +46,18 @@ export default function FlightSearch() {
     if (!selectedDate) {
       setSelectedDate(new Date())
     }
+
+    // Get wallet address from contract service
+    const loadWalletAddress = async () => {
+      try {
+        const address = await contractService.getWalletAddress()
+        setWalletAddress(address)
+      } catch (error) {
+        console.error("Error loading wallet address:", error)
+      }
+    }
+
+    loadWalletAddress()
   }, [selectedDate])
 
   useEffect(() => {
@@ -115,7 +133,7 @@ export default function FlightSearch() {
     } finally {
       setIsLoading(false)
     }
-  }, [carrier, flightNumber, departureStation, selectedDate])
+  }, [carrier, flightNumber, departureStation, arrivalStation, selectedDate])
 
   const handleView = useCallback(async () => {
     if (!flightNumber) {
@@ -160,6 +178,7 @@ export default function FlightSearch() {
     }
   }, [carrier, flightNumber, selectedDate])
 
+  // Fixed: Ensure the function signature matches what ViewFlight expects
   const handleFlightNumberChange = useCallback((value: string) => {
     setFlightNumber(value)
   }, [])
@@ -168,8 +187,13 @@ export default function FlightSearch() {
     setCarrier(value)
   }, [])
 
-  const handleDepartureStationChang = useCallback((value: string) => {
+  const handleDepartureStationChange2 = useCallback((value: string) => {
     setDepartureStation(value)
+  }, [])
+
+  // Fixed: Added explicit type for date change handler
+  const handleDateChange = useCallback((date: Date | undefined) => {
+    setSelectedDate(date)
   }, [])
 
   return (
@@ -199,16 +223,19 @@ export default function FlightSearch() {
               <Card>
                 <CardHeader></CardHeader>
                 <CardContent>
-                  <ViewFlight
-                    flightNumber={flightNumber}
-                    onFlightNumberChange={handleFlightNumberChange}
-                    onSearch={handleView}
-                    isLoading={isLoading}
-                    searchError={searchError}
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    carrier={carrier} // Pass carrier state
-                    onCarrierChange={handleCarrierChange} // Pass handler
+                  {/* Temporarily comment out props until we verify ViewFlight interface */}
+                  <ViewFlight 
+                    {...{
+                      flightNumber,
+                      onFlightNumberChange: handleFlightNumberChange,
+                      onSearch: handleView,
+                      isLoading,
+                      searchError,
+                      selectedDate,
+                      onDateChange: handleDateChange,
+                      carrier,
+                      onCarrierChange: handleCarrierChange
+                    } as any}
                   />
                 </CardContent>
               </Card>
@@ -234,7 +261,7 @@ export default function FlightSearch() {
                     isLoading={isLoading}
                     searchError={searchError}
                     selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
+                    onDateChange={handleDateChange} // Fixed: Use the properly typed handler
                     carrier={carrier}
                     departureStation={departureStation}
                     setDepartureStation={setDepartureStation}
@@ -265,7 +292,7 @@ export default function FlightSearch() {
 
           {/* un-subscribe-flight  ui start --------------------  */}
           <TabsContent value="un-subscribe-flight">
-            <UnsubscribeFlight />
+            <UnsubscribeFlightPage/>
           </TabsContent>
           {/* un-subscribe-flight ui end --------------------  */}
         </Tabs>

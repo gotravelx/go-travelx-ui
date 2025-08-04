@@ -13,23 +13,6 @@ export type FlightPhase =
 export type TransactionStatusType = "pending" | "completed" | "failed"
 export type TransactionType = "set" | "update"
 
-export interface SubscriptionDetails {
-  subscription: {
-    _id: string
-    walletAddress: string
-    flightNumber: string
-    departureAirport: string
-    arrivalAirport: string
-    blockchainTxHash: string
-    flightSubscriptionStatus: string
-    isSubscriptionActive: boolean
-    subscriptionDate: string
-    createdAt: string
-    updatedAt: string
-  }
-  flight: FlightData
-}
-
 export interface MarketedFlightSegment {
   MarketingAirlineCode?: string
   FlightNumber?: string
@@ -41,6 +24,10 @@ export interface AirportInfo {
   shortName: string
   city: string
   state: string
+  departureGate?: string
+  departureTerminal?: string
+  arrivalGate?: string
+  arrivalTerminal?: string
 }
 
 export interface FlightTimes {
@@ -110,6 +97,7 @@ export interface FlightInfoResponse {
   }
 }
 
+// This is the structure of the flight data as expected by components like FlightStatusView
 export interface FlightData {
   flightNumber: string // key  Flight Number :   5300
   scheduledDepartureDate: string // key  exa : 2025-03-06
@@ -180,7 +168,6 @@ export interface FlightStatusEvent {
   eventTime?: string
 }
 
-
 export interface AirportCode {
   airPortCode: string
   createdAt: string
@@ -207,45 +194,57 @@ export interface AirportSearchResponse {
   tableName: string
 }
 
-
-export interface AirportCode {
-  airPortCode: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AirportSearchResponse {
-  success: boolean;
-  message: string;
-  query: {
-    original: string;
-    processed: string;
-    type: string;
-    sortBy: string;
-    order: string;
-  };
-  data: AirportCode[];
-  metadata: {
-    totalFound: number;
-    limit: number;
-    hasMore: boolean;
-    searchTime: number;
-  };
-  tableName: string;
-}
-
 export interface FlightSubscriptionRequest {
-  flightNumber: string;
-  scheduledDepartureDate: string;
-  carrierCode: string;
-  departureAirport: string;
-  arrivalAirport: string;
+  flightNumber: string
+  scheduledDepartureDate: string
+  carrierCode: string
+  departureAirport: string
+  arrivalAirport: string
 }
 
-export interface SubscriptionResponse {
+// This is the structure of the subscription details as expected by the components (nested)
+export interface SubscriptionDetails {
+  subscription: {
+    _id: string // Generated unique ID for React keying
+    walletAddress: string
+    flightNumber: string
+    departureAirport: string // This is the code, e.g., "IAD"
+    arrivalAirport: string // This is the code, e.g., "JST"
+    blockchainTxHash: string
+    flightSubscriptionStatus: string
+    isSubscriptionActive: boolean
+    subscriptionDate: string // ISO string
+    createdAt: string
+    updatedAt: string
+  }
+  flight: FlightData // The detailed flight data associated with the subscription
+}
+
+// The actual API response structure for get-flight-subscriptions
+export interface GetFlightSubscriptionsApiResponse {
   success: boolean
   walletAddress: string
   subscriptionCount: number
-  subscriptions: SubscriptionDetails[]
+  subscriptions: Array<{
+    flightNumber: string
+    blockchainTxHash: string
+    subscriptionDate: string
+    departureDate: string
+    departureAirport: AirportInfo // Full AirportInfo object
+    arrivalAirport: AirportInfo // Full AirportInfo object
+    times: FlightTimes
+    delays: FlightDelays
+    aircraft: AircraftInfo
+    status: FlightStatus
+    airline: AirlineInfo
+    isCanceled: boolean
+    equipmentModel: string
+    duration: FlightDuration
+    baggageClaim: string
+    flightType: string
+    isInternational: boolean
+    blockchainHashKey: string
+    MarketedFlightSegment?: MarketedFlightSegment[]
+  }>
   message: string
 }
