@@ -138,6 +138,17 @@ export interface FlightData {
   isSubscribed: boolean
   blockchainTxHash?: string
   MarketedFlightSegment?: MarketedFlightSegment[]
+  plannedDuration?: string | null,
+  actualDuration?: string | null,
+  scheduledDuration?: string | null,
+  status?: {
+    current?: string
+    code?: string
+    legStatus?: string
+    departureStatus?: string
+    arrivalStatus?: string
+  }
+   
 }
 
 export interface TransactionStatus {

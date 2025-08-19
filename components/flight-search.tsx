@@ -62,10 +62,10 @@ export default function FlightSearch() {
 
   useEffect(() => {
     if (viewFlightData) {
-      console.log("view flight data ------>", viewFlightData)
+      // console.log("view flight data ------>", viewFlightData)
     }
     if (subscribeFlightData) {
-      console.log("subscribe flight data ------>", subscribeFlightData)
+      // console.log("subscribe flight data ------>", subscribeFlightData)
     }
   }, [viewFlightData, subscribeFlightData])
 

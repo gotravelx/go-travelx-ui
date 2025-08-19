@@ -9,7 +9,6 @@ import { mapStatusCodeToPhase } from "@/utils/common"
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
 
-
 class FlightService {
   private baseUrl: string
 
@@ -51,9 +50,9 @@ class FlightService {
     departureDate: Date,
   ): Promise<FlightData> => {
     try {
-      console.log(
-        `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} to ${arrivalStation} on ${departureDate.toISOString()}`,
-      )
+      // console.log(
+      //   `Fetching flight details for ${carrierCode} ${flightNumber} ${departureStation} to ${arrivalStation} on ${departureDate.toISOString()}`,
+      // )
 
       const response = await fetch(
         `${this.baseUrl}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
@@ -66,7 +65,6 @@ class FlightService {
       }
 
       const data = await response.json()
-      console.log("Flight data from API:", data)
 
       // Transform the API response to match FlightData interface
       if (data.success && data.flightInfo) {
@@ -110,6 +108,9 @@ class FlightService {
           isSubscribed: flightInfo.isSubscribed || false,
           blockchainTxHash: "",
           MarketedFlightSegment: flightInfo.marketedFlightSegment || [],
+          plannedDuration: flightInfo.duration?.planned || "",
+          actualDuration: flightInfo.duration?.actual || "",
+          scheduledDuration: flightInfo.duration?.scheduled || "",
         }
 
         return transformedData
@@ -286,6 +287,9 @@ class FlightService {
             isSubscribed: true, // Assuming if it's in this list, it's subscribed
             blockchainTxHash: apiSub.blockchainHashKey,
             MarketedFlightSegment: apiSub.MarketedFlightSegment || [],
+            plannedDuration: apiSub.duration.planned,
+            actualDuration: apiSub.duration.actual,
+            scheduledDuration: apiSub.duration.scheduled, 
           }
 
           return {

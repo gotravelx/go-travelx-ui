@@ -357,7 +357,7 @@ export default function ViewFlightDatTable({
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`${getStatusBadgeColor(flight)} p-2 px-4 text-md`}>
-                        {getStatusText(flight)}
+                        {flight?.statusCode.toUpperCase() || "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell>

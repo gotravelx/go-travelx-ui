@@ -148,10 +148,6 @@ export function mapStatusCodeToPhase(legStatus: string): ExtendedFlightPhase {
 export const getStatusDisplay = (statusCode: string, isArrival = false) => {
   const code = statusCode?.toUpperCase();
 
-  console.log(
-    `getStatusDisplay called with code: ${code}, isArrival: ${isArrival}`
-  );
-
   if (isArrival) {
     // Arrival status mapping
     switch (code) {
