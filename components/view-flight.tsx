@@ -376,7 +376,7 @@ const ViewFlightClient = memo(
         {localSearchError && (
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{localSearchError}</AlertDescription>
+            <AlertDescription data-testid="flight-error">{localSearchError}</AlertDescription>
           </Alert>
         )}
 
@@ -385,7 +385,7 @@ const ViewFlightClient = memo(
           {isLoadingSubscriptions ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2">Loading subscribed flights...</span>
+              <span className="ml-2" data-testid="loading-text">Loading subscribed flights...</span>
             </div>
           ) : hasInitiallyLoaded && filteredFlights.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">

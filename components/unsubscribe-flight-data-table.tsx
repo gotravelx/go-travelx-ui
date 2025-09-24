@@ -203,7 +203,8 @@ export default function UnSubscribeDataTable({
   if (isLoading) {
     return (
       <div className="flex justify-center p-8 items-center">
-        <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"></div>
+        <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"    role="status"
+        aria-label="loading"></div>
       </div>
     );
   }

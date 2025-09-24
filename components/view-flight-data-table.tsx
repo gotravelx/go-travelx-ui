@@ -201,7 +201,9 @@ export default function ViewFlightDatTable({
   if (isLoading) {
     return (
       <div className="flex justify-center p-8 items-center">
-        <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"></div>
+        <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin" role="status"
+  aria-label="Loading flights"
+  data-testid="loading-text"></div>
       </div>
     );
   }
@@ -255,11 +257,10 @@ export default function ViewFlightDatTable({
   // );
 
 
-  console.log("Flight Data Table Rendered", flights, "flights");
   return (
     <>
       <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
-        <Table>
+        <Table data-testid="flight-table">
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="hidden md:table-cell">

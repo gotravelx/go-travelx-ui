@@ -160,7 +160,6 @@ export default function FlightStatusView({
   };
 
   useEffect(() => {
-    console.log(flightData);
   }, [flightData]);
 
   const getTimeRemaining = (targetDate: string) => {

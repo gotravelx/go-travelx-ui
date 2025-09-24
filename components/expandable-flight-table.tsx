@@ -21,6 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import type { FlightData } from "@/types/flight";
+import React from "react";
 
 interface ExpandableFlightTableProps {
   flights?: FlightData[];
@@ -82,18 +83,6 @@ export default function ExpandableFlightTable({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(date);
-    } catch (error) {
-      return "Invalid date";
-    }
-  };
 
   const formatTime = (dateString: string) => {
     try {
@@ -111,7 +100,8 @@ export default function ExpandableFlightTable({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"  role="status"
+  aria-label="loading"></div>
       </div>
     );
   }
@@ -132,7 +122,7 @@ export default function ExpandableFlightTable({
         </TableHeader>
         <TableBody>
           {flights?.map((flight) => (
-            <>
+            <React.Fragment key={flight.flightNumber}>
               <TableRow
                 key={flight.flightNumber}
                 className="cursor-pointer hover:bg-muted/50"
@@ -327,7 +317,7 @@ export default function ExpandableFlightTable({
                   </TableRow>
                 )}
               </AnimatePresence>
-            </>
+            </React.Fragment>
           ))}
         </TableBody>
       </Table>

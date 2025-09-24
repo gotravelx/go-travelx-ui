@@ -29,7 +29,7 @@ export function MainNav() {
     setIsMounted(true);
   }, []);
 
-  // Close mobile menu when route changes
+// Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
@@ -44,7 +44,7 @@ export function MainNav() {
       .map((n) => n[0])
       .join("")
       .toUpperCase();
-  };
+};
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
@@ -64,7 +64,10 @@ export function MainNav() {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav
+            aria-label="Desktop Menu"
+            className="hidden md:flex items-center gap-6"
+          >
             <Link
               href="/"
               className={cn(
@@ -155,6 +158,7 @@ export function MainNav() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Toggle Mobile Menu"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -169,7 +173,10 @@ export function MainNav() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t bg-background">
+        <nav
+          aria-label="Mobile Menu"
+          className="md:hidden border-t bg-background"
+        >
           <div className="container py-4 px-4 space-y-4">
             <Link
               href="/"
@@ -248,7 +255,7 @@ export function MainNav() {
               </Link>
             )}
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );
