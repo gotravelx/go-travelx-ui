@@ -15,7 +15,6 @@ import { format } from "date-fns"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FlightData } from "@/types/flight"
-import { contractService } from "@/services/contract-service"
 import UnsubscribeFlightPage from "@/pages/unsubscribe-flight/pages"
 
 
@@ -34,42 +33,14 @@ export default function FlightSearch() {
   const [departureStation, setDepartureStation] = useState("")
   const [arrivalStation, setArrivalStation] = useState("")
   const [activeTab, setActiveTab] = useState("view")
-  
-  // Add wallet address state - you might get this from a wallet context or user session
-  const [walletAddress, setWalletAddress] = useState<string>("")
+
 
   useEffect(() => {
-    // This ensures the component is fully client-side rendered
-    console.log("Flight search component mounted")
-
-    // Set default date on component mount
     if (!selectedDate) {
       setSelectedDate(new Date())
     }
-
-    // Get wallet address from contract service
-    const loadWalletAddress = async () => {
-      try {
-        const address = await contractService.getWalletAddress()
-        setWalletAddress(address)
-      } catch (error) {
-        console.error("Error loading wallet address:", error)
-      }
-    }
-
-    loadWalletAddress()
   }, [selectedDate])
 
-  useEffect(() => {
-    if (viewFlightData) {
-      // console.log("view flight data ------>", viewFlightData)
-    }
-    if (subscribeFlightData) {
-      // console.log("subscribe flight data ------>", subscribeFlightData)
-    }
-  }, [viewFlightData, subscribeFlightData])
-
-  // Clear data when switching tabs
   const handleTabChange = useCallback(
     (value: string) => {
       setActiveTab(value)

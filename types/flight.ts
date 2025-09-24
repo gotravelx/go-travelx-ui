@@ -217,7 +217,6 @@ export interface FlightSubscriptionRequest {
 export interface SubscriptionDetails {
   subscription: {
     _id: string // Generated unique ID for React keying
-    walletAddress: string
     flightNumber: string
     departureAirport: string // This is the code, e.g., "IAD"
     arrivalAirport: string // This is the code, e.g., "JST"
@@ -234,7 +233,6 @@ export interface SubscriptionDetails {
 // The actual API response structure for get-flight-subscriptions
 export interface GetFlightSubscriptionsApiResponse {
   success: boolean
-  walletAddress: string
   subscriptionCount: number
   subscriptions: Array<{
     flightNumber: string

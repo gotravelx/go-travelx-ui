@@ -96,7 +96,9 @@ export default function UnSubscribeDataTable({
     try {
       const success = await flightService.unsubscribeFlights(
         [confirmingSubscription.subscription.flightNumber],
-        [confirmingSubscription.subscription.departureAirport]
+        ["UA"],
+        [confirmingSubscription.subscription.departureAirport],
+        [confirmingSubscription.subscription.arrivalAirport]
       );
 
       if (success) {

@@ -35,7 +35,7 @@ interface UnsubscribeFlightClientProps {
   walletAddress: string
 }
 
-export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFlightClientProps) {
+export default function UnsubscribeFlightClient() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDetails[]>([])
   const [filteredSubscriptions, setFilteredSubscriptions] = useState<SubscriptionDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -62,7 +62,7 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
   const fetchSubscriptions = useCallback(async () => {
     setIsLoading(true)
     try {
-      const fetchedSubscriptions = await flightService.getSubscribedFlightsDetails(walletAddress)
+      const fetchedSubscriptions = await flightService.getSubscribedFlightsDetails()
       setSubscriptions(fetchedSubscriptions)
       setFilteredSubscriptions(fetchedSubscriptions)
       // Clear selected subscriptions if they are no longer in the fetched list
@@ -83,7 +83,7 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
     } finally {
       setIsLoading(false)
     }
-  }, [walletAddress])
+  }, [])
 
   useEffect(() => {
     fetchSubscriptions()
@@ -126,7 +126,9 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
     setIsUnsubscribing(true)
     try {
       const flightNumbersToUnsubscribe: string[] = []
+      const carrierCodes: string[] = []
       const departureAirportsToUnsubscribe: string[] = []
+      const arrivalAirportsToUnsubscribe: string[] = []
 
       selectedSubscriptions.forEach((selectedFlightNumber) => {
         const subscription = subscriptions.find((sub) => sub.subscription.flightNumber === selectedFlightNumber)
@@ -136,7 +138,7 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
         }
       })
 
-      const success = await flightService.unsubscribeFlights(flightNumbersToUnsubscribe, departureAirportsToUnsubscribe)
+      const success = await flightService.unsubscribeFlights(flightNumbersToUnsubscribe, carrierCodes,departureAirportsToUnsubscribe,arrivalAirportsToUnsubscribe)
 
       if (success) {
         toast.success(`Successfully unsubscribed from ${selectedSubscriptions.size} flight(s).`)

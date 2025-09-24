@@ -18,9 +18,8 @@ class FlightService {
 
   searchAirportCodes = async (): Promise<AirportSearchResponse> => {
     try {
-      console.log("Fetching airport codes from:", `${this.baseUrl}/v1/airport-codes`)
 
-      const response = await fetch(`${this.baseUrl}/v1/airport-codes`, {
+      const response = await fetch(`${this.baseUrl}/airport-codes`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -55,7 +54,7 @@ class FlightService {
       // )
 
       const response = await fetch(
-        `${this.baseUrl}/v1/flights/get-flight-status/${flightNumber}?departureDate=${
+        `${this.baseUrl}/flights/get-flight-status/${flightNumber}?departureDate=${
           departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&arrival=${arrivalStation}&includeFullData=false`,
       )
@@ -137,7 +136,7 @@ class FlightService {
 
       console.log("Request body:", requestBody)
 
-      const response = await fetch(`${this.baseUrl}/v1/subscription/add-flight-subscription`, {
+      const response = await fetch(`${this.baseUrl}/subscription/add-flight-subscription`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -161,7 +160,7 @@ class FlightService {
 
   getSubscribedFlights = async (): Promise<FlightData[]> => {
     try {
-      const response = await fetch(`${this.baseUrl}/v1/flights/get-all-flights`, {
+      const response = await fetch(`${this.baseUrl}/flights/get-all-flights`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -230,11 +229,10 @@ class FlightService {
     }
   }
 
-  getSubscribedFlightsDetails = async (walletAddress: string): Promise<SubscriptionDetails[]> => {
+  getSubscribedFlightsDetails = async (): Promise<SubscriptionDetails[]> => {
     try {
-      console.log(`Fetching subscribed flights details for wallet: ${walletAddress}`)
 
-      const response = await fetch(`${this.baseUrl}/v1/subscription/get-flight-subscriptions`, {
+      const response = await fetch(`${this.baseUrl}/subscription/get-flight-subscriptions`, {
         
       })
 
@@ -252,7 +250,7 @@ class FlightService {
           const flightData: FlightData = {
             flightNumber: apiSub.flightNumber,
             scheduledDepartureDate: apiSub.departureDate,
-            carrierCode: apiSub.airline.code,
+            carrierCode: apiSub.carrierCode,
             operatingAirline: apiSub.airline.name,
             estimatedArrivalUTC: apiSub.times.estimatedArrival,
             estimatedDepartureUTC: apiSub.times.estimatedDeparture,
@@ -295,7 +293,6 @@ class FlightService {
           return {
             subscription: {
               _id: apiSub._id || "", // Add _id from apiSub, fallback to empty string if missing
-              walletAddress: data.walletAddress, // From top-level response
               flightNumber: apiSub.flightNumber,
               departureAirport: apiSub.departureAirport.code, // Just the code
               arrivalAirport: apiSub.arrivalAirport.code, // Just the code
@@ -317,18 +314,20 @@ class FlightService {
     }
   }
 
-  unsubscribeFlights = async (flightNumbers: string[], departureAirports: string[]): Promise<boolean> => {
+  unsubscribeFlights = async (flightNumbers: string[],carrierCodes:string[],departureAirports: string[],arrivalAirports:string[]): Promise<boolean> => {
     try {
       console.log(`Unsubscribing from ${flightNumbers.length} flights`)
 
-      const response = await fetch(`${this.baseUrl}/v1/subscription/unsubscribe-flight`, {
+      const response = await fetch(`${this.baseUrl}/subscription/unsubscribe-flight`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           flightNumbers,
+          carrierCodes,
           departureAirports,
+          arrivalAirports,
         }),
       })
 
