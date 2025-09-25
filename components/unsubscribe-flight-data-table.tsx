@@ -40,13 +40,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { SubscriptionDetails } from "@/types/flight";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
+import type { SubscriptionDetails, FlightData } from "@/types/flight";
 
 interface UnSubscribeDataTableProps {
   subscriptions: SubscriptionDetails[];
   isLoading: boolean;
-  selectedSubscriptions: Set<string>;
-  onSubscriptionSelect: (subscriptionId: string) => void;
+  selectedSubscriptions: Set<string>; // Stores flightNumber
+  onSubscriptionSelect: (flightNumber: string) => void; // Takes flightNumber
   selectAll: boolean;
   onSelectAll: (checked: boolean) => void;
   onUnsubscribe: () => void;
@@ -61,51 +62,48 @@ export default function UnSubscribeDataTable({
   onSelectAll,
   onUnsubscribe,
 }: UnSubscribeDataTableProps) {
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [selectedFlight, setSelectedFlight] = useState<any | null>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null); // Stores flightNumber
+  const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUnsubscribing, setIsUnsubscribing] = useState<string | null>(null);
+  const [isUnsubscribing, setIsUnsubscribing] = useState<string | null>(null); // Stores flightNumber
 
   // Add state for confirmation dialog
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [confirmingSubscription, setConfirmingSubscription] =
     useState<SubscriptionDetails | null>(null);
 
-  const toggleRow = (subscriptionId: string) => {
-    setExpandedRow(expandedRow === subscriptionId ? null : subscriptionId);
+  const toggleRow = (flightNumber: string) => {
+    // Takes flightNumber
+    setExpandedRow(expandedRow === flightNumber ? null : flightNumber);
   };
 
-  const openFlightDetails = (flight: any) => {
-    setSelectedFlight(flight);
+  // Helper to map SubscriptionDetails.flight to FlightData for FlightStatusView
+  const openFlightDetails = (flightData: FlightData) => {
+    setSelectedFlight(flightData);
     setIsDialogOpen(true);
   };
 
-  // Update the handleSingleUnsubscribe function to show confirmation first
   const handleSingleUnsubscribe = async (subscription: SubscriptionDetails) => {
     setConfirmingSubscription(subscription);
     setIsConfirmDialogOpen(true);
   };
 
-  // Add a new function to actually perform the unsubscription after confirmation
   const confirmSingleUnsubscribe = async () => {
-    if (confirmingSubscription) {
-      setIsUnsubscribing(confirmingSubscription.subscription._id);
-    }
+    if (!confirmingSubscription) return;
+
+    setIsUnsubscribing(confirmingSubscription.subscription.flightNumber); // Use flightNumber for tracking
 
     try {
-      // Use the consolidated API method with arrays of length 1
       const success = await flightService.unsubscribeFlights(
-        [confirmingSubscription?.subscription?.flightNumber ?? ""],
-        [confirmingSubscription?.flight?.carrierCode ?? ""],
-        [confirmingSubscription?.subscription?.departureAirport ?? ""]
+        [confirmingSubscription.subscription.flightNumber],
+        ["UA"],
+        [confirmingSubscription.subscription.departureAirport],
+        [confirmingSubscription.subscription.arrivalAirport]
       );
 
       if (success) {
         toast.success("Successfully unsubscribed from flight");
-        // Remove this subscription from the selected set
-        onSubscriptionSelect(confirmingSubscription?.subscription?._id ?? "");
-
-        // Refresh the subscription list
+        onSubscriptionSelect(confirmingSubscription.subscription.flightNumber); // Use flightNumber
         onUnsubscribe();
       } else {
         toast.error("Failed to unsubscribe from flight");
@@ -121,6 +119,7 @@ export default function UnSubscribeDataTable({
   };
 
   const getStatusBadgeColor = (flight: any) => {
+    // Takes FlightData
     if (flight?.isCanceled) return "bg-red-500/20 text-red-500";
     if ((flight?.departureDelayMinutes ?? 0) > 0)
       return "bg-yellow-500/20 text-yellow-500";
@@ -141,13 +140,12 @@ export default function UnSubscribeDataTable({
     }
   };
 
-  // Modify the getStatusText function to return uppercase status codes
   const getStatusText = (flight: any) => {
+    // Takes FlightData
     if (flight?.isCanceled) return "CNCL";
     if ((flight?.departureDelayMinutes ?? 0) > 0)
       return `DELAYED ${flight?.departureDelayMinutes} min`;
 
-    // Use currentFlightStatus if available, otherwise use statusCode
     if (flight?.currentFlightStatus) {
       return flight?.currentFlightStatus.toUpperCase();
     }
@@ -202,12 +200,82 @@ export default function UnSubscribeDataTable({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-8 items-center">
-        <div className="border-b-2 border-primary h-12 rounded-full w-12 animate-spin"    role="status"
-        aria-label="loading"></div>
+      <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="w-[50px]">
+                <Skeleton className="h-4 w-4 rounded-sm" />
+              </TableHead>
+              <TableHead className="hidden md:table-cell">
+                <Skeleton className="h-4 w-[100px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[80px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[80px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[80px]" />
+              </TableHead>
+              <TableHead className="hidden md:table-cell">
+                <Skeleton className="h-4 w-[120px]" />
+              </TableHead>
+              <TableHead className="hidden md:table-cell">
+                <Skeleton className="h-4 w-[100px]" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="h-4 w-[90px]" />
+              </TableHead>
+              <TableHead className="w-[100px]">
+                <Skeleton className="h-4 w-[70px]" />
+              </TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <Skeleton className="h-4 w-4 rounded-sm" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell className="font-medium">
+                  <Skeleton className="h-4 w-[120px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-[120px]" />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-[80px] rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-[90px] rounded-md" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
+
+
 
   return (
     <>
@@ -244,24 +312,23 @@ export default function UnSubscribeDataTable({
           <TableBody>
             {subscriptions?.length > 0 ? (
               subscriptions?.map((subscription) => (
-                <>
-                  <TableRow
-                    key={subscription?.subscription._id}
-                    className="hover:bg-muted/50"
-                  >
+                <React.Fragment key={subscription.subscription.flightNumber}>
+                  <TableRow className="hover:bg-muted/50">
                     <TableCell>
                       <Checkbox
                         checked={selectedSubscriptions.has(
-                          subscription?.subscription?._id
+                          subscription.subscription.flightNumber
                         )}
                         onCheckedChange={() =>
-                          onSubscriptionSelect(subscription?.subscription?._id)
+                          onSubscriptionSelect(
+                            subscription.subscription.flightNumber
+                          )
                         }
-                        aria-label={`Select subscription ${subscription?.subscription?._id}`}
+                        aria-label={`Select subscription ${subscription.subscription.flightNumber}`}
                       />
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {subscription?.subscription?.blockchainTxHash ? (
+                      {subscription.subscription.blockchainTxHash ? (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -310,51 +377,43 @@ export default function UnSubscribeDataTable({
                     <TableCell className="font-medium">
                       <div className="flex gap-2 items-center">
                         <Plane className="h-4 text-primary w-4" />
-                        {subscription?.flight?.carrierCode}{" "}
-                        {subscription?.flight?.flightNumber}
+                        {subscription.flight.carrierCode}{" "}
+                        {subscription.flight.flightNumber}
                       </div>
                     </TableCell>
 
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
-                          {subscription?.flight?.departureCity} (
-                          {subscription?.flight?.departureAirport})
+                          {subscription.flight.departureCity} (
+                          {subscription.flight.departureAirport})
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 items-center">
                         <span className="font-medium">
-                          {subscription?.flight?.arrivalCity} (
-                          {subscription?.flight?.arrivalAirport})
+                          {subscription.flight.arrivalCity} (
+                          {subscription.flight.arrivalAirport})
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Calendar className="h-4 text-muted-foreground w-4" />
-                        {formatDate(
-                          subscription?.flight?.scheduledDepartureDate
-                        )}
+                        {formatDate(subscription.flight.scheduledDepartureDate)}
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex gap-2 items-center">
                         <Clock className="h-4 text-muted-foreground w-4" />
-                        {formatDate(
-                          subscription?.subscription?.subscriptionDate
-                        )}
+                        {formatDate(subscription.subscription.subscriptionDate)}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`${getStatusBadgeColor(
-                          subscription?.flight
-                        )} p-2 px-4 text-md`}
-                      >
-                        {getStatusText(subscription?.flight)}
+                      <Badge variant="outline" className="p-2 px-4 text-md">
+                        {subscription?.flight?.statusCode?.toUpperCase() || "N/A"}
+ 
                       </Badge>
                     </TableCell>
 
@@ -365,10 +424,12 @@ export default function UnSubscribeDataTable({
                           size="sm"
                           onClick={() => handleSingleUnsubscribe(subscription)}
                           disabled={
-                            isUnsubscribing === subscription.subscription._id
+                            isUnsubscribing ===
+                            subscription.subscription.flightNumber
                           }
                         >
-                          {isUnsubscribing === subscription.subscription._id ? (
+                          {isUnsubscribing ===
+                          subscription.subscription.flightNumber ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             "Unsubscribe"
@@ -381,9 +442,12 @@ export default function UnSubscribeDataTable({
                         variant="ghost"
                         size="icon"
                         className="h-8 p-0 w-8"
-                        onClick={() => toggleRow(subscription.subscription._id)}
+                        onClick={() =>
+                          toggleRow(subscription.subscription.flightNumber)
+                        }
                       >
-                        {expandedRow === subscription.subscription._id ? (
+                        {expandedRow ===
+                        subscription.subscription.flightNumber ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <ChevronRight className="h-4 w-4" />
@@ -391,8 +455,10 @@ export default function UnSubscribeDataTable({
                       </Button>
                     </TableCell>
                   </TableRow>
-                  {expandedRow === subscription.subscription._id && (
-                    <TableRow key={`${subscription.subscription._id}-expanded`}>
+                  {expandedRow === subscription.subscription.flightNumber && (
+                    <TableRow
+                      key={`${subscription.subscription.flightNumber}-expanded`}
+                    >
                       <TableCell colSpan={10} className="bg-muted/20 p-0">
                         <div className="p-4">
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -584,7 +650,7 @@ export default function UnSubscribeDataTable({
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </React.Fragment>
               ))
             ) : (
               <TableRow>
@@ -629,7 +695,8 @@ export default function UnSubscribeDataTable({
                   setConfirmingSubscription(null);
                 }}
                 disabled={
-                  isUnsubscribing === confirmingSubscription.subscription._id
+                  isUnsubscribing ===
+                  confirmingSubscription.subscription.flightNumber
                 }
               >
                 Cancel
@@ -638,10 +705,12 @@ export default function UnSubscribeDataTable({
                 variant="destructive"
                 onClick={confirmSingleUnsubscribe}
                 disabled={
-                  isUnsubscribing === confirmingSubscription.subscription._id
+                  isUnsubscribing ===
+                  confirmingSubscription.subscription.flightNumber
                 }
               >
-                {isUnsubscribing === confirmingSubscription.subscription._id ? (
+                {isUnsubscribing ===
+                confirmingSubscription.subscription.flightNumber ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Unsubscribing...

@@ -1,11 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 
-"use client"
+"use client";
 
-import { useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { Play, XIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Play, XIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+// Use your YouTube embed URL with autoplay
+const goTravelXDemo = "https://www.youtube.com/embed/5596oBHoSkM?si=C6qrIrF4riK-fMYm";
+const thumbnail = "/thumbnail.png";
 
 type AnimationStyle =
   | "from-bottom"
@@ -15,14 +18,14 @@ type AnimationStyle =
   | "from-right"
   | "fade"
   | "top-in-bottom-out"
-  | "left-in-right-out"
+  | "left-in-right-out";
 
 interface HeroVideoProps {
-  animationStyle?: AnimationStyle
-  videoSrc: string
-  thumbnailSrc: string
-  thumbnailAlt?: string
-  className?: string
+  animationStyle?: AnimationStyle;
+  videoSrc: string;
+  thumbnailSrc: string;
+  thumbnailAlt?: string;
+  className?: string;
 }
 
 const animationVariants = {
@@ -66,7 +69,7 @@ const animationVariants = {
     animate: { x: 0, opacity: 1 },
     exit: { x: "100%", opacity: 0 },
   },
-}
+};
 
 export function HeroVideoPlayer({
   animationStyle = "from-center",
@@ -75,15 +78,18 @@ export function HeroVideoPlayer({
   thumbnailAlt = "Video thumbnail",
   className,
 }: HeroVideoProps) {
-  const [isVideoOpen, setIsVideoOpen] = useState(false)
-  const selectedAnimation = animationVariants[animationStyle]
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const selectedAnimation = animationVariants[animationStyle];
 
   return (
     <div className={cn("relative", className)}>
-      <div className="group relative cursor-pointer" onClick={() => setIsVideoOpen(true)}>
+      <div
+        className="group relative cursor-pointer"
+        onClick={() => setIsVideoOpen(true)}
+      >
         <img
-          src={thumbnailSrc || "/placeholder.svg"}
-          alt={thumbnailAlt}
+          src={thumbnail || "/placeholder.svg"}
+          alt={"thumbnail"}
           width={1920}
           height={1080}
           className="w-full rounded-md border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8]"
@@ -96,7 +102,8 @@ export function HeroVideoPlayer({
               <Play
                 className="size-8 scale-100 fill-white text-white transition-transform duration-200 ease-out group-hover:scale-105"
                 style={{
-                  filter: "drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06))",
+                  filter:
+                    "drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06))",
                 }}
               />
             </div>
@@ -117,8 +124,12 @@ export function HeroVideoPlayer({
               {...selectedAnimation}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="relative mx-4 aspect-video w-full max-w-4xl md:mx-0"
+              onClick={(e) => e.stopPropagation()}
             >
-              <motion.button className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black">
+              <motion.button 
+                className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black"
+                onClick={() => setIsVideoOpen(false)}
+              >
                 <XIcon className="size-5" />
               </motion.button>
               <div className="relative isolate z-[1] size-full overflow-hidden rounded-2xl border-2 border-white">
@@ -126,8 +137,11 @@ export function HeroVideoPlayer({
                   src={videoSrc}
                   data-testid="video-iframe"
                   className="size-full rounded-2xl"
-                  allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  title="YouTube video player"
+                  style={{ border: 0 }}
+                  referrerPolicy="strict-origin-when-cross-origin"
                 ></iframe>
               </div>
             </motion.div>
@@ -135,7 +149,7 @@ export function HeroVideoPlayer({
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }
 
 export function HeroVideoDialog() {
@@ -144,17 +158,17 @@ export function HeroVideoDialog() {
       <HeroVideoPlayer
         className="block dark:hidden"
         animationStyle="top-in-bottom-out"
-        videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
-        thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png"
+        videoSrc={goTravelXDemo}
+        thumbnailSrc={thumbnail}
         thumbnailAlt="Hero Video"
       />
       <HeroVideoPlayer
         className="hidden dark:block"
         animationStyle="top-in-bottom-out"
-        videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
-        thumbnailSrc="https://startup-template-sage.vercel.app/hero-dark.png"
+        videoSrc={goTravelXDemo}
+        thumbnailSrc={thumbnail}
         thumbnailAlt="Hero Video"
       />
     </div>
-  )
+  );
 }

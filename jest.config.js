@@ -45,7 +45,8 @@ const customJestConfig = {
     "<rootDir>/components/subscribtion-flight-status-view.tsx", 
     "<rootDir>/components/subscribe-card.tsx",
     "<rootDir>/components/flight-status-view.tsx",
-  ],
+
+    ],
 };
 
 module.exports = createJestConfig(customJestConfig);

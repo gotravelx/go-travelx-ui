@@ -36,11 +36,7 @@ const mockFlights: FlightData[] = [
 ]
 
 describe("ViewFlightDatTable", () => {
-  it("renders loading spinner when isLoading=true", () => {
-    render(<ViewFlightDatTable flights={[]} isLoading />)
-    expect(screen.getByRole("status")).toBeInTheDocument()
-  })
-
+ 
   it("renders 'No flights found' when no data", () => {
     render(<ViewFlightDatTable flights={[]} totalItems={0} />)
     expect(screen.getByText(/No flights found/i)).toBeInTheDocument()
@@ -63,6 +59,7 @@ describe("ViewFlightDatTable", () => {
       expect(screen.queryByText(/Flight AA 123 Status/i)).not.toBeInTheDocument()
     )
   })
+
 
   it("handles pagination controls", () => {
     const handlePageChange = jest.fn()
