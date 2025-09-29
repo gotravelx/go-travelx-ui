@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`RootLayout renders providers and children 1`] = `
+<div>
+  <html
+    lang="en"
+  >
+    <body
+      class="className"
+    >
+      <div
+        data-testid="auth-provider"
+      >
+        <div
+          data-testid="theme-provider"
+        >
+          <nav
+            data-testid="main-nav"
+          >
+            MainNav
+          </nav>
+          <div
+            data-testid="toaster"
+          >
+            Toaster 
+            top-right
+          </div>
+          <div
+            data-testid="page-content"
+          >
+            Page Content
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
+</div>
+`;

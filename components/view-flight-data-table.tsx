@@ -195,11 +195,10 @@ export default function ViewFlightDatTable({
   //   true
   // );
 
-  console.log("Flight Data Table Rendered", flights, "flights")
   return (
     <>
       <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
-        <Table>
+        <Table data-testid="flight-table">
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="hidden md:table-cell">{renderTableHeaderWithTooltip("Transaction ID")}</TableHead>
@@ -351,13 +350,13 @@ export default function ViewFlightDatTable({
                     </TableCell>
 
                     <TableCell>
-                      <div className="flex gap-1 items-center">
+                      <div className="flex gap-1 items-center w-[75px]">
                         <Badge className="py-2 "> {mapArrivalStateCodeToText(flight?.arrivalState || "")}</Badge>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`${getStatusBadgeColor(flight)} p-2 px-4 text-md`}>
-                        {flight?.statusCode.toUpperCase() || "N/A"}
+                      {flight?.statusCode ? flight.statusCode.toUpperCase() : "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell>

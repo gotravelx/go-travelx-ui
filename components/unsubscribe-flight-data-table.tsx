@@ -275,6 +275,8 @@ export default function UnSubscribeDataTable({
     );
   }
 
+
+
   return (
     <>
       <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
@@ -410,7 +412,7 @@ export default function UnSubscribeDataTable({
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="p-2 px-4 text-md">
-                        {/* {subscription.status?.legStatus || "N/A"} */}
+                        {subscription?.flight?.statusCode?.toUpperCase() || "N/A"}
  
                       </Badge>
                     </TableCell>
