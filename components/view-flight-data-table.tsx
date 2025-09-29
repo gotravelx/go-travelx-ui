@@ -350,7 +350,7 @@ export default function ViewFlightDatTable({
                     </TableCell>
 
                     <TableCell>
-                      <div className="flex gap-1 items-center">
+                      <div className="flex gap-1 items-center w-[75px]">
                         <Badge className="py-2 "> {mapArrivalStateCodeToText(flight?.arrivalState || "")}</Badge>
                       </div>
                     </TableCell>

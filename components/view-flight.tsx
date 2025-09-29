@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { CalendarIcon, AlertCircle, Loader2 } from "lucide-react";
+import { CalendarIcon, AlertCircle, Loader2, Code } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -30,6 +30,7 @@ import ViewFlightDatTable from "./view-flight-data-table";
 import { flightService } from "@/services/api";
 import type { FlightData } from "@/types/flight";
 import { Label } from "@/components/ui/label"; // Import Label
+import { AirportAutocomplete } from "./ui/airportAutocomplete";
 
 export default function ViewFlight() {
   const [flights, setFlights] = useState<FlightData[]>([]);
@@ -86,25 +87,28 @@ export default function ViewFlight() {
     }
   }, []);
 
-  const handleDepartureStationChange = useCallback((value: string) => {
-    const formattedValue = value.toUpperCase().slice(0, 3);
-    setDepartureStation(formattedValue);
-    if (formattedValue && formattedValue.length !== 3) {
+  const handleDepartureSelect = (airport: any) => {
+    const code = airport || "";
+
+    setDepartureStation(code);
+
+    if (code.length !== 3) {
       setDepartureStationError("Station code must be 3 characters");
     } else {
       setDepartureStationError("");
     }
-  }, []);
+  };
 
-  const handleArrivalStationChange = useCallback((value: string) => {
-    const formattedValue = value.toUpperCase().slice(0, 3);
-    setArrivalStation(formattedValue);
-    if (formattedValue && formattedValue.length !== 3) {
+  const handleArrivalSelect = (airport: any) => {
+    const code = airport || "";
+    setArrivalStation(code);
+
+    if (airport.length !== 3) {
       setArrivalStationError("Station code must be 3 characters");
     } else {
       setArrivalStationError("");
     }
-  }, []);
+  };
 
   const resetFilters = useCallback(() => {
     setFlightNumber("");
@@ -268,17 +272,15 @@ export default function ViewFlight() {
                 From
               </Label>
               <div>
-                <Input
-                  id="departure-station"
-                  placeholder="Enter Station Code"
+                <AirportAutocomplete
                   value={departureStation}
-                  onChange={(e) => handleDepartureStationChange(e.target.value)}
+                  id="departure-station"
+                  onSelect={handleDepartureSelect}
                   className={`bg-background/90 border-2 ${
                     departureStationError
                       ? "border-red-500"
                       : "border-primary/50"
-                  } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
-                  maxLength={3}
+                  } shadow-sm w-full focus-visible:border-primary md:w-[200px]`}
                 />
                 {departureStationError && (
                   <p className="text-xs text-red-500 mt-1">
@@ -296,15 +298,13 @@ export default function ViewFlight() {
                 To
               </Label>
               <div>
-                <Input
-                  id="arrival-station"
-                  placeholder="Enter Station Code"
+                <AirportAutocomplete
                   value={arrivalStation}
-                  onChange={(e) => handleArrivalStationChange(e.target.value)}
+                  id="arrival-station"
+                  onSelect={handleArrivalSelect}
                   className={`bg-background/90 border-2 ${
                     arrivalStationError ? "border-red-500" : "border-primary/50"
-                  } shadow-sm w-full focus-visible:border-primary md:w-[120px]`}
-                  maxLength={3}
+                  } shadow-sm w-full focus-visible:border-primary md:w-[200px]`}
                 />
                 {arrivalStationError && (
                   <p className="text-xs text-red-500 mt-1">
