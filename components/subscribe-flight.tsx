@@ -19,6 +19,7 @@ import {
 import { format } from "date-fns";
 import { AlertCircle, CalendarIcon } from "lucide-react";
 import { memo, useState, useEffect } from "react";
+import { AirportAutocomplete } from "./ui/airportAutocomplete";
 
 const SubscribeFlight = memo(
   ({
@@ -74,17 +75,17 @@ const SubscribeFlight = memo(
     };
 
     // Add departure station validation
-    const handleDepartureStationChange = (value: string) => {
+    const handleDepartureStationChange = (code: string) => {
       // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
+      const formattedValue = code.toUpperCase().slice(0, 3);
       setDepartureStation(formattedValue);
       onDepartureStationChange(formattedValue);
     };
 
     // Handle arrival station validation
-    const handleArrivalStationChange = (value: string) => {
+    const handleArrivalStationChange = (code: string) => {
       // Convert to uppercase and limit to 3 characters
-      const formattedValue = value.toUpperCase().slice(0, 3);
+      const formattedValue = code.toUpperCase().slice(0, 3);
       setArrivalStation(formattedValue);
       onArrivalStationChange(formattedValue);
     };
@@ -103,7 +104,7 @@ const SubscribeFlight = memo(
         errorMessage = "Flight number must be 4 digits";
         hasError = true;
       }
-      
+
       if (hasError) {
         // Set error message if setSearchError is available
         if (typeof setSearchError === "function") {
@@ -174,14 +175,14 @@ const SubscribeFlight = memo(
             >
               From
             </label>
-            <Input
-              id="departure-station"
-              placeholder="Enter Station Code"
-              value={departureStation}
-              onChange={(e) => handleDepartureStationChange(e.target.value)}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              maxLength={3}
-            />
+            <div>
+              <AirportAutocomplete
+                value={departureStation}
+                id="departure-station"
+                onSelect={handleDepartureStationChange}
+                className={`bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[200px]`}
+              />
+            </div>
           </div>
 
           {/* Arrival Station */}
@@ -192,14 +193,12 @@ const SubscribeFlight = memo(
             >
               To
             </label>
-            <Input
-              id="arrival-station"
-              placeholder="Enter Station Code"
-              value={arrivalStation}
-              onChange={(e) => handleArrivalStationChange(e.target.value)}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[120px]"
-              maxLength={3}
-            />
+            <AirportAutocomplete
+                value={arrivalStation}
+                id="arrival-station"
+                onSelect={handleArrivalStationChange}
+                className={`bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[200px]`}
+              />
           </div>
 
           {/* Date Picker */}

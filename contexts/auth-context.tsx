@@ -8,12 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { authServices } from "@/services/api";
+import { User } from "@/types/auth";
 
-type User = {
-  id: string;
-  username: string;
-  name: string;
-};
+
 
 type AuthContextType = {
   user: User | null;
@@ -23,66 +21,33 @@ type AuthContextType = {
   logout: () => void;
 };
 
-const defaultUser = {
-  id: "1",
-  username: "demo_cleaner",
-  name: "Demo User",
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(authServices.getUser());
   const [isLoading, setIsLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
-  // Ensure we're on the client side before accessing localStorage
   useEffect(() => {
-    setIsClient(true);
+    setUser(authServices.getUser());
+    setIsLoading(false);
   }, []);
-
-  useEffect(() => {
-    // Only run this effect on the client side
-    if (isClient) {
-      try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error("Error accessing localStorage:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  }, [isClient]);
 
   const login = async (username: string, password: string) => {
     try {
       setIsLoading(true);
-      if (username === "demo_cleaner" && password === "demo1234") {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setUser(defaultUser);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify(defaultUser));
-        }
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error("Invalid credentials"));
-      }
+      const loggedInUser:any = await authServices.login(username, password);
+      setUser(loggedInUser);
     } catch (error) {
-      return Promise.reject(error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = () => {
+    authServices.logout();
     setUser(null);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("user");
-    }
     router.push("/login");
   };
 
@@ -103,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
