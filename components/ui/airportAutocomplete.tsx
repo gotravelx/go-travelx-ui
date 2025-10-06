@@ -10,16 +10,18 @@ type Airport = {
   country: string;
 };
 
+type AirportAutocompleteProps = Omit<React.ComponentProps<"input">, "onSelect"> & {
+  onSelect?: (code: string) => void;
+  className?: string;
+  value?: string;
+};
+
 export function AirportAutocomplete({
   onSelect,
   className,
   value,
   ...props
-}: {
-  onSelect?: (code: string) => void;
-  className?: string;
-  value?: string;
-} & React.ComponentProps<"input">) {
+}: AirportAutocompleteProps) {
   const [query, setQuery] = React.useState("");
   const [filtered, setFiltered] = React.useState<Airport[]>([]);
   const [showDropdown, setShowDropdown] = React.useState(false);
@@ -47,8 +49,7 @@ export function AirportAutocomplete({
       }))
       .filter(
         (a) =>
-          a.code.toLowerCase().includes(query.toLowerCase()) ||
-          a.city.toLowerCase().includes(query.toLowerCase())
+          a.code.toLowerCase().includes(query.toLowerCase()) 
       )
       .slice(0, 10);
     setFiltered(results);

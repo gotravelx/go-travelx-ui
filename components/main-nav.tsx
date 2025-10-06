@@ -29,7 +29,7 @@ export function MainNav() {
     setIsMounted(true);
   }, []);
 
-// Close mobile menu when route changes
+  // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
@@ -44,7 +44,7 @@ export function MainNav() {
       .map((n) => n[0])
       .join("")
       .toUpperCase();
-};
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
@@ -126,7 +126,10 @@ export function MainNav() {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          {user?.name}
+                          {user?.name
+                            ? user?.name?.charAt(0)?.toUpperCase() +
+                              user?.name?.slice(1)?.toLowerCase()
+                            : ""}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user?.username}
