@@ -97,6 +97,18 @@ export function MainNav() {
             >
               Marketing
             </Link>
+                
+            <Link
+              href="/guide"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isActive("/guide")
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
+            >
+              Guide
+            </Link>
 
             {isAuthenticated ? (
               <>
