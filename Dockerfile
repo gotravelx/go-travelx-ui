@@ -13,7 +13,7 @@ COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
  
 # Copy environment file (from pipeline)
-COPY .env .env
+# COPY .env .env
  
 # Copy app files and build
 COPY . .
@@ -33,7 +33,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.env .env
+# COPY --from=builder /app/.env .env
  
 # Expose port
 EXPOSE 3000
