@@ -222,13 +222,61 @@ export default function ViewFlight() {
                 Carrier
               </Label>
               <Select value={carrier} onValueChange={handleCarrierChange}>
-                <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[120px]">
+                <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[140px]">
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UA">UA</SelectItem>
-                  <SelectItem value="AA">AA</SelectItem>
-                  <SelectItem value="DL">DL</SelectItem>
+                <SelectContent className="md:w-[300px]">
+                  {/* United Airlines */}
+                  <SelectItem value="UA">UA – United Airlines</SelectItem>
+
+                  {/* Star Alliance Partners */}
+                  <SelectItem value="AC">AC – Air Canada</SelectItem>
+                  <SelectItem value="A3">A3 – Aegean Airlines</SelectItem>
+                  <SelectItem value="JP">JP – Adria Airways</SelectItem>
+                  <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
+                  <SelectItem value="NH">
+                    NH – ANA (All Nippon Airways)
+                  </SelectItem>
+                  <SelectItem value="OZ">OZ – Asiana Airlines</SelectItem>
+                  <SelectItem value="OS">OS – Austrian Airlines</SelectItem>
+                  <SelectItem value="SN">SN – Brussels Airlines</SelectItem>
+                  <SelectItem value="CA">CA – Air China</SelectItem>
+                  <SelectItem value="OU">OU – Croatia Airlines</SelectItem>
+                  <SelectItem value="MS">MS – EgyptAir</SelectItem>
+                  <SelectItem value="LO">LO – LOT Polish Airlines</SelectItem>
+                  <SelectItem value="LH">LH – Lufthansa</SelectItem>
+                  <SelectItem value="SK">
+                    SK – Scandinavian Airlines (SAS)
+                  </SelectItem>
+                  <SelectItem value="ZH">ZH – Shenzhen Airlines</SelectItem>
+                  <SelectItem value="SQ">SQ – Singapore Airlines</SelectItem>
+                  <SelectItem value="SA">SA – South African Airways</SelectItem>
+                  <SelectItem value="LX">
+                    LX – Swiss International Air Lines
+                  </SelectItem>
+                  <SelectItem value="TG">TG – Thai Airways</SelectItem>
+                  <SelectItem value="TP">TP – TAP Air Portugal</SelectItem>
+                  <SelectItem value="ET">ET – Ethiopian Airlines</SelectItem>
+                  <SelectItem value="CM">CM – Copa Airlines</SelectItem>
+                  <SelectItem value="TK">TK – Turkish Airlines</SelectItem>
+                  <SelectItem value="BR">BR – EVA Air</SelectItem>
+
+                  {/* UA Codeshare Airlines */}
+                  <SelectItem value="MX">
+                    MX – Breeze Airways (UA codeshare)
+                  </SelectItem>
+                  <SelectItem value="HA">
+                    HA – Hawaiian Airlines (UA codeshare)
+                  </SelectItem>
+                  <SelectItem value="WN">
+                    WN – Southwest (limited codeshares)
+                  </SelectItem>
+                  <SelectItem value="G3">
+                    G3 – Gol Airlines (UA partner)
+                  </SelectItem>
+                  <SelectItem value="VS">
+                    VS – Virgin Atlantic (UA partner via codeshare routes)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

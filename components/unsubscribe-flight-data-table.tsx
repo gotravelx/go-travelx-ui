@@ -71,6 +71,9 @@ export default function UnSubscribeDataTable({
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [confirmingSubscription, setConfirmingSubscription] =
     useState<SubscriptionDetails | null>(null);
+  // Popup for open link (Tab / Window)
+  const [openLinkDialog, setOpenLinkDialog] = useState(false);
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
 
   const toggleRow = (flightNumber: string) => {
     // Takes flightNumber
@@ -275,8 +278,6 @@ export default function UnSubscribeDataTable({
     );
   }
 
-
-
   return (
     <>
       <div className="bg-card border border-border rounded-lg w-full overflow-hidden">
@@ -351,16 +352,19 @@ export default function UnSubscribeDataTable({
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
-                                <a
-                                  href={`https://columbus.caminoscan.com/tx/${subscription.subscription.blockchainTxHash}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                                <button
                                   className="text-primary hover:underline"
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPendingTxHash(
+                                      subscription.subscription.blockchainTxHash
+                                    );
+                                    setOpenLinkDialog(true);
+                                  }}
                                   title="View transaction on Caminoscan"
                                 >
                                   <ExternalLink className="h-3 w-3" />
-                                </a>
+                                </button>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -412,8 +416,8 @@ export default function UnSubscribeDataTable({
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="p-2 px-4 text-md">
-                        {subscription?.flight?.statusCode?.toUpperCase() || "N/A"}
- 
+                        {subscription?.flight?.statusCode?.toUpperCase() ||
+                          "N/A"}
                       </Badge>
                     </TableCell>
 
@@ -723,6 +727,45 @@ export default function UnSubscribeDataTable({
           </div>
         </div>
       )}
+
+      {/* Popup: Open Link Choose Option */}
+      <Dialog open={openLinkDialog} onOpenChange={setOpenLinkDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Open Transaction Link</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 mt-3">
+            <Button
+              onClick={() => {
+                if (pendingTxHash)
+                  window.open(
+                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    "_blank"
+                  );
+                setOpenLinkDialog(false);
+              }}
+            >
+              Open in New Tab
+            </Button>
+
+            <Button
+              onClick={() => {
+                if (pendingTxHash)
+                  window.open(
+                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    "_blank",
+                    "noopener,noreferrer,width=900,height=700"
+                  );
+                setOpenLinkDialog(false);
+              }}
+              variant="outline"
+            >
+              Open in New Window
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
