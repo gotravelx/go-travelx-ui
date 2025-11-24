@@ -105,7 +105,15 @@ export default function LandingPage() {
             <div className="max-w-4xl mx-auto text-center">
               <button
                 onClick={() => {
-                  window.open("https://gotravelx.com/client/", "_blank");
+                  const host = window.location.hostname;
+              
+                  let prefix = "";
+                  if (host.startsWith("dev.")) prefix = "dev.";
+                  else if (host.startsWith("qa.")) prefix = "qa.";
+                  else if (host.startsWith("stg.")) prefix = "stg.";
+              
+                  const url = `https://${prefix}client.gotravelx.com/`;
+                  window.open(url, "_blank");
                 }}
                 className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >

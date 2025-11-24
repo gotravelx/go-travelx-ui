@@ -27,14 +27,14 @@ export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams?.get("redirect") || "/";
+  const redirectUrl = searchParams?.get("redirect") || "/flifo";
 
   useEffect(() => {
     // If already authenticated, redirect to the intended destination
     if (isAuthenticated) {
-      router.push(redirectUrl);
+      router.push("/flifo"); 
     }
-  }, [isAuthenticated, redirectUrl, router]);
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

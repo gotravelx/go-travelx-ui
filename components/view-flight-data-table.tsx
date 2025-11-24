@@ -41,11 +41,13 @@ export default function ViewFlightDatTable({
   onPageChange = () => {},
   onItemsPerPageChange = () => {},
 }: FlightDataTableProps) {
-  const [expandedRow, setExpandedRow] = useState<string | null>(null)
-  const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [localCurrentPage, setLocalCurrentPage] = useState(currentPage)
-  const [localItemsPerPage, setLocalItemsPerPage] = useState(itemsPerPage)
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [localCurrentPage, setLocalCurrentPage] = useState(currentPage);
+  const [localItemsPerPage, setLocalItemsPerPage] = useState(itemsPerPage);
+  const [openLinkDialog, setOpenLinkDialog] = useState(false);
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalCurrentPage(currentPage)
@@ -289,8 +291,14 @@ export default function ViewFlightDatTable({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-primary hover:underline"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="View transaction on Caminoscan"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setPendingTxHash(
+                                      flight.blockchainTxHash || null
+                                    );
+                                    setOpenLinkDialog(true);
+                                  }}
                                 >
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
@@ -356,7 +364,7 @@ export default function ViewFlightDatTable({
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`${getStatusBadgeColor(flight)} p-2 px-4 text-md`}>
-                      {flight?.statusCode ? flight.statusCode.toUpperCase() : "N/A"}
+                        {flight?.statusCode ? flight.statusCode.toUpperCase() : "N/A"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -437,20 +445,20 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">Delay:</div>
                                 <div>{flight?.arrivalState || "TBD"}</div>
                                 {flight.marketedFlightSegment && flight.marketedFlightSegment.length > 0 && (
-                                  <>
-                                    <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
-                                      Codeshare Details:
-                                    </div>
-                                    {flight.marketedFlightSegment.map((segment, idx) => (
-                                      <Fragment key={idx}>
-                                        <div className="text-muted-foreground pl-2">Airline:</div>
-                                        <div>
-                                          {segment.MarketingAirlineCode || "TBD"} {segment.FlightNumber || "TBD"}
-                                        </div>
-                                      </Fragment>
-                                    ))}
-                                  </>
-                                )}
+                                    <>
+                                      <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
+                                        Codeshare Details:
+                                      </div>
+                                      {flight.marketedFlightSegment.map((segment, idx) => (
+                                          <Fragment key={idx}>
+                                            <div className="text-muted-foreground pl-2">Airline:</div>
+                                            <div>
+                                              {segment.MarketingAirlineCode || "TBD"} {segment.FlightNumber || "TBD"}
+                                            </div>
+                                          </Fragment>
+                                        ))}
+                                    </>
+                                  )}
                               </div>
                             </div>
                           </div>
@@ -579,12 +587,51 @@ export default function ViewFlightDatTable({
           <DialogHeader>
             <DialogTitle className="flex gap-2 items-center">
               <Plane className="h-5 w-5" />
-              Flight {selectedFlight?.carrierCode} {selectedFlight?.flightNumber} Status
+              Flight {selectedFlight?.carrierCode}{" "}
+              {selectedFlight?.flightNumber} Status
             </DialogTitle>
           </DialogHeader>
           {selectedFlight && <FlightStatusView flightData={selectedFlight} />}
         </DialogContent>
       </Dialog>
+        {/*window open */}
+      <Dialog open={openLinkDialog} onOpenChange={setOpenLinkDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Open Transaction Link</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 mt-3">
+            <Button
+              onClick={() => {
+                if (pendingTxHash)
+                  window.open(
+                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    "_blank"
+                  );
+                setOpenLinkDialog(false);
+              }}
+            >
+              Open in New Tab
+            </Button>
+
+            <Button
+              onClick={() => {
+                if (pendingTxHash)
+                  window.open(
+                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    "_blank",
+                    "noopener,noreferrer,width=900,height=700"
+                  );
+                setOpenLinkDialog(false);
+              }}
+              variant="outline"
+            >
+              Open in New Window
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
-  )
+  );
 }
