@@ -50,13 +50,19 @@ interface UnsubscribeFlightClientProps {
   walletAddress?: string;
 }
 
-export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFlightClientProps) {
+export default function UnsubscribeFlightClient({
+  walletAddress,
+}: UnsubscribeFlightClientProps) {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDetails[]>([]);
-  const [filteredSubscriptions, setFilteredSubscriptions] = useState<SubscriptionDetails[]>([]);
+  const [filteredSubscriptions, setFilteredSubscriptions] = useState<
+    SubscriptionDetails[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedSubscriptions, setSelectedSubscriptions] = useState<Set<string>>(new Set());
+  const [selectedSubscriptions, setSelectedSubscriptions] = useState<
+    Set<string>
+  >(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -77,7 +83,8 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
   const fetchSubscriptions = useCallback(async () => {
     setIsLoading(true);
     try {
-      const fetchedSubscriptions = await flightService.getSubscribedFlightsDetails();
+      const fetchedSubscriptions =
+        await flightService.getSubscribedFlightsDetails();
       setSubscriptions(fetchedSubscriptions);
       setFilteredSubscriptions(fetchedSubscriptions);
       setSelectedSubscriptions((prev) => {
@@ -122,7 +129,9 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
   const handleSelectAll = (checked: boolean) => {
     setSelectAll(checked);
     if (checked) {
-      setSelectedSubscriptions(new Set(subscriptions.map((sub) => sub.subscription.flightNumber)));
+      setSelectedSubscriptions(
+        new Set(subscriptions.map((sub) => sub.subscription.flightNumber))
+      );
     } else {
       setSelectedSubscriptions(new Set());
     }
@@ -159,7 +168,9 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
         arrivalAirports
       );
       if (success) {
-        toast.success(`Successfully unsubscribed from ${flightNumbers.length} flight(s).`);
+        toast.success(
+          `Successfully unsubscribed from ${flightNumbers.length} flight(s).`
+        );
         setSelectedSubscriptions(new Set());
         setSelectAll(false);
         fetchSubscriptions();
@@ -184,22 +195,33 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
   };
 
   // 🟢 Filter Handlers
-  const handleCarrierChange = useCallback((value: string) => setCarrier(value), []);
+  const handleCarrierChange = useCallback(
+    (value: string) => setCarrier(value),
+    []
+  );
 
   const handleFlightNumberChange = useCallback((value: string) => {
     const numericValue = value.replace(/\D/g, "").slice(0, 4);
     setFlightNumber(numericValue);
-    setFlightNumberError(numericValue && numericValue.length !== 4 ? "Flight number must be 4 digits" : "");
+    setFlightNumberError(
+      numericValue && numericValue.length !== 4
+        ? "Flight number must be 4 digits"
+        : ""
+    );
   }, []);
 
   const handleDepartureSelect = (airport: string) => {
     setDepartureStation(airport || "");
-    setDepartureStationError(airport.length !== 3 ? "Station code must be 3 characters" : "");
+    setDepartureStationError(
+      airport.length !== 3 ? "Station code must be 3 characters" : ""
+    );
   };
 
   const handleArrivalSelect = (airport: string) => {
     setArrivalStation(airport || "");
-    setArrivalStationError(airport.length !== 3 ? "Station code must be 3 characters" : "");
+    setArrivalStationError(
+      airport.length !== 3 ? "Station code must be 3 characters" : ""
+    );
   };
 
   const resetFilters = useCallback(() => {
@@ -221,31 +243,58 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
     setIsSearching(true);
     try {
       let filtered = [...subscriptions];
-      if (flightNumber) filtered = filtered.filter((item) => item.subscription.flightNumber.includes(flightNumber));
-      if (carrier) filtered = filtered.filter((item) => item.flight.carrierCode === carrier);
-      if (departureStation) filtered = filtered.filter((item) => item.flight.departureAirport === departureStation);
-      if (arrivalStation) filtered = filtered.filter((item) => item.flight.arrivalAirport === arrivalStation);
+      if (flightNumber)
+        filtered = filtered.filter((item) =>
+          item.subscription.flightNumber.includes(flightNumber)
+        );
+      if (carrier)
+        filtered = filtered.filter(
+          (item) => item.flight.carrierCode === carrier
+        );
+      if (departureStation)
+        filtered = filtered.filter(
+          (item) => item.flight.departureAirport === departureStation
+        );
+      if (arrivalStation)
+        filtered = filtered.filter(
+          (item) => item.flight.arrivalAirport === arrivalStation
+        );
       if (selectedDate) {
         const dateString = format(selectedDate, "yyyy-MM-dd");
-        filtered = filtered.filter((item) => item.flight.scheduledDepartureDate === dateString);
+        filtered = filtered.filter(
+          (item) => item.flight.scheduledDepartureDate === dateString
+        );
       }
       setFilteredSubscriptions(filtered);
-      if (filtered.length === 0) toast.info("No subscriptions match your search criteria");
+      if (filtered.length === 0)
+        toast.info("No subscriptions match your search criteria");
     } catch (error) {
       console.error("Error applying filters:", error);
       setSearchError("Error applying filters");
     } finally {
       setIsSearching(false);
     }
-  }, [subscriptions, flightNumber, carrier, departureStation, arrivalStation, selectedDate]);
+  }, [
+    subscriptions,
+    flightNumber,
+    carrier,
+    departureStation,
+    arrivalStation,
+    selectedDate,
+  ]);
 
   // Pagination
   useEffect(() => setCurrentPage(1), [itemsPerPage]);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentSubscriptions = filteredSubscriptions.slice(indexOfFirst, indexOfLast);
+  const currentSubscriptions = filteredSubscriptions.slice(
+    indexOfFirst,
+    indexOfLast
+  );
   const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage);
-  const activeSubscriptions = subscriptions.filter((sub) => sub.subscription.isSubscriptionActive);
+  const activeSubscriptions = subscriptions.filter(
+    (sub) => sub.subscription.isSubscriptionActive
+  );
 
   return (
     <>
@@ -269,37 +318,52 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                     <SelectTrigger className="w-[120px] border-primary/50">
                       <SelectValue placeholder="Any" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="md:w-[300px]">
+                      {/* United Airlines */}
                       <SelectItem value="UA">UA – United Airlines</SelectItem>
+
+                      {/* Star Alliance Partners */}
                       <SelectItem value="AC">AC – Air Canada</SelectItem>
-                      <SelectItem value="A3">A3 – Aegean Airlines</SelectItem>
-                      <SelectItem value="JP">JP – Adria Airways</SelectItem>
-                      <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
-                      <SelectItem value="NH">NH – ANA (All Nippon Airways)</SelectItem>
-                      <SelectItem value="OZ">OZ – Asiana Airlines</SelectItem>
+                      <SelectItem value="LX">
+                        LX – Swiss International Air Lines
+                      </SelectItem>
+                      <SelectItem value="NH">
+                        NH – ANA (All Nippon Airways)
+                      </SelectItem>
+                      <SelectItem value="LH">LH – Lufthansa</SelectItem>
                       <SelectItem value="OS">OS – Austrian Airlines</SelectItem>
-                      <SelectItem value="SN">SN – Brussels Airlines</SelectItem>
                       <SelectItem value="CA">CA – Air China</SelectItem>
                       <SelectItem value="OU">OU – Croatia Airlines</SelectItem>
-                      <SelectItem value="MS">MS – EgyptAir</SelectItem>
-                      <SelectItem value="LO">LO – LOT Polish Airlines</SelectItem>
-                      <SelectItem value="LH">LH – Lufthansa</SelectItem>
-                      <SelectItem value="SK">SK – Scandinavian Airlines (SAS)</SelectItem>
-                      <SelectItem value="ZH">ZH – Shenzhen Airlines</SelectItem>
-                      <SelectItem value="SQ">SQ – Singapore Airlines</SelectItem>
-                      <SelectItem value="SA">SA – South African Airways</SelectItem>
-                      <SelectItem value="LX">LX – Swiss International Air Lines</SelectItem>
-                      <SelectItem value="TG">TG – Thai Airways</SelectItem>
-                      <SelectItem value="TP">TP – TAP Air Portugal</SelectItem>
-                      <SelectItem value="ET">ET – Ethiopian Airlines</SelectItem>
+                      <SelectItem value="ET">
+                        ET – Ethiopian Airlines
+                      </SelectItem>
                       <SelectItem value="CM">CM – Copa Airlines</SelectItem>
-                      <SelectItem value="TK">TK – Turkish Airlines</SelectItem>
-                      <SelectItem value="BR">BR – EVA Air</SelectItem>
-                      <SelectItem value="MX">MX – Breeze Airways (UA codeshare)</SelectItem>
-                      <SelectItem value="HA">HA – Hawaiian Airlines (UA codeshare)</SelectItem>
-                      <SelectItem value="WN">WN – Southwest (limited codeshares)</SelectItem>
-                      <SelectItem value="G3">G3 – Gol Airlines (UA partner)</SelectItem>
-                      <SelectItem value="VS">VS – Virgin Atlantic (UA partner via codeshare routes)</SelectItem>
+                      <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
+                      <SelectItem value="CL">
+                        CL – Lufthansa CityLine
+                      </SelectItem>
+
+                      {/* UA Codeshare / Partner Airlines */}
+                      <SelectItem value="VA">
+                        VA – Virgin Australia Airlines
+                      </SelectItem>
+                      <SelectItem value="OO">
+                        OO – SkyWest dba United Express
+                      </SelectItem>
+                      <SelectItem value="YV">YV – Mesa Airlines</SelectItem>
+                      <SelectItem value="YX">YX – Republic Airways</SelectItem>
+                      <SelectItem value="EW">EW – Eurowings</SelectItem>
+                      <SelectItem value="QK">QK – Jazz Aviation</SelectItem>
+                      <SelectItem value="HA">HA – Hawaiian Airlines</SelectItem>
+                      <SelectItem value="G7">
+                        G7 – GOL Airlines (Brazil)
+                      </SelectItem>
+                      <SelectItem value="AD">
+                        AD – Azul Brazilian Airlines
+                      </SelectItem>
+                      <SelectItem value="C5">C5 – Chalair Aviation</SelectItem>
+                      <SelectItem value="FZ">FZ – FlyDubai</SelectItem>
+                      <SelectItem value="EK">EK – Emirates</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -311,9 +375,13 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                     value={flightNumber}
                     onChange={(e) => handleFlightNumberChange(e.target.value)}
                     maxLength={4}
-                    className={`border-2 ${flightNumberError ? "border-red-500" : "border-primary/50"}`}
+                    className={`border-2 ${
+                      flightNumberError ? "border-red-500" : "border-primary/50"
+                    }`}
                   />
-                  {flightNumberError && <p className="text-xs text-red-500">{flightNumberError}</p>}
+                  {flightNumberError && (
+                    <p className="text-xs text-red-500">{flightNumberError}</p>
+                  )}
                 </div>
                 {/* Departure */}
                 <div>
@@ -321,7 +389,11 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                   <AirportAutocomplete
                     value={departureStation}
                     onSelect={handleDepartureSelect}
-                    className={`border-2 ${departureStationError ? "border-red-500" : "border-primary/50"}`}
+                    className={`border-2 ${
+                      departureStationError
+                        ? "border-red-500"
+                        : "border-primary/50"
+                    }`}
                   />
                 </div>
                 {/* Arrival */}
@@ -330,17 +402,26 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                   <AirportAutocomplete
                     value={arrivalStation}
                     onSelect={handleArrivalSelect}
-                    className={`border-2 ${arrivalStationError ? "border-red-500" : "border-primary/50"}`}
+                    className={`border-2 ${
+                      arrivalStationError
+                        ? "border-red-500"
+                        : "border-primary/50"
+                    }`}
                   />
                 </div>
                 {/* Date */}
                 <div className="flex flex-col w-full md:w-auto">
                   <label className="text-sm font-medium">Departure Date</label>
-                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                  <Popover
+                    open={isCalendarOpen}
+                    onOpenChange={setIsCalendarOpen}
+                  >
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="border-primary/50">
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDate ? format(selectedDate, "PPP") : "Select Date"}
+                        {selectedDate
+                          ? format(selectedDate, "PPP")
+                          : "Select Date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent align="start">
@@ -358,7 +439,11 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                 {/* Search & Reset */}
                 <div className="flex gap-2">
                   <Button onClick={applyFilters} disabled={isSearching}>
-                    {isSearching ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Search"}
+                    {isSearching ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      "Search"
+                    )}
                   </Button>
                   <Button onClick={resetFilters} variant="outline">
                     Clear
@@ -369,11 +454,14 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                   <Button
                     variant="destructive"
                     onClick={handleBulkUnsubscribe}
-                    disabled={selectedSubscriptions.size === 0 || isUnsubscribing}
+                    disabled={
+                      selectedSubscriptions.size === 0 || isUnsubscribing
+                    }
                   >
                     {isUnsubscribing ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" /> Unsubscribing...
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />{" "}
+                        Unsubscribing...
                       </>
                     ) : (
                       `Unsubscribe Selected (${selectedSubscriptions.size})`
@@ -409,7 +497,8 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
           {activeSubscriptions.length > 0 && (
             <CardFooter className="flex justify-between items-center">
               <div className="text-sm text-muted-foreground">
-                Showing {indexOfFirst + 1}-{Math.min(indexOfLast, filteredSubscriptions.length)} of{" "}
+                Showing {indexOfFirst + 1}-
+                {Math.min(indexOfLast, filteredSubscriptions.length)} of{" "}
                 {filteredSubscriptions.length}
               </div>
               <div className="flex gap-2 items-center">
@@ -440,14 +529,17 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
                       />
                     </PaginationItem>
                     <PaginationItem>
-                      <PaginationLink className="border-primary/50">{currentPage}</PaginationLink>
+                      <PaginationLink className="border-primary/50">
+                        {currentPage}
+                      </PaginationLink>
                     </PaginationItem>
                     <PaginationItem>
                       <PaginationNext
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          if (currentPage < totalPages) setCurrentPage((p) => p + 1);
+                          if (currentPage < totalPages)
+                            setCurrentPage((p) => p + 1);
                         }}
                         className="border-primary/50"
                       />
@@ -460,22 +552,35 @@ export default function UnsubscribeFlightClient({ walletAddress }: UnsubscribeFl
         </Card>
       </div>
       {/* 🟢 Bulk Unsubscribe Confirmation Dialog */}
-      <Dialog open={isConfirmBulkDialogOpen} onOpenChange={setIsConfirmBulkDialogOpen}>
+      <Dialog
+        open={isConfirmBulkDialogOpen}
+        onOpenChange={setIsConfirmBulkDialogOpen}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Confirm Bulk Unsubscription</DialogTitle>
             <DialogDescription>
-              Are you sure you want to unsubscribe from {selectedSubscriptions.size} selected flights?
+              Are you sure you want to unsubscribe from{" "}
+              {selectedSubscriptions.size} selected flights?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmBulkDialogOpen(false)} disabled={isUnsubscribing}>
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmBulkDialogOpen(false)}
+              disabled={isUnsubscribing}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmBulkUnsubscribe} disabled={isUnsubscribing}>
+            <Button
+              variant="destructive"
+              onClick={confirmBulkUnsubscribe}
+              disabled={isUnsubscribing}
+            >
               {isUnsubscribing ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Unsubscribing...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                  Unsubscribing...
                 </>
               ) : (
                 "Confirm Unsubscribe"
