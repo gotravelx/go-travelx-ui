@@ -226,10 +226,44 @@ export default function ViewFlight() {
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent className="md:w-[300px]">
-                  {/* United Airlines */}
+
+                    {/* United Airlines */}
+                    <SelectItem value="UA">UA – United Airlines</SelectItem>
+
+                    {/* Star Alliance Partners */}
+                    <SelectItem value="AC">AC – Air Canada</SelectItem>
+                    <SelectItem value="LX">LX – Swiss International Air Lines</SelectItem>
+                    <SelectItem value="NH">NH – ANA (All Nippon Airways)</SelectItem>
+                    <SelectItem value="LH">LH – Lufthansa</SelectItem>
+                    <SelectItem value="OS">OS – Austrian Airlines</SelectItem>
+                    <SelectItem value="CA">CA – Air China</SelectItem>
+                    <SelectItem value="OU">OU – Croatia Airlines</SelectItem>
+                    <SelectItem value="ET">ET – Ethiopian Airlines</SelectItem>
+                    <SelectItem value="CM">CM – Copa Airlines</SelectItem>
+                    <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
+                    <SelectItem value="CL">CL – Lufthansa CityLine</SelectItem>
+
+                    {/* UA Codeshare / Partner Airlines */}
+                    <SelectItem value="VA">VA – Virgin Australia Airlines</SelectItem>
+                    <SelectItem value="OO">OO – SkyWest dba United Express</SelectItem>
+                    <SelectItem value="YV">YV – Mesa Airlines</SelectItem>
+                    <SelectItem value="YX">YX – Republic Airways</SelectItem>
+                    <SelectItem value="EW">EW – Eurowings</SelectItem>
+                    <SelectItem value="QK">QK – Jazz Aviation</SelectItem>
+                    <SelectItem value="HA">HA – Hawaiian Airlines</SelectItem>
+                    <SelectItem value="G7">G7 – GOL Airlines (Brazil)</SelectItem>
+                    <SelectItem value="AD">AD – Azul Brazilian Airlines</SelectItem>
+                    <SelectItem value="C5">C5 – Chalair Aviation</SelectItem>
+                    <SelectItem value="FZ">FZ – FlyDubai</SelectItem>
+                    <SelectItem value="EK">EK – Emirates</SelectItem>
+
+                  </SelectContent>
+
+                {/* <SelectContent className="md:w-[300px]">
+                  United Airlines
                   <SelectItem value="UA">UA – United Airlines</SelectItem>
 
-                  {/* Star Alliance Partners */}
+                   Star Alliance Partners 
                   <SelectItem value="AC">AC – Air Canada</SelectItem>
                   <SelectItem value="A3">A3 – Aegean Airlines</SelectItem>
                   <SelectItem value="JP">JP – Adria Airways</SelectItem>
@@ -261,7 +295,7 @@ export default function ViewFlight() {
                   <SelectItem value="TK">TK – Turkish Airlines</SelectItem>
                   <SelectItem value="BR">BR – EVA Air</SelectItem>
 
-                  {/* UA Codeshare Airlines */}
+                  UA Codeshare Airlines 
                   <SelectItem value="MX">
                     MX – Breeze Airways (UA codeshare)
                   </SelectItem>
@@ -277,7 +311,7 @@ export default function ViewFlight() {
                   <SelectItem value="VS">
                     VS – Virgin Atlantic (UA partner via codeshare routes)
                   </SelectItem>
-                </SelectContent>
+                </SelectContent> */}
               </Select>
             </div>
 

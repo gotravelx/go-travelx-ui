@@ -81,7 +81,7 @@ class FlightService {
         const transformedData: FlightData = {
           flightNumber: flightInfo.flightNumber,
           scheduledDepartureDate: flightInfo.departureDate,
-          carrierCode: flightInfo.airline?.code || carrierCode,
+          carrierCode: flightInfo?.carrierCode ||flightInfo?.airline?.code || "UA",
           operatingAirline: flightInfo.airline?.name || "",
           estimatedArrivalUTC: flightInfo.times?.estimatedArrival || "",
           estimatedDepartureUTC: flightInfo.times?.estimatedDeparture || "",
@@ -155,6 +155,7 @@ class FlightService {
         }
       );
       const result = await response.json();
+
       console.log("Subscription response:", result);
       if (!response.ok) {
         throw new Error(
@@ -192,7 +193,7 @@ class FlightService {
             flight.departureDate ||
             flight.times?.scheduledDeparture?.split("T")[0] ||
             "",
-          carrierCode: flight.airline?.code || "UA", // Default to UA if not provided
+          carrierCode: flight?.carrierCode|| "UA", // Default to UA if not provided
           operatingAirline: flight.airline?.name || "",
           estimatedArrivalUTC: flight.times?.estimatedArrival || "",
           estimatedDepartureUTC: flight.times?.estimatedDeparture || "",
