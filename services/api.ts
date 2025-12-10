@@ -53,7 +53,7 @@ class FlightService {
     }
   };
   searchFlight = async (
-    carrierCode: string,
+    carrier: string,
     flightNumber: string,
     departureStation: string,
     arrivalStation: string,
@@ -63,7 +63,7 @@ class FlightService {
       const response = await this.fetchWithRetry(
         `${
           this.baseUrl
-        }/flights/get-flight-status/${flightNumber}?departureDate=${
+        }/flights/get-flight-status/${flightNumber}?carrier=${carrier}&departureDate=${
           departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&arrival=${arrivalStation}&includeFullData=false`,
         {
