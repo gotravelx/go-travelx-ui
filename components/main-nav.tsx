@@ -18,12 +18,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export function MainNav() {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme } = useTheme()
 
   useEffect(() => {
     setIsMounted(true);
@@ -46,18 +49,25 @@ export function MainNav() {
       .toUpperCase();
   };
 
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-      <div className="container mx-auto px-4">
-        <div className="h-16 flex items-center justify-between">
+      <div className="container mx-auto px-6  ">
+        <div className="h-20 flex items-center justify-between">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Link href="/" className="flex items-center space-x-2">
-              <Plane className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+            <Link href="/" className="flex items-center space-x-1">
+            <Image
+                src={theme === "light" ? "/gotravelx-dark.png" : "/gotravelx-white.png"}
+                alt="GoTravelX Logo"
+                width={75}
+                height={80}
+                className="rounded-md"
+              />
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
                 GoTravelX
               </span>
             </Link>

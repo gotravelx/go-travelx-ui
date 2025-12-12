@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -22,10 +22,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
+import Image from "next/image";
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,16 +48,22 @@ export function Footer() {
   };
 
   const currentYear = new Date().getFullYear();
-
+  if (!mounted) return null;
   return (
     <footer className="bg-background/80 backdrop-blur-sm border-t border-border/50 pt-12 pb-6 mt-auto">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Plane className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+            <div className="flex items-center gap-2">
+            <Image
+                src={theme === "dark" ? "/gotravelx-white.png" : "/gotravelx-dark.png"}
+                alt="GoTravelX Logo"
+                width={75}
+                height={80}
+                className="rounded-md"
+              />
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                 GoTravelX
               </span>
             </div>
