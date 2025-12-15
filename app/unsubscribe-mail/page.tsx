@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,13 +17,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
 export default function UnsubscribePage() {
-const searchParams = useSearchParams();
-const email = searchParams ? searchParams.get("email") : null;
+  const searchParams = useSearchParams();
+  const email = searchParams ? searchParams.get("email") : null;
 
-const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
-    "idle"
-);
-const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [message, setMessage] = useState("");
 
   const handleUnsubscribe = async () => {
     if (!email) {
@@ -31,10 +33,16 @@ const [message, setMessage] = useState("");
     }
 
     setStatus("loading");
+
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/newsletter/unsubscribe?email=${email}`,
-        { method: "DELETE" }
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/newsletter/unsubscribe?email=${encodeURIComponent(
+          email
+        )}`,
+        {
+          method: "DELETE",
+          cache: "no-store",
+        }
       );
 
       const result = await res.json();
@@ -48,21 +56,21 @@ const [message, setMessage] = useState("");
         setStatus("error");
         setMessage(result?.message || "Failed to unsubscribe.");
       }
-    } catch (err) {
+    } catch (error) {
       setStatus("error");
-      setMessage("Something went wrong. Please try again.");
+      setMessage("Something went wrong. Please try again later.");
     }
   };
 
-  const handleCancel = () => {
-    window.close(); // closes tab if opened from email
+  const handleClose = () => {
+    window.close();
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-center text-2xl font-bold">
             Unsubscribe
           </CardTitle>
           <CardDescription className="text-center">
@@ -73,6 +81,12 @@ const [message, setMessage] = useState("");
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {status === "idle" && (
+            <p className="text-center text-gray-600 dark:text-gray-300">
+              Are you sure you want to unsubscribe from the GoTravelX newsletter?
+            </p>
+          )}
+
           {status === "error" && (
             <Alert variant="destructive">
               <AlertDescription>{message}</AlertDescription>
@@ -84,25 +98,18 @@ const [message, setMessage] = useState("");
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
-
-          {status === "idle" && (
-            <p className="text-center text-gray-600">
-              Are you sure you want to unsubscribe from GoTravelX Newsletter?
-            </p>
-          )}
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-3">
+        <CardFooter className="flex flex-col gap-3">
           {status === "idle" && (
             <>
-              <Button onClick={handleUnsubscribe} className="w-full">
+              <Button className="w-full" onClick={handleUnsubscribe}>
                 Unsubscribe
               </Button>
-
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={handleCancel}
+                onClick={handleClose}
               >
                 Cancel
               </Button>
@@ -111,7 +118,7 @@ const [message, setMessage] = useState("");
 
           {status === "loading" && (
             <Button disabled className="w-full">
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Unsubscribing...
             </Button>
           )}
@@ -120,7 +127,7 @@ const [message, setMessage] = useState("");
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => window.close()}
+              onClick={handleClose}
             >
               Close
             </Button>
