@@ -203,11 +203,13 @@ export default function UnsubscribeFlightClient({
   const handleFlightNumberChange = useCallback((value: string) => {
     const numericValue = value.replace(/\D/g, "").slice(0, 4);
     setFlightNumber(numericValue);
-    setFlightNumberError(
-      numericValue && numericValue.length !== 4
-        ? "Flight number must be 4 digits"
-        : ""
-    );
+    if (numericValue.length === 0) {
+      setFlightNumberError("");
+    } else if (numericValue.length < 1 || numericValue.length > 4) {
+      setFlightNumberError("Flight number must be 1–4 digits");
+    } else {
+      setFlightNumberError("");
+    }
   }, []);
 
   const handleDepartureSelect = (airport: string) => {
@@ -244,9 +246,9 @@ export default function UnsubscribeFlightClient({
     try {
       let filtered = [...subscriptions];
       if (flightNumber)
-        filtered = filtered.filter((item) =>
-          item.subscription.flightNumber.includes(flightNumber)
-        );
+      filtered = filtered.filter((item) =>
+        item.subscription.flightNumber.includes(flightNumber)
+      );    
       if (carrier)
         filtered = filtered.filter(
           (item) => item.flight.carrierCode === carrier
@@ -323,48 +325,43 @@ export default function UnsubscribeFlightClient({
                       <SelectItem value="UA">UA – United Airlines</SelectItem>
 
                       {/* Star Alliance Partners */}
+                      <SelectItem value="AI">AI – Air India</SelectItem>
+                      <SelectItem value="A3">A3 – Aegean Airlines</SelectItem>
+                      <SelectItem value="JP">JP – Adria Airways</SelectItem>
+                      <SelectItem value="OZ">OZ – Asiana Airlines</SelectItem>
+                      <SelectItem value="SN">SN – Brussels Airlines</SelectItem>
+                      <SelectItem value="MS">MS – EgyptAir</SelectItem>
+                      <SelectItem value="LO">LO – LOT Polish Airlines</SelectItem>
+                      <SelectItem value="SK">SK – Scandinavian Airlines</SelectItem>
+                      <SelectItem value="ZH">ZH – Shenzhen Airlines</SelectItem>
+                      <SelectItem value="SQ">SQ – Singapore Airlines</SelectItem>
+                      <SelectItem value="SA">SA – South African Airways</SelectItem>
+                      <SelectItem value="TG">TG – Thai Airways</SelectItem>
+                      <SelectItem value="TP">TP – TAP Air Portugal</SelectItem>
+                      <SelectItem value="TK">TK – Turkish Airlines</SelectItem>
                       <SelectItem value="AC">AC – Air Canada</SelectItem>
-                      <SelectItem value="LX">
-                        LX – Swiss International Air Lines
-                      </SelectItem>
-                      <SelectItem value="NH">
-                        NH – ANA (All Nippon Airways)
-                      </SelectItem>
-                      <SelectItem value="LH">LH – Lufthansa</SelectItem>
+                      <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
+                      <SelectItem value="NH">NH – ANA (All Nippon Airways)</SelectItem>
                       <SelectItem value="OS">OS – Austrian Airlines</SelectItem>
                       <SelectItem value="CA">CA – Air China</SelectItem>
                       <SelectItem value="OU">OU – Croatia Airlines</SelectItem>
-                      <SelectItem value="ET">
-                        ET – Ethiopian Airlines
-                      </SelectItem>
+                      <SelectItem value="LH">LH – Lufthansa</SelectItem>
+                      <SelectItem value="LX">LX – Swiss International Air Lines</SelectItem>
+                      <SelectItem value="ET">ET – Ethiopian Airlines</SelectItem>
                       <SelectItem value="CM">CM – Copa Airlines</SelectItem>
-                      <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
-                      <SelectItem value="CL">
-                        CL – Lufthansa CityLine
-                      </SelectItem>
-
-                      {/* UA Codeshare / Partner Airlines */}
-                      <SelectItem value="VA">
-                        VA – Virgin Australia Airlines
-                      </SelectItem>
-                      <SelectItem value="OO">
-                        OO – SkyWest dba United Express
-                      </SelectItem>
-                      <SelectItem value="YV">YV – Mesa Airlines</SelectItem>
+                      <SelectItem value="BR">BR – EVA Air</SelectItem>
                       <SelectItem value="YX">YX – Republic Airways</SelectItem>
-                      <SelectItem value="EW">EW – Eurowings</SelectItem>
-                      <SelectItem value="QK">QK – Jazz Aviation</SelectItem>
+
+
+                      {/* UA Codeshare Airlines */}
+                      <SelectItem value="MX">MX – Breeze Airways</SelectItem>
                       <SelectItem value="HA">HA – Hawaiian Airlines</SelectItem>
-                      <SelectItem value="G7">
-                        G7 – GOL Airlines (Brazil)
-                      </SelectItem>
-                      <SelectItem value="AD">
-                        AD – Azul Brazilian Airlines
-                      </SelectItem>
-                      <SelectItem value="C5">C5 – Chalair Aviation</SelectItem>
-                      <SelectItem value="FZ">FZ – FlyDubai</SelectItem>
-                      <SelectItem value="EK">EK – Emirates</SelectItem>
-                    </SelectContent>
+                      <SelectItem value="WN">WN – Southwest</SelectItem>
+                      <SelectItem value="G3">G3 – Gol Airlines</SelectItem>
+                      <SelectItem value="VS">VS – Virgin Atlantic</SelectItem>
+
+                      </SelectContent>
+
                   </Select>
                 </div>
                 {/* Flight Number */}

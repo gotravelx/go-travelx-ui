@@ -39,88 +39,78 @@ const SubscribeFlight = memo(
     onArrivalStationChange,
     onCarrierChange,
     setSearchError,
-  }: {
-    flightNumber: string;
-    onFlightNumberChange: (value: string) => void;
-    onSearch: () => void;
-    isLoading: boolean;
-    searchError: string;
-    selectedDate: Date | undefined;
-    onDateChange: (value: Date) => void;
-    carrier: string;
-    departureStation: string;
-    setDepartureStation: (value: string) => void;
-    arrivalStation: string;
-    setArrivalStation: (value: string) => void;
-    onDepartureStationChange: (value: string) => void;
-    onArrivalStationChange: (value: string) => void;
-    onCarrierChange: (value: string) => void;
-    setSearchError?: (value: string) => void;
-  }) => {
+  }: any) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-    // Set default date on component mount
+    // -------------------------
+    // SET DEFAULT DATE
+    // -------------------------
     useEffect(() => {
       if (!selectedDate) {
-        const today = new Date();
-        onDateChange(today);
+        onDateChange(new Date());
       }
     }, [selectedDate, onDateChange]);
 
-    // Add flight number validation
-    const handleFlightNumberChange = (value: string) => {
-      // Only allow numeric input and limit to 4 digits
-      const numericValue = value.replace(/\D/g, "").slice(0, 4);
-      onFlightNumberChange(numericValue);
-    };
+  // -------------------------
+// FLIGHT NUMBER VALIDATION (1–4 digits)
+// -------------------------
+const handleFlightNumberChange = (value: string) => {
+  const numericValue = value.replace(/\D/g, "").slice(0, 4);
+  onFlightNumberChange(numericValue);
 
-    // Add departure station validation
+  // Live validation
+  if (numericValue.length === 0) {
+    setSearchError("");
+  } else if (numericValue.length < 1 || numericValue.length > 4) {
+    setSearchError("Flight number must be 1–4 digits");
+  } else {
+    setSearchError("");
+  }
+};
+
+    // -------------------------
+    // DEPARTURE STATION
+    // -------------------------
     const handleDepartureStationChange = (code: string) => {
-      // Convert to uppercase and limit to 3 characters
-      const formattedValue = code.toUpperCase().slice(0, 3);
-      setDepartureStation(formattedValue);
-      onDepartureStationChange(formattedValue);
+      const formatted = code.toUpperCase().slice(0, 3);
+      setDepartureStation(formatted);
+      onDepartureStationChange(formatted);
     };
 
-    // Handle arrival station validation
+    // -------------------------
+    // ARRIVAL STATION
+    // -------------------------
     const handleArrivalStationChange = (code: string) => {
-      // Convert to uppercase and limit to 3 characters
-      const formattedValue = code.toUpperCase().slice(0, 3);
-      setArrivalStation(formattedValue);
-      onArrivalStationChange(formattedValue);
+      const formatted = code.toUpperCase().slice(0, 3);
+      setArrivalStation(formatted);
+      onArrivalStationChange(formatted);
     };
 
-    // Update the onSearch function to validate inputs before searching
+    // -------------------------
+    // SEARCH VALIDATION
+    // -------------------------
     const handleSearch = () => {
-      // Validate inputs before searching
-      let hasError = false;
       let errorMessage = "";
-
-      if (
-        !flightNumber ||
-        flightNumber.length !== 4 ||
-        !/^\d+$/.test(flightNumber)
-      ) {
-        errorMessage = "Flight number must be 4 digits";
-        hasError = true;
+    
+      if (!flightNumber || flightNumber.length < 1 || flightNumber.length > 4) {
+        errorMessage = "Flight number must be 1–4 digits";
       }
-
-      if (hasError) {
-        // Set error message if setSearchError is available
-        if (typeof setSearchError === "function") {
-          setSearchError(errorMessage);
-        }
+      
+    
+      if (!carrier) {
+        errorMessage = "Please select a carrier";
+      }
+    
+      if (errorMessage) {
+        setSearchError && setSearchError(errorMessage);
         return;
       }
-
-      // Clear any previous error if setSearchError is available
-      if (searchError && typeof setSearchError === "function") {
-        setSearchError("");
-      }
-
-      // Proceed with search
+    
+      setSearchError && setSearchError("");
       onSearch();
     };
+    
+   
 
     return (
       <div className="w-full mx-auto">
@@ -130,136 +120,141 @@ const SubscribeFlight = memo(
             font-weight: 500;
           }
         `}</style>
+
+        {/* FORM ROW */}
         <div className="flex flex-col form-input-enhanced w-full gap-4 md:flex-row">
+
+          {/* CARRIER */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="carrier-select"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="carrier-select" className="text-sm font-medium mb-1">
               Carrier
             </label>
+
             <Select value={carrier} onValueChange={onCarrierChange}>
-              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus:border-primary md:w-[140px]">
+              <SelectTrigger className="bg-background/90 border-2 border-primary/50 shadow-sm w-full md:w-[140px]">
                 <SelectValue placeholder="Carrier" />
               </SelectTrigger>
+
               <SelectContent className="md:w-[300px]">
 
-                    {/* United Airlines */}
-                    <SelectItem value="UA">UA – United Airlines</SelectItem>
+                {/* United Airlines */}
+                <SelectItem value="UA">UA – United Airlines</SelectItem>
 
-                    {/* Star Alliance Partners */}
-                    <SelectItem value="AC">AC – Air Canada</SelectItem>
-                    <SelectItem value="LX">LX – Swiss International Air Lines</SelectItem>
-                    <SelectItem value="NH">NH – ANA (All Nippon Airways)</SelectItem>
-                    <SelectItem value="LH">LH – Lufthansa</SelectItem>
-                    <SelectItem value="OS">OS – Austrian Airlines</SelectItem>
-                    <SelectItem value="CA">CA – Air China</SelectItem>
-                    <SelectItem value="OU">OU – Croatia Airlines</SelectItem>
-                    <SelectItem value="ET">ET – Ethiopian Airlines</SelectItem>
-                    <SelectItem value="CM">CM – Copa Airlines</SelectItem>
-                    <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
-                    <SelectItem value="CL">CL – Lufthansa CityLine</SelectItem>
+                {/* Star Alliance Partners */}
+                <SelectItem value="AI">AI – Air India</SelectItem>
+                <SelectItem value="A3">A3 – Aegean Airlines</SelectItem>
+                <SelectItem value="JP">JP – Adria Airways</SelectItem>
+                <SelectItem value="OZ">OZ – Asiana Airlines</SelectItem>
+                <SelectItem value="SN">SN – Brussels Airlines</SelectItem>
+                <SelectItem value="MS">MS – EgyptAir</SelectItem>
+                <SelectItem value="LO">LO – LOT Polish Airlines</SelectItem>
+                <SelectItem value="SK">SK – Scandinavian Airlines</SelectItem>
+                <SelectItem value="ZH">ZH – Shenzhen Airlines</SelectItem>
+                <SelectItem value="SQ">SQ – Singapore Airlines</SelectItem>
+                <SelectItem value="SA">SA – South African Airways</SelectItem>
+                <SelectItem value="TG">TG – Thai Airways</SelectItem>
+                <SelectItem value="TP">TP – TAP Air Portugal</SelectItem>
+                <SelectItem value="TK">TK – Turkish Airlines</SelectItem>
+                <SelectItem value="AC">AC – Air Canada</SelectItem>
+                <SelectItem value="NZ">NZ – Air New Zealand</SelectItem>
+                <SelectItem value="NH">NH – ANA (All Nippon Airways)</SelectItem>
+                <SelectItem value="OS">OS – Austrian Airlines</SelectItem>
+                <SelectItem value="CA">CA – Air China</SelectItem>
+                <SelectItem value="OU">OU – Croatia Airlines</SelectItem>
+                <SelectItem value="LH">LH – Lufthansa</SelectItem>
+                <SelectItem value="LX">LX – Swiss</SelectItem>
+                <SelectItem value="ET">ET – Ethiopian Airlines</SelectItem>
+                <SelectItem value="CM">CM – Copa Airlines</SelectItem>
+                <SelectItem value="BR">BR – EVA Air</SelectItem>
+                <SelectItem value="YX">YX – Republic Airways</SelectItem>
 
-                    {/* UA Codeshare / Partner Airlines */}
-                    <SelectItem value="VA">VA – Virgin Australia Airlines</SelectItem>
-                    <SelectItem value="OO">OO – SkyWest dba United Express</SelectItem>
-                    <SelectItem value="YV">YV – Mesa Airlines</SelectItem>
-                    <SelectItem value="YX">YX – Republic Airways</SelectItem>
-                    <SelectItem value="EW">EW – Eurowings</SelectItem>
-                    <SelectItem value="QK">QK – Jazz Aviation</SelectItem>
-                    <SelectItem value="HA">HA – Hawaiian Airlines</SelectItem>
-                    <SelectItem value="G7">G7 – GOL Airlines (Brazil)</SelectItem>
-                    <SelectItem value="AD">AD – Azul Brazilian Airlines</SelectItem>
-                    <SelectItem value="C5">C5 – Chalair Aviation</SelectItem>
-                    <SelectItem value="FZ">FZ – FlyDubai</SelectItem>
-                    <SelectItem value="EK">EK – Emirates</SelectItem>
 
-                  </SelectContent>
+                {/* Codeshare */}
+                <SelectItem value="MX">MX – Breeze Airways</SelectItem>
+                <SelectItem value="HA">HA – Hawaiian Airlines</SelectItem>
+                <SelectItem value="WN">WN – Southwest</SelectItem>
+                <SelectItem value="G3">G3 – Gol Airlines</SelectItem>
+                <SelectItem value="VS">VS – Virgin Atlantic</SelectItem>
+
+              </SelectContent>
             </Select>
           </div>
 
+          {/* FLIGHT NUMBER */}
           <div className="flex flex-3 flex-col">
             <label htmlFor="flight-number" className="text-sm font-medium mb-1">
               Flight
             </label>
+
             <Input
               id="flight-number"
               placeholder="Enter Flight Number"
               value={flightNumber}
               onChange={(e) => handleFlightNumberChange(e.target.value)}
-              disabled={isLoading}
-              className="bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary"
               maxLength={4}
+              disabled={isLoading}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm"
             />
+            
+
           </div>
 
+          {/* AND */}
           <div className="flex flex-5 flex-col justify-center items-center">
             <div className="pt-4">and </div>
           </div>
 
-          {/* Departure Station */}
+          {/* FROM */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="departure-station"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="departure-station" className="text-sm font-medium mb-1">
               From
             </label>
-            <div>
-              <AirportAutocomplete
-                value={departureStation}
-                id="departure-station"
-                onSelect={handleDepartureStationChange}
-                className={`bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[200px]`}
-              />
-            </div>
+
+            <AirportAutocomplete
+              value={departureStation}
+              id="departure-station"
+              onSelect={handleDepartureStationChange}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm md:w-[200px]"
+            />
           </div>
 
-          {/* Arrival Station */}
+          {/* TO */}
           <div className="flex flex-col w-full md:w-auto">
-            <label
-              htmlFor="arrival-station"
-              className="text-sm font-medium mb-1"
-            >
+            <label htmlFor="arrival-station" className="text-sm font-medium mb-1">
               To
             </label>
+
             <AirportAutocomplete
               value={arrivalStation}
               id="arrival-station"
               onSelect={handleArrivalStationChange}
-              className={`bg-background/90 border-2 border-primary/50 shadow-sm w-full focus-visible:border-primary md:w-[200px]`}
+              className="bg-background/90 border-2 border-primary/50 shadow-sm md:w-[200px]"
             />
           </div>
 
-          {/* Date Picker */}
+          {/* DATE PICKER */}
           <div className="flex flex-col w-full md:w-auto">
             <label className="text-sm font-medium mb-1">Departure Date</label>
+
             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full hover:border-primary md:w-auto"
+                  className="bg-background/90 border-2 border-primary/50 justify-start shadow-sm w-full md:w-auto"
                 >
                   <CalendarIcon className="h-4 w-4 mr-2" />
-                  {selectedDate
-                    ? format(selectedDate, "PPP")
-                    : format(new Date(), "PPP")}
+                  {selectedDate ? format(selectedDate, "PPP") : format(new Date(), "PPP")}
                 </Button>
               </PopoverTrigger>
+
               <PopoverContent className="p-0 w-auto" align="start">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(selectedDate) => {
-                    if (selectedDate) {
-                      const normalizedDate = new Date(
-                        Date.UTC(
-                          selectedDate.getFullYear(),
-                          selectedDate.getMonth(),
-                          selectedDate.getDate()
-                        )
-                      );
-                      onDateChange(normalizedDate);
+                  onSelect={(d) => {
+                    if (d) {
+                      const normalized = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                      onDateChange(normalized);
                     }
                     setIsCalendarOpen(false);
                   }}
@@ -270,18 +265,19 @@ const SubscribeFlight = memo(
             </Popover>
           </div>
 
-          {/* Search Button */}
+          {/* SEARCH BUTTON */}
           <div className="flex justify-end mt-auto">
             <Button
               onClick={handleSearch}
-              className="h-10 w-full gradient-border md:w-auto"
               disabled={isLoading}
+              className="h-10 w-full md:w-auto gradient-border"
             >
               {isLoading ? "Searching..." : "Search"}
             </Button>
           </div>
         </div>
 
+        {/* ERROR MESSAGE */}
         {searchError && (
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />

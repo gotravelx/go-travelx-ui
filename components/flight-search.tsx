@@ -34,12 +34,13 @@ export default function FlightSearch() {
   const [arrivalStation, setArrivalStation] = useState("")
   const [activeTab, setActiveTab] = useState("view")
 
-
+  
   useEffect(() => {
     if (!selectedDate) {
       setSelectedDate(new Date())
     }
   }, [selectedDate])
+
 
   const handleTabChange = useCallback(
     (value: string) => {
