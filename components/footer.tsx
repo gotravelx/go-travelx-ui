@@ -17,6 +17,7 @@ import {
   Github,
   ChevronUp,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,16 +27,60 @@ import { toast } from "sonner";
 export function Footer() {
   const [email, setEmail] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const getEnvironment = () => {
+    const host = window.location.hostname;
+  
+    if (host.includes("stg")) return "stg";
+    if (host.includes("qa")) return "qa";
+    if (host.includes("dev")) return "dev";
+    if (host === "localhost") return "local";
+  
+    return "prod"; 
+  };
+  
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       toast.error("Please enter a valid email address");
       return;
     }
 
-    toast.success("Thanks for subscribing to our newsletter!");
-    setEmail("");
+    setIsLoading(true);
+
+    try {
+      const env = getEnvironment();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/newsletter/subscribe`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            categories: ["updates", "promotions"],
+            env 
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Subscription failed");
+        return;
+      }
+
+      toast.success("Thanks for subscribing to our newsletter!");
+      setEmail("");
+    } catch (error) {
+      toast.error("Something went wrong. Try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const currentYear = new Date().getFullYear();
@@ -211,8 +256,17 @@ export function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-9"
                 />
-                <Button type="submit" size="sm" className="shrink-0">
-                  Subscribe
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="shrink-0"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    "Subscribe"
+                  )}
                 </Button>
               </div>
             </form>
