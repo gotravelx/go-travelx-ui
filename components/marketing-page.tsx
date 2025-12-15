@@ -98,10 +98,10 @@ export default function MarketingPage() {
                 <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-start">
                   <div className="space-y-4">
                     <h3 className="text-2xl font-bold">
-                      Flight Information Oracle
+                    FLIFO (Flight Information) Data Oracle
                     </h3>
                     <p className="text-muted-foreground">
-                      Our FLIFO (Flight Information Oracle) provides real-time,
+                      Our FLIFO (Flight Information) Data Oracle provides real-time,
                       verified flight data directly from airlines to the
                       blockchain. This creates a single source of truth that can
                       be accessed by travelers, airlines, and third-party

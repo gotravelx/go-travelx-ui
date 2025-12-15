@@ -125,56 +125,100 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 md:py-24 bg-muted/30">
-          <div className="container px-4 md:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Why Choose GoTravelX?
-              </h2>
-              <p className="mx-auto mt-4 max-w-[700px] text-muted-foreground md:text-xl">
-                Our blockchain-powered platform offers unique advantages for
-                travelers and airlines alike.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {/* Feature 1 */}
-              <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
-                <div className="p-3 rounded-full bg-primary/10 mb-4">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Secure & Encrypted</h3>
-                <p className="text-muted-foreground">
-                  End-to-end encrypted flight updates with blockchain
-                  verification for maximum security and privacy.
+          {/* Features Section */}
+          <section className="py-16 md:py-24 bg-muted/30">
+            <div className="container px-4 md:px-6">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  Why Choose GoTravelX?
+                </h2>
+                <p className="mx-auto mt-4 max-w-[700px] text-muted-foreground md:text-xl">
+                  Our blockchain-powered platform offers unique advantages for
+                  travelers, airlines, and developers building on Web3.
                 </p>
               </div>
 
-              {/* Feature 2 */}
-              <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
-                <div className="p-3 rounded-full bg-primary/10 mb-4">
-                  <Globe className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Global Coverage</h3>
-                <p className="text-muted-foreground">
-                  Track flights from major airlines worldwide with real-time
-                  updates and notifications.
-                </p>
-              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 
-              {/* Feature 3 */}
-              <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
-                <div className="p-3 rounded-full bg-primary/10 mb-4">
-                  <Zap className="h-6 w-6 text-primary" />
+                {/* Feature 1 */}
+                <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Secure & Encrypted</h3>
+                  <p className="text-muted-foreground">
+                    End-to-end encrypted flight updates with blockchain verification
+                    ensuring complete transparency and tamper-proof data.
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-2">Real-Time Updates</h3>
-                <p className="text-muted-foreground">
-                  Receive instant notifications about gate changes, delays, and
-                  other important flight information.
-                </p>
+
+                {/* Feature 2 */}
+                <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    <Globe className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Global Coverage</h3>
+                  <p className="text-muted-foreground">
+                    Track flights from major international airlines with reliable,
+                    real-time information.
+                  </p>
+                </div>
+
+                {/* Feature 3 */}
+                <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Real-Time Updates</h3>
+                  <p className="text-muted-foreground">
+                    Receive instant notifications about delays, gate changes, cancellations,
+                    and more — powered by dynamic blockchain updates.
+                  </p>
+                </div>
+
+                {/* Feature 4 – Web3 Smart Contracts */}
+                <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    <Plane className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Web 3.0 Smart Contract Support</h3>
+                  <p className="text-muted-foreground">
+                    Power your decentralized applications using live flight data.
+                    Smart Contracts can automatically trigger refunds, rewards, or
+                    actions based on flight events — the true benefit of storing data 
+                    on-chain.
+                  </p>
+                </div>
+
+                {/* Feature 5 – Tokenized Transactions */}
+                <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    <ArrowRight className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Tokenized Transactions</h3>
+                  <p className="text-muted-foreground">
+                    Convert interactions into blockchain tokens or reward points.
+                    A seamless way to track engagement, loyalty, and event-driven
+                    transactions.
+                  </p>
+                </div>
+
+                {/* Feature 6 – Custom Scorecard Tracking */}
+                <div className="flex flex-col items-center text-center p-6 bg-background rounded-xl border shadow-sm">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    <Eye className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Custom Scorecard Tracking</h3>
+                  <p className="text-muted-foreground">
+                    Build smart scorecards using flight history to analyze performance,
+                    reliability, delay trends, and operational efficiency.
+                  </p>
+                </div>
+
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+
 
         {/* CTA Section */}
         <section className="py-16 md:py-24">

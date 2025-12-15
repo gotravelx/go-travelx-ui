@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Play, XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 // Use your YouTube embed URL with autoplay
-const goTravelXDemo = "https://www.youtube.com/embed/5596oBHoSkM?si=C6qrIrF4riK-fMYm";
+const goTravelXDemo = "https://www.youtube.com/embed/h0OfsbgLgJw?si=hgEb3zDiA68-MiWn";
 const thumbnail = "/thumbnail.png";
 
 type AnimationStyle =
