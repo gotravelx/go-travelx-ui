@@ -17,6 +17,7 @@ if (!TENANT_ID || !CLIENT_ID || !CLIENT_SECRET || !SCOPE) {
     CLIENT_SECRET: !!CLIENT_SECRET,
     SCOPE: !!SCOPE,
   });
+  throw new Error('Missing required Azure OAuth environment variables');
 }
 
 const TOKEN_URL = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
@@ -34,9 +35,9 @@ async function getAccessToken(): Promise<string> {
 
   // Fetch new token
   const params = new URLSearchParams({
-    client_id: CLIENT_ID || '',
-    client_secret: CLIENT_SECRET || '',
-    scope: SCOPE || '',
+    client_id: CLIENT_ID!,
+    client_secret: CLIENT_SECRET!,
+    scope: SCOPE!,
     grant_type: 'client_credentials',
   });
 
@@ -58,7 +59,11 @@ async function getAccessToken(): Promise<string> {
   cachedToken = data.access_token;
   tokenExpiry = now + (data.expires_in - 300) * 1000;
 
-  return cachedToken!;
+  if (!cachedToken) {
+    throw new Error('Access token not found in response');
+  }
+
+  return cachedToken;
 }
 
 export async function GET(req: Request) {
