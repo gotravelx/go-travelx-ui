@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
 
+// Force dynamic rendering to prevent static generation errors with useSearchParams
+export const dynamic = 'force-dynamic';
+
 export default function RteProxyPage() {
   const searchParams = useSearchParams();
   const { theme } = useTheme();
 
-  // Support both 'flightno' and 'flightNo' parameter names
   const flightno = searchParams
     ? (searchParams.get('flightno') ?? searchParams.get('flightNo'))
     : null;
