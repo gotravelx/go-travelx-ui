@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
 
 // Force dynamic rendering to prevent static generation errors with useSearchParams
 export const dynamic = 'force-dynamic';
 
-export default function RteProxyPage() {
+function FlightStatusContent() {
   const searchParams = useSearchParams();
   const { theme } = useTheme();
 
@@ -89,5 +89,13 @@ export default function RteProxyPage() {
         </pre>
       )}
     </div>
+  );
+}
+
+export default function RteProxyPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '24px' }}>Loading...</div>}>
+      <FlightStatusContent />
+    </Suspense>
   );
 }
