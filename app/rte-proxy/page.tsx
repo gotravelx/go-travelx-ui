@@ -31,27 +31,54 @@ function FlightStatusContent() {
   useEffect(() => {
     if (!flightno) return;
 
-    setLoading(true);
-    setError(null);
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
 
-    const query = new URLSearchParams({
-      fltNbr: flightno,
-      ...(carrier && { carrier }),
-      ...(date && { fltLegSchedDepDt: date }),
-      ...(departure && { departure }),
-      ...(arrival && { arrival }),
-    });
-
-    fetch(`/api/proxy?${query.toString()}`)
-      .then(async res => {
-        if (!res.ok) {
-          throw new Error(await res.text());
+      try {
+        // 1. Fetch access token
+        const tokenRes = await fetch('/api/auth/token');
+        if (!tokenRes.ok) {
+          const tokenError = await tokenRes.text();
+          throw new Error(`Failed to fetch token: ${tokenError}`);
         }
-        return res.json();
-      })
-      .then(setResponse)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+        const tokenData = await tokenRes.json();
+        const token = tokenData.access_token;
+
+        if (!token) {
+          throw new Error('Access token not found in response');
+        }
+
+        // 2. Call proxy with token
+        const query = new URLSearchParams({
+          fltNbr: flightno,
+          ...(carrier && { carrier }),
+          ...(date && { fltLegSchedDepDt: date }),
+          ...(departure && { departure }),
+          ...(arrival && { arrival }),
+        });
+
+        const proxyRes = await fetch(`/api/proxy?${query.toString()}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!proxyRes.ok) {
+          const proxyError = await proxyRes.text();
+          throw new Error(`Proxy error: ${proxyError}`);
+        }
+
+        const data = await proxyRes.json();
+        setResponse(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [flightno, carrier, date, departure, arrival]);
 
   if (!mounted) return null;
