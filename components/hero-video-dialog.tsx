@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { Play, XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 // Use your YouTube embed URL with autoplay
@@ -87,7 +88,7 @@ export function HeroVideoPlayer({
         className="group relative cursor-pointer"
         onClick={() => setIsVideoOpen(true)}
       >
-        <img
+        <Image
           src={thumbnail || "/placeholder.svg"}
           alt={"thumbnail"}
           width={1920}
@@ -126,7 +127,7 @@ export function HeroVideoPlayer({
               className="relative mx-4 aspect-video w-full max-w-4xl md:mx-0"
               onClick={(e) => e.stopPropagation()}
             >
-              <motion.button 
+              <motion.button
                 className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black"
                 onClick={() => setIsVideoOpen(false)}
               >

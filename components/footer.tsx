@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -19,27 +19,35 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { theme, resolvedTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const getEnvironment = () => {
     const host = window.location.hostname;
-  
+
     if (host.includes("stg")) return "stg";
     if (host.includes("qa")) return "qa";
     if (host.includes("dev")) return "dev";
     if (host === "localhost") return "local";
-  
-    return "prod"; 
+
+    return "prod";
   };
-  
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -62,7 +70,7 @@ export function Footer() {
           body: JSON.stringify({
             email,
             categories: ["updates", "promotions"],
-            env 
+            env
           }),
         }
       );
@@ -91,11 +99,26 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Plane className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                GoTravelX
-              </span>
+            <div className="flex items-start">
+              {isMounted && (theme === "light" || resolvedTheme === "light") ? (
+                <Image
+                  src="/logo-light.png"
+                  alt="GoTravelX Logo"
+                  width={240}
+                  height={80}
+                  className="h-20 w-auto object-contain"
+                />
+              ) : isMounted && (theme === "dark" || resolvedTheme === "dark") ? (
+                <Image
+                  src="/logo-dark0.png"
+                  alt="GoTravelX Logo"
+                  width={240}
+                  height={80}
+                  className="h-20 w-auto object-contain"
+                />
+              ) : (
+                <Plane className="h-16 w-16 text-primary" />
+              )}
             </div>
             <p className="text-sm text-muted-foreground text-left">
               Revolutionizing flight tracking with blockchain technology. Get
@@ -278,9 +301,8 @@ export function Footer() {
               >
                 {isExpanded ? "Hide Details" : "More About GoTravelX"}
                 <ChevronUp
-                  className={`ml-1 h-4 w-4 transition-transform ${
-                    isExpanded ? "rotate-180" : ""
-                  }`}
+                  className={`ml-1 h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""
+                    }`}
                 />
               </Button>
 
