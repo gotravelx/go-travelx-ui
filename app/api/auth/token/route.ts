@@ -29,6 +29,7 @@ export async function GET() {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: params.toString(),
+            cache: 'no-store',
         });
 
         if (!response.ok) {

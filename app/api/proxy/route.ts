@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 const TARGET_URL_BASE = process.env.KONG_API_TARGET_URL;
 
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -29,6 +30,7 @@ export async function GET(req: Request) {
       if (key !== 'fltNbr') targetUrl.searchParams.append(key, value);
     });
 
+
     const res = await fetch(targetUrl.toString(), {
       method: 'GET',
       headers: {
@@ -39,6 +41,20 @@ export async function GET(req: Request) {
       },
       cache: 'no-store',
     });
+
+    if (!res.ok) {
+      const errorBody = await res.text();
+      console.error('Proxy Upstream Error:', {
+        status: res.status,
+        statusText: res.statusText,
+        body: errorBody,
+      });
+      // We might want to return this error details to the client for easier debugging
+      return NextResponse.json(
+        { error: 'Upstream error', status: res.status, details: errorBody },
+        { status: res.status }
+      );
+    }
 
     const contentType = res.headers.get('content-type') ?? 'application/json';
     const body = await res.text();
