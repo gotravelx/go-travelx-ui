@@ -184,7 +184,8 @@ class FlightService {
         return [];
       }
       // Transform the API response to match our FlightData interface
-      return data.flights.map((flight: any) => {
+      // Reverse the array to show the latest subscriptions first
+      return [...data.flights].reverse().map((flight: any) => {
         return {
           flightNumber: (flight.flightNumber || "").toString(),
           scheduledDepartureDate:
@@ -248,7 +249,8 @@ class FlightService {
       const data: GetFlightSubscriptionsApiResponse = await response.json();
       console.log("Subscribed flights details API response:", data);
       if (data.success && data.subscriptions) {
-        return data.subscriptions.map((apiSub: any) => {
+        // Reverse the array to show the latest subscriptions first
+        return [...data.subscriptions].reverse().map((apiSub: any) => {
           // Map the flat API response object into the nested SubscriptionDetails structure
           const flightData: FlightData = {
             flightNumber: apiSub.flightNumber,

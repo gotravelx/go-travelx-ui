@@ -54,6 +54,26 @@ export default function SubscribeFlightCard({
   // State for confirmation dialogs
   const [isStandardDialogOpen, setIsStandardDialogOpen] = useState(false);
   const [isSecureDialogOpen, setIsSecureDialogOpen] = useState(false);
+  const [showRedirectDialog, setShowRedirectDialog] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+
+  // Handle countdown logic
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showRedirectDialog && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (showRedirectDialog && countdown === 0) {
+      window.location.reload();
+    }
+    return () => clearTimeout(timer);
+  }, [showRedirectDialog, countdown]);
+
+  const handleCancelRedirect = () => {
+    setShowRedirectDialog(false);
+    setCountdown(5);
+  };
 
   // Handle standard subscription button click - opens confirmation dialog
   const handleSubscribeClick = () => {
@@ -84,6 +104,7 @@ export default function SubscribeFlightCard({
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       });
       toast.success(result.message || "Successfully subscribed to standard flight updates");
+      setShowRedirectDialog(true);
     } catch (error: any) {
       console.error("Error subscribing to flight:", error);
       toast.error(error.message || "Failed to subscribe to flight");
@@ -115,6 +136,7 @@ export default function SubscribeFlightCard({
       toast.success(
         result.message || "Successfully subscribed to secure encrypted flight updates"
       );
+      setShowRedirectDialog(true);
     } catch (error: any) {
       console.error("Error subscribing to flight:", error);
       toast.error(error.message || "Failed to subscribe to flight");
@@ -718,6 +740,31 @@ export default function SubscribeFlightCard({
               ) : (
                 "Confirm Secure Subscription"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Redirect Countdown Dialog */}
+      <Dialog open={showRedirectDialog} onOpenChange={setShowRedirectDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-primary" />
+              Subscription Successful
+            </DialogTitle>
+            <DialogDescription className="text-base py-4">
+              You will be redirected to view your subscriptions in{" "}
+              <span className="font-bold text-primary text-lg">{countdown}</span> seconds...
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row justify-center sm:justify-center gap-4">
+            <Button
+              variant="outline"
+              onClick={handleCancelRedirect}
+              className="w-full sm:w-auto"
+            >
+              Cancel & Stay Here
             </Button>
           </DialogFooter>
         </DialogContent>
