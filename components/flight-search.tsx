@@ -171,7 +171,7 @@ export default function FlightSearch() {
   return (
     <div className="bg-gradient-to-b dark:from-background dark:to-secondary/10 from-background to-muted/50">
       <Toaster position="top-right" />
-      <main className="flex-grow">
+      <main className="flex-grow mt-[7rem]">
         <Tabs
           defaultValue="view"
           className="container mt-20 mx-auto px-4 py-4"
