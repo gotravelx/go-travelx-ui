@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plane, BookOpen, Home, Menu, X, LogOut } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-switcher";
+import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -24,6 +26,7 @@ export function MainNav() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, resolvedTheme } = useTheme();
 
   useEffect(() => {
     setIsMounted(true);
@@ -33,8 +36,6 @@ export function MainNav() {
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
-
-  if (!isMounted) return null;
 
   const isActive = (path: string) => pathname === path;
 
@@ -48,18 +49,33 @@ export function MainNav() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-      <div className="container mx-auto px-4">
-        <div className="h-16 flex items-center justify-between">
+      <div className="container mx-auto px-6">
+        <div className="h-22 flex items-center justify-between mt-2">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Link href="/" className="flex items-center space-x-2">
-              <Plane className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-                GoTravelX
-              </span>
+            <Link href="/" className="flex items-center">
+              {isMounted && (theme === "light" || resolvedTheme === "light") ? (
+                <Image
+                  src="/logo-light.png"
+                  alt="GoTravelX Logo"
+                  width={240}
+                  height={80}
+                  className="h-20 w-auto object-contain"
+                />
+              ) : isMounted && (theme === "dark" || resolvedTheme === "dark") ? (
+                <Image
+                  src="/logo-dark0.png"
+                  alt="GoTravelX Logo"
+                  width={240}
+                  height={80}
+                  className="h-20 w-auto object-contain"
+                />
+              ) : (
+                <Plane className="h-16 w-16 text-primary" />
+              )}
             </Link>
           </motion.div>
 
@@ -97,7 +113,7 @@ export function MainNav() {
             >
               Marketing
             </Link>
-                
+
             <Link
               href="/guide"
               className={cn(
@@ -110,59 +126,61 @@ export function MainNav() {
               Guide
             </Link>
 
-            {isAuthenticated ? (
-              <>
-                <Link href="/flifo">
-                  <Button
-                    className="gap-2"
-                    variant={isActive("/flifo") ? "default" : "outline"}
-                  >
-                    <Plane className="h-4 w-4" />
-                    Flight Info
-                  </Button>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+            {isMounted && (
+              isAuthenticated ? (
+                <>
+                  <Link href="/flifo">
                     <Button
-                      variant="ghost"
-                      className="relative h-8 w-8 rounded-full"
+                      className="gap-2"
+                      variant={isActive("/flifo") ? "default" : "outline"}
                     >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {user ? getInitials(user.name) : "U"}
-                        </AvatarFallback>
-                      </Avatar>
+                      <Plane className="h-4 w-4" />
+                      Flight Info
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user?.name
-                            ? user?.name?.charAt(0)?.toUpperCase() +
+                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="relative h-8 w-8 rounded-full"
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {user ? getInitials(user.name) : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {user?.name
+                              ? user?.name?.charAt(0)?.toUpperCase() +
                               user?.name?.slice(1)?.toLowerCase()
-                            : ""}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user?.username}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={logout}
-                      className="cursor-pointer"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <Link href="/login">
-                <Button className="gap-2">Sign In</Button>
-              </Link>
+                              : ""}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user?.username}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={logout}
+                        className="cursor-pointer"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <Link href="/login">
+                  <Button className="gap-2">Sign In</Button>
+                </Link>
+              )
             )}
             <ThemeToggle />
           </nav>
@@ -224,50 +242,52 @@ export function MainNav() {
               <span>Marketing</span>
             </Link>
 
-            {isAuthenticated ? (
-              <>
-                <Link
-                  href="/flifo"
-                  className={cn(
-                    "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                    isActive("/flifo") &&
+            {isMounted && (
+              isAuthenticated ? (
+                <>
+                  <Link
+                    href="/flifo"
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                      isActive("/flifo") &&
                       "bg-primary text-primary-foreground hover:bg-primary/90"
-                  )}
-                >
-                  <Plane className="h-4 w-4" />
-                  <span>Flight Tracking</span>
-                </Link>
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex items-center gap-2 p-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {user ? getInitials(user.name) : "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {user?.username}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start mt-2 text-red-500 hover:text-red-600 hover:bg-red-100/10"
-                    onClick={logout}
+                    )}
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Log out
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="flex items-center gap-2 p-2 rounded-md bg-primary text-primary-foreground"
-              >
-                <span>Sign In</span>
-              </Link>
+                    <Plane className="h-4 w-4" />
+                    <span>Flight Tracking</span>
+                  </Link>
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex items-center gap-2 p-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {user ? getInitials(user.name) : "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user?.username}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start mt-2 text-red-500 hover:text-red-600 hover:bg-red-100/10"
+                      onClick={logout}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Log out
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 p-2 rounded-md bg-primary text-primary-foreground"
+                >
+                  <span>Sign In</span>
+                </Link>
+              )
             )}
           </div>
         </nav>
