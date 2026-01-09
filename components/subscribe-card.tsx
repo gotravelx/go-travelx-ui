@@ -76,19 +76,17 @@ export default function SubscribeFlightCard({
         arrivalAirport: flightData.arrivalAirport,
         departureDate: flightData.scheduledDepartureDate,
       });
-      await flightService.subscribeToFlight({
+      const result = await flightService.subscribeToFlight({
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
         arrivalAirport: flightData.arrivalAirport,
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       });
-      toast.success("Successfully subscribed to standard flight updates");
-    } catch (error) {
+      toast.success(result.message || "Successfully subscribed to standard flight updates");
+    } catch (error: any) {
       console.error("Error subscribing to flight:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to subscribe to flight"
-      );
+      toast.error(error.message || "Failed to subscribe to flight");
     } finally {
       setIsSubscribing(false);
       setIsStandardDialogOpen(false);
@@ -107,7 +105,7 @@ export default function SubscribeFlightCard({
         departureDate: flightData.scheduledDepartureDate,
       });
       // In a real implementation, this would call a different API endpoint for secure subscriptions
-      await flightService.subscribeToFlight({
+      const result = await flightService.subscribeToFlight({
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
@@ -115,13 +113,11 @@ export default function SubscribeFlightCard({
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       });
       toast.success(
-        "Successfully subscribed to secure encrypted flight updates"
+        result.message || "Successfully subscribed to secure encrypted flight updates"
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error subscribing to flight:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to subscribe to flight"
-      );
+      toast.error(error.message || "Failed to subscribe to flight");
     } finally {
       setIsSecureSubscribing(false);
       setIsSecureDialogOpen(false);
@@ -194,16 +190,16 @@ export default function SubscribeFlightCard({
     const durationToUse = actual || scheduled || planned;
 
     console.log("Actual Duration:", actual);
-    
+
     if (durationToUse) {
       const parsed = parseISODuration(durationToUse);
       if (parsed) {
         const { hours, minutes } = parsed;
         console.log("Parsed duration:", parsed);
-        
+
         durationFormatted = `${hours}h ${minutes}m`;
         console.log("Formatted duration:", durationFormatted);
-        
+
       }
     }
   } catch (error) {
@@ -438,11 +434,10 @@ export default function SubscribeFlightCard({
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Delay:</span>
                       <span
-                        className={`font-medium ${
-                          (flightData.departureDelayMinutes ?? 0) > 0
-                            ? "text-destructive"
-                            : "text-emerald-500"
-                        }`}
+                        className={`font-medium ${(flightData.departureDelayMinutes ?? 0) > 0
+                          ? "text-destructive"
+                          : "text-emerald-500"
+                          }`}
                       >
                         {(flightData.departureDelayMinutes ?? 0) > 0
                           ? `${flightData.departureDelayMinutes} minutes`
@@ -503,11 +498,10 @@ export default function SubscribeFlightCard({
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Delay:</span>
                       <span
-                        className={`font-medium ${
-                          (flightData.arrivalDelayMinutes ?? 0) > 0
-                            ? "text-destructive"
-                            : "text-emerald-500"
-                        }`}
+                        className={`font-medium ${(flightData.arrivalDelayMinutes ?? 0) > 0
+                          ? "text-destructive"
+                          : "text-emerald-500"
+                          }`}
                       >
                         {(flightData.arrivalDelayMinutes ?? 0) > 0
                           ? `${flightData.arrivalDelayMinutes} minutes`
@@ -537,7 +531,7 @@ export default function SubscribeFlightCard({
                     </thead>
                     <tbody>
                       {flightData.marketedFlightSegment &&
-                      flightData.marketedFlightSegment.length > 0 ? (
+                        flightData.marketedFlightSegment.length > 0 ? (
                         flightData.marketedFlightSegment.map(
                           (segment, index) => (
                             <tr key={index} className="hover:bg-muted/30">

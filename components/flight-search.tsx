@@ -34,7 +34,7 @@ export default function FlightSearch() {
   const [arrivalStation, setArrivalStation] = useState("")
   const [activeTab, setActiveTab] = useState("view")
 
-  
+
   useEffect(() => {
     if (!selectedDate) {
       setSelectedDate(new Date())
@@ -101,7 +101,8 @@ export default function FlightSearch() {
       setSubscribeFlightData(data)
       setSearchError("") // Clear any previous errors
     } catch (error) {
-      setSearchError("Error fetching flight data")
+      setSearchError(`Unable to fetch data for flight ${carrier} ${flightNumber}. Please verify the details and try again.`)
+      setSubscribeFlightData(null) // Clear previous flight data on error
     } finally {
       setIsLoading(false)
     }
@@ -196,7 +197,7 @@ export default function FlightSearch() {
                 <CardHeader></CardHeader>
                 <CardContent>
                   {/* Temporarily comment out props until we verify ViewFlight interface */}
-                  <ViewFlight 
+                  <ViewFlight
                     {...{
                       flightNumber,
                       onFlightNumberChange: handleFlightNumberChange,
@@ -264,7 +265,7 @@ export default function FlightSearch() {
 
           {/* un-subscribe-flight  ui start --------------------  */}
           <TabsContent value="un-subscribe-flight">
-            <UnsubscribeFlightPage/>
+            <UnsubscribeFlightPage />
           </TabsContent>
           {/* un-subscribe-flight ui end --------------------  */}
         </Tabs>

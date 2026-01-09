@@ -61,10 +61,8 @@ class FlightService {
   ): Promise<FlightData> => {
     try {
       const response = await this.fetchWithRetry(
-        `${
-          this.baseUrl
-        }/flights/get-flight-status/${flightNumber}?carrier=${carrier}&departureDate=${
-          departureDate.toISOString().split("T")[0]
+        `${this.baseUrl
+        }/flights/get-flight-status/${flightNumber}?carrier=${carrier}&departureDate=${departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&arrival=${arrivalStation}&includeFullData=false`,
         {
           method: "GET",
@@ -81,7 +79,7 @@ class FlightService {
         const transformedData: FlightData = {
           flightNumber: flightInfo.flightNumber,
           scheduledDepartureDate: flightInfo.departureDate,
-          carrierCode: flightInfo?.carrierCode ||flightInfo?.airline?.code || "UA",
+          carrierCode: flightInfo?.carrierCode || flightInfo?.airline?.code || "UA",
           operatingAirline: flightInfo.airline?.name || "",
           estimatedArrivalUTC: flightInfo.times?.estimatedArrival || "",
           estimatedDepartureUTC: flightInfo.times?.estimatedDeparture || "",
@@ -158,9 +156,9 @@ class FlightService {
 
       console.log("Subscription response:", result);
       if (!response.ok) {
-        throw new Error(
-          result.message || `HTTP error! status: ${response.status}`
-        );
+        // Extract main error message only
+        const errorMessage = result.error || result.message || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
       return result;
     } catch (error) {
@@ -193,7 +191,7 @@ class FlightService {
             flight.departureDate ||
             flight.times?.scheduledDeparture?.split("T")[0] ||
             "",
-          carrierCode: flight?.carrierCode|| "UA", // Default to UA if not provided
+          carrierCode: flight?.carrierCode || "UA", // Default to UA if not provided
           operatingAirline: flight.airline?.name || "",
           estimatedArrivalUTC: flight.times?.estimatedArrival || "",
           estimatedDepartureUTC: flight.times?.estimatedDeparture || "",
@@ -373,34 +371,34 @@ class AuthService {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-  
+
     const data: { success: boolean; username: string; accessToken: string; refreshToken: string } =
       await response.json();
-  
+
     if (!response.ok || !data.success) {
       throw new Error("Login failed");
     }
-  
+
     this.token = data.accessToken;
-  
+
     if (typeof window !== "undefined") {
       localStorage.setItem("token", this.token);
       localStorage.setItem("refreshToken", data.refreshToken);
     }
-  
+
     this.user = {
       id: "1",
       username: data.username,
       name: data.username,
     };
-  
+
     if (typeof window !== "undefined") {
       localStorage.setItem("user", JSON.stringify(this.user));
     }
-  
+
     return this.user;
   }
-  
+
   logout(): void {
     this.token = null;
     if (typeof window !== "undefined") {
@@ -431,7 +429,7 @@ class AuthService {
         throw new Error("Failed to refresh token");
       }
       const data = await response.json();
-      this.token = data.accessToken as string; 
+      this.token = data.accessToken as string;
       if (typeof window !== "undefined") {
         localStorage.setItem("token", this.token);
         localStorage.setItem("refreshToken", data.refreshToken);
