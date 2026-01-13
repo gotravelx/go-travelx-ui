@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Loader2, RefreshCw, Search } from "lucide-react";
+import { Plus, Trash2, Loader2, RefreshCw, Search, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -54,6 +54,14 @@ export default function CarriersAdminPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    // Validation state
+    const [isValidateModalOpen, setIsValidateModalOpen] = useState(false);
+    const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+    const [flightNumber, setFlightNumber] = useState("");
+    const [validationData, setValidationData] = useState<any>(null);
+    const [isValidating, setIsValidating] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
+
     const filteredCarriers = carriers
         .filter((carrier) =>
             carrier.carrierName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,6 +92,7 @@ export default function CarriersAdminPage() {
         setIsLoading(true);
         try {
             const data = await carrierService.getAllCarriers();
+            console.log("data", data);
             setCarriers(data);
         } catch (error) {
             console.error(error);
@@ -134,6 +143,65 @@ export default function CarriersAdminPage() {
         } catch (error) {
             console.error(error);
             toast.error("Failed to delete carrier");
+        }
+    };
+
+    const handleOpenValidate = (carrier: Carrier) => {
+        setSelectedCarrier(carrier);
+        setFlightNumber("");
+        setValidationData(null);
+        setValidationError(null);
+        setIsValidateModalOpen(true);
+    };
+
+    const handleValidate = async () => {
+        if (!flightNumber) {
+            toast.error("Flight number is required");
+            return;
+        }
+
+        setIsValidating(true);
+        setValidationError(null);
+        setValidationData(null);
+
+        try {
+            // 1. Fetch access token
+            const tokenRes = await fetch('/api/auth/token');
+            if (!tokenRes.ok) {
+                const tokenError = await tokenRes.text();
+                throw new Error(`Failed to fetch token: ${tokenError}`);
+            }
+            const tokenData = await tokenRes.json();
+            const token = tokenData.access_token;
+
+            if (!token) {
+                throw new Error('Access token not found in response');
+            }
+
+            // 2. Call proxy with token
+            const query = new URLSearchParams({
+                fltNbr: flightNumber,
+                carrier: selectedCarrier?.carrierCode || "",
+            });
+
+            const proxyRes = await fetch(`/api/proxy?${query.toString()}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!proxyRes.ok) {
+                const proxyError = await proxyRes.text();
+                throw new Error(`Proxy error: ${proxyError}`);
+            }
+
+            const data = await proxyRes.json();
+            setValidationData(data);
+        } catch (err: any) {
+            setValidationError(err.message);
+            toast.error("Validation failed");
+        } finally {
+            setIsValidating(false);
         }
     };
 
@@ -194,6 +262,14 @@ export default function CarriersAdminPage() {
                                                 <TableCell>{carrier.program}</TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-primary hover:text-primary"
+                                                            onClick={() => handleOpenValidate(carrier)}
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
                                                         <AlertDialog>
                                                             <AlertDialogTrigger asChild>
                                                                 <Button
@@ -319,6 +395,54 @@ export default function CarriersAdminPage() {
                             Save changes
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Validation Dialog */}
+            <Dialog open={isValidateModalOpen} onOpenChange={setIsValidateModalOpen}>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Validate Flight Data</DialogTitle>
+                        <DialogDescription>
+                            Check flight data for <span className="font-bold">{selectedCarrier?.carrierName} ({selectedCarrier?.carrierCode})</span>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="flightNumber" className="text-right">
+                                Flight Number
+                            </Label>
+                            <Input
+                                id="flightNumber"
+                                value={flightNumber}
+                                onChange={(e) => setFlightNumber(e.target.value)}
+                                className="col-span-3"
+                                placeholder="e.g. 123"
+                            />
+                        </div>
+                        <div className="flex justify-end">
+                            <Button onClick={handleValidate} disabled={isValidating || !flightNumber}>
+                                {isValidating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Validate
+                            </Button>
+                        </div>
+
+                        {validationError && (
+                            <div className="p-4 rounded-md bg-destructive/10 text-destructive text-sm">
+                                <p className="font-bold mb-1">Error:</p>
+                                <pre className="whitespace-pre-wrap">{validationError}</pre>
+                            </div>
+                        )}
+
+                        {validationData && (
+                            <div className="mt-4">
+                                <p className="text-sm font-medium mb-2">Response Data:</p>
+                                <pre className="p-4 rounded-md bg-muted text-xs overflow-auto max-h-[400px]">
+                                    {JSON.stringify(validationData, null, 2)}
+                                </pre>
+                            </div>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>
