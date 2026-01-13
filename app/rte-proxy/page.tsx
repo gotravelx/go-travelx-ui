@@ -89,7 +89,7 @@ function FlightStatusContent() {
     <div
       style={{
         padding: '24px',
-        margin: '50px',
+        margin: '90px',
         fontFamily: 'Arial',
         backgroundColor: isDark ? '#000' : '#fff',
         color: isDark ? '#fff' : '#000',
