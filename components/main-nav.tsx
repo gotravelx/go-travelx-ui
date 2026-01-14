@@ -129,6 +129,17 @@ export function MainNav() {
             {isMounted && (
               isAuthenticated ? (
                 <>
+                  <Link
+                    href="/admin/carriers"
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-primary",
+                      isActive("/admin/carriers")
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    Carriers
+                  </Link>
                   <Link href="/flifo">
                     <Button
                       className="gap-2"
@@ -146,7 +157,7 @@ export function MainNav() {
                       >
                         <Avatar className="h-8 w-8">
                           <AvatarFallback className="bg-primary/10 text-primary">
-                            {user ? getInitials(user.name) : "U"}
+                            {user?.name ? getInitials(user.name) : "U"}
                           </AvatarFallback>
                         </Avatar>
                       </Button>
@@ -246,6 +257,16 @@ export function MainNav() {
               isAuthenticated ? (
                 <>
                   <Link
+                    href="/admin/carriers"
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                      isActive("/admin/carriers") && "bg-muted"
+                    )}
+                  >
+                    <Plane className="h-4 w-4" />
+                    <span>Carriers</span>
+                  </Link>
+                  <Link
                     href="/flifo"
                     className={cn(
                       "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
@@ -260,7 +281,7 @@ export function MainNav() {
                     <div className="flex items-center gap-2 p-2">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          {user ? getInitials(user.name) : "U"}
+                          {user?.name ? getInitials(user.name) : "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div>
