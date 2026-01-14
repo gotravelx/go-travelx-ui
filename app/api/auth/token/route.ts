@@ -67,13 +67,25 @@ const BACKEND_BASE_URL = rawBaseUrl.replace("/v1", "");
 console.log("BACKEND_BASE_URL", BACKEND_BASE_URL)
 
 export async function GET() {
+    const startTime = Date.now();
+
     try {
         if (!BACKEND_BASE_URL) {
+            console.error('[Token Route] Backend URL not configured');
             return NextResponse.json(
                 { error: "Backend URL not configured" },
                 { status: 500 }
             );
         }
+
+        console.log(`[Token Route] Fetching token from: ${BACKEND_BASE_URL}/api/auth/token`);
+
+        // Create abort controller for timeout (15 seconds)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+            console.error('[Token Route] Request timeout after 15s');
+            controller.abort();
+        }, 15000);
 
         const response = await fetch(
             `${BACKEND_BASE_URL}/api/auth/token`,
@@ -83,11 +95,18 @@ export async function GET() {
                     Accept: "application/json",
                 },
                 cache: "no-store",
+                signal: controller.signal,
             }
         );
 
+        clearTimeout(timeoutId);
+
+        const duration = Date.now() - startTime;
+        console.log(`[Token Route] Backend responded in ${duration}ms with status ${response.status}`);
+
         if (!response.ok) {
             const errorText = await response.text();
+            console.error(`[Token Route] Backend error (${response.status}):`, errorText);
             return NextResponse.json(
                 { error: "Backend token API failed", details: errorText },
                 { status: response.status }
@@ -95,9 +114,21 @@ export async function GET() {
         }
 
         const data = await response.json();
+        console.log('[Token Route] ✓ Token fetched successfully');
         return NextResponse.json(data);
 
     } catch (err: any) {
+        const duration = Date.now() - startTime;
+
+        if (err.name === 'AbortError') {
+            console.error(`[Token Route] ✗ Request aborted after ${duration}ms (timeout)`);
+            return NextResponse.json(
+                { error: "Token request timeout", details: "Backend did not respond within 15 seconds" },
+                { status: 504 }
+            );
+        }
+
+        console.error(`[Token Route] ✗ Error after ${duration}ms:`, err.message);
         return NextResponse.json(
             { error: "Token proxy failed", details: err?.message },
             { status: 500 }
