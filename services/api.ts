@@ -61,10 +61,8 @@ class FlightService {
   ): Promise<FlightData> => {
     try {
       const response = await this.fetchWithRetry(
-        `${
-          this.baseUrl
-        }/flights/get-flight-status/${flightNumber}?carrier=${carrier}&departureDate=${
-          departureDate.toISOString().split("T")[0]
+        `${this.baseUrl
+        }/flights/get-flight-status/${flightNumber}?carrier=${carrier}&departureDate=${departureDate.toISOString().split("T")[0]
         }&departure=${departureStation}&arrival=${arrivalStation}&includeFullData=false`,
         {
           method: "GET",
@@ -81,7 +79,7 @@ class FlightService {
         const transformedData: FlightData = {
           flightNumber: flightInfo.flightNumber,
           scheduledDepartureDate: flightInfo.departureDate,
-          carrierCode: flightInfo?.carrierCode ||flightInfo?.airline?.code || "UA",
+          carrierCode: flightInfo?.carrierCode || flightInfo?.airline?.code || "UA",
           operatingAirline: flightInfo.airline?.name || "",
           estimatedArrivalUTC: flightInfo.times?.estimatedArrival || "",
           estimatedDepartureUTC: flightInfo.times?.estimatedDeparture || "",
@@ -158,9 +156,9 @@ class FlightService {
 
       console.log("Subscription response:", result);
       if (!response.ok) {
-        throw new Error(
-          result.message || `HTTP error! status: ${response.status}`
-        );
+        // Extract main error message only
+        const errorMessage = result.error || result.message || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
       return result;
     } catch (error) {
@@ -186,14 +184,15 @@ class FlightService {
         return [];
       }
       // Transform the API response to match our FlightData interface
-      return data.flights.map((flight: any) => {
+      // Reverse the array to show the latest subscriptions first
+      return [...data.flights].reverse().map((flight: any) => {
         return {
           flightNumber: (flight.flightNumber || "").toString(),
           scheduledDepartureDate:
             flight.departureDate ||
             flight.times?.scheduledDeparture?.split("T")[0] ||
             "",
-          carrierCode: flight?.carrierCode|| "UA", // Default to UA if not provided
+          carrierCode: flight?.carrierCode || "UA", // Default to UA if not provided
           operatingAirline: flight.airline?.name || "",
           estimatedArrivalUTC: flight.times?.estimatedArrival || "",
           estimatedDepartureUTC: flight.times?.estimatedDeparture || "",
@@ -250,7 +249,8 @@ class FlightService {
       const data: GetFlightSubscriptionsApiResponse = await response.json();
       console.log("Subscribed flights details API response:", data);
       if (data.success && data.subscriptions) {
-        return data.subscriptions.map((apiSub: any) => {
+        // Reverse the array to show the latest subscriptions first
+        return [...data.subscriptions].reverse().map((apiSub: any) => {
           // Map the flat API response object into the nested SubscriptionDetails structure
           const flightData: FlightData = {
             flightNumber: apiSub.flightNumber,
@@ -373,34 +373,34 @@ class AuthService {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-  
+
     const data: { success: boolean; username: string; accessToken: string; refreshToken: string } =
       await response.json();
-  
+
     if (!response.ok || !data.success) {
       throw new Error("Login failed");
     }
-  
+
     this.token = data.accessToken;
-  
+
     if (typeof window !== "undefined") {
       localStorage.setItem("token", this.token);
       localStorage.setItem("refreshToken", data.refreshToken);
     }
-  
+
     this.user = {
       id: "1",
       username: data.username,
       name: data.username,
     };
-  
+
     if (typeof window !== "undefined") {
       localStorage.setItem("user", JSON.stringify(this.user));
     }
-  
+
     return this.user;
   }
-  
+
   logout(): void {
     this.token = null;
     if (typeof window !== "undefined") {
@@ -431,7 +431,7 @@ class AuthService {
         throw new Error("Failed to refresh token");
       }
       const data = await response.json();
-      this.token = data.accessToken as string; 
+      this.token = data.accessToken as string;
       if (typeof window !== "undefined") {
         localStorage.setItem("token", this.token);
         localStorage.setItem("refreshToken", data.refreshToken);

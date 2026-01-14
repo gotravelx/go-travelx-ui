@@ -40,7 +40,7 @@ function FlightStatusContent() {
         // 1. Fetch access token
         const token = await getAccessToken();
 
-        // 2. Call proxy with token
+        // 2. Call proxy with token with carrier
         const query = new URLSearchParams({
           fltNbr: flightno,
           ...(carrier && { carrier }),
@@ -80,7 +80,7 @@ function FlightStatusContent() {
     <div
       style={{
         padding: '24px',
-        margin: '50px',
+        margin: '90px',
         fontFamily: 'Arial',
         backgroundColor: isDark ? '#000' : '#fff',
         color: isDark ? '#fff' : '#000',

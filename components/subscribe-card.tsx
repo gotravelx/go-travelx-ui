@@ -54,6 +54,26 @@ export default function SubscribeFlightCard({
   // State for confirmation dialogs
   const [isStandardDialogOpen, setIsStandardDialogOpen] = useState(false);
   const [isSecureDialogOpen, setIsSecureDialogOpen] = useState(false);
+  const [showRedirectDialog, setShowRedirectDialog] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+
+  // Handle countdown logic
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showRedirectDialog && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (showRedirectDialog && countdown === 0) {
+      window.location.reload();
+    }
+    return () => clearTimeout(timer);
+  }, [showRedirectDialog, countdown]);
+
+  const handleCancelRedirect = () => {
+    setShowRedirectDialog(false);
+    setCountdown(5);
+  };
 
   // Handle standard subscription button click - opens confirmation dialog
   const handleSubscribeClick = () => {
@@ -76,19 +96,18 @@ export default function SubscribeFlightCard({
         arrivalAirport: flightData.arrivalAirport,
         departureDate: flightData.scheduledDepartureDate,
       });
-      await flightService.subscribeToFlight({
+      const result = await flightService.subscribeToFlight({
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
         arrivalAirport: flightData.arrivalAirport,
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       });
-      toast.success("Successfully subscribed to standard flight updates");
-    } catch (error) {
+      toast.success(result.message || "Successfully subscribed to standard flight updates");
+      setShowRedirectDialog(true);
+    } catch (error: any) {
       console.error("Error subscribing to flight:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to subscribe to flight"
-      );
+      toast.error(error.message || "Failed to subscribe to flight");
     } finally {
       setIsSubscribing(false);
       setIsStandardDialogOpen(false);
@@ -107,7 +126,7 @@ export default function SubscribeFlightCard({
         departureDate: flightData.scheduledDepartureDate,
       });
       // In a real implementation, this would call a different API endpoint for secure subscriptions
-      await flightService.subscribeToFlight({
+      const result = await flightService.subscribeToFlight({
         flightNumber: flightData.flightNumber,
         carrierCode: flightData.carrierCode,
         departureAirport: flightData.departureAirport,
@@ -115,13 +134,12 @@ export default function SubscribeFlightCard({
         scheduledDepartureDate: flightData.scheduledDepartureDate,
       });
       toast.success(
-        "Successfully subscribed to secure encrypted flight updates"
+        result.message || "Successfully subscribed to secure encrypted flight updates"
       );
-    } catch (error) {
+      setShowRedirectDialog(true);
+    } catch (error: any) {
       console.error("Error subscribing to flight:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to subscribe to flight"
-      );
+      toast.error(error.message || "Failed to subscribe to flight");
     } finally {
       setIsSecureSubscribing(false);
       setIsSecureDialogOpen(false);
@@ -194,16 +212,16 @@ export default function SubscribeFlightCard({
     const durationToUse = actual || scheduled || planned;
 
     console.log("Actual Duration:", actual);
-    
+
     if (durationToUse) {
       const parsed = parseISODuration(durationToUse);
       if (parsed) {
         const { hours, minutes } = parsed;
         console.log("Parsed duration:", parsed);
-        
+
         durationFormatted = `${hours}h ${minutes}m`;
         console.log("Formatted duration:", durationFormatted);
-        
+
       }
     }
   } catch (error) {
@@ -438,11 +456,10 @@ export default function SubscribeFlightCard({
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Delay:</span>
                       <span
-                        className={`font-medium ${
-                          (flightData.departureDelayMinutes ?? 0) > 0
-                            ? "text-destructive"
-                            : "text-emerald-500"
-                        }`}
+                        className={`font-medium ${(flightData.departureDelayMinutes ?? 0) > 0
+                          ? "text-destructive"
+                          : "text-emerald-500"
+                          }`}
                       >
                         {(flightData.departureDelayMinutes ?? 0) > 0
                           ? `${flightData.departureDelayMinutes} minutes`
@@ -503,11 +520,10 @@ export default function SubscribeFlightCard({
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Delay:</span>
                       <span
-                        className={`font-medium ${
-                          (flightData.arrivalDelayMinutes ?? 0) > 0
-                            ? "text-destructive"
-                            : "text-emerald-500"
-                        }`}
+                        className={`font-medium ${(flightData.arrivalDelayMinutes ?? 0) > 0
+                          ? "text-destructive"
+                          : "text-emerald-500"
+                          }`}
                       >
                         {(flightData.arrivalDelayMinutes ?? 0) > 0
                           ? `${flightData.arrivalDelayMinutes} minutes`
@@ -537,7 +553,7 @@ export default function SubscribeFlightCard({
                     </thead>
                     <tbody>
                       {flightData.marketedFlightSegment &&
-                      flightData.marketedFlightSegment.length > 0 ? (
+                        flightData.marketedFlightSegment.length > 0 ? (
                         flightData.marketedFlightSegment.map(
                           (segment, index) => (
                             <tr key={index} className="hover:bg-muted/30">
@@ -724,6 +740,31 @@ export default function SubscribeFlightCard({
               ) : (
                 "Confirm Secure Subscription"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Redirect Countdown Dialog */}
+      <Dialog open={showRedirectDialog} onOpenChange={setShowRedirectDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-primary" />
+              Subscription Successful
+            </DialogTitle>
+            <DialogDescription className="text-base py-4">
+              You will be redirected to view your subscriptions in{" "}
+              <span className="font-bold text-primary text-lg">{countdown}</span> seconds...
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row justify-center sm:justify-center gap-4">
+            <Button
+              variant="outline"
+              onClick={handleCancelRedirect}
+              className="w-full sm:w-auto"
+            >
+              Cancel & Stay Here
             </Button>
           </DialogFooter>
         </DialogContent>

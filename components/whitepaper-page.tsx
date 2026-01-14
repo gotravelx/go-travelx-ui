@@ -27,10 +27,12 @@ export default function WhitepaperPage() {
                   platform.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button size="lg" className="gap-2">
-                    <Download className="h-4 w-4" />
-                    Download PDF
-                  </Button>
+                  <a href="/GoTravelX_Whitepaper.pdf" download>
+                    <Button size="lg" className="gap-2">
+                      <Download className="h-4 w-4" />
+                      Download PDF
+                    </Button>
+                  </a>
                   <Link href="/flifo">
                     <Button size="lg" variant="outline">
                       Try the Platform
@@ -142,10 +144,10 @@ export default function WhitepaperPage() {
                     </li>
                   </ul>
                   <div className="mt-8">
-                    <Button className="w-full gap-2">
+                    {/* <Button className="w-full gap-2">
                       <Download className="h-4 w-4" />
                       Download Full PDF
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </div>
@@ -258,10 +260,12 @@ export default function WhitepaperPage() {
                     This is a preview of the whitepaper. Download the full PDF
                     for complete details.
                   </p>
-                  <Button size="lg" className="gap-2">
-                    <Download className="h-4 w-4" />
-                    Download Full Whitepaper
-                  </Button>
+                  <a href="/GoTravelX_Whitepaper.pdf" download>
+                    <Button size="lg" className="gap-2">
+                      <Download className="h-4 w-4" />
+                      Download Full Whitepaper
+                    </Button>
+                  </a>
                 </div>
               </div>
             </div>
