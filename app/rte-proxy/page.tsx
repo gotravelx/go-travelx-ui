@@ -49,7 +49,7 @@ function FlightStatusContent() {
           throw new Error('Access token not found in response');
         }
 
-        // 2. Call proxy with token
+        // 2. Call proxy with token with carrier
         const query = new URLSearchParams({
           fltNbr: flightno,
           ...(carrier && { carrier }),
