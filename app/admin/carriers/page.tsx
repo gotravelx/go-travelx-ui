@@ -44,6 +44,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { carrierService, Carrier } from "@/services/carrierService";
+import { getAccessToken } from "@/utils/auth";
 
 export default function CarriersAdminPage() {
     const [carriers, setCarriers] = useState<Carrier[]>([]);
@@ -166,17 +167,7 @@ export default function CarriersAdminPage() {
 
         try {
             // 1. Fetch access token
-            const tokenRes = await fetch('/api/auth/token');
-            if (!tokenRes.ok) {
-                const tokenError = await tokenRes.text();
-                throw new Error(`Failed to fetch token: ${tokenError}`);
-            }
-            const tokenData = await tokenRes.json();
-            const token = tokenData.access_token;
-
-            if (!token) {
-                throw new Error('Access token not found in response');
-            }
+            const token = await getAccessToken();
 
             // 2. Call proxy with token
             const query = new URLSearchParams({

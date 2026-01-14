@@ -97,7 +97,7 @@ export function MainNav() {
             >
               Marketing
             </Link>
-                
+
             <Link
               href="/guide"
               className={cn(
@@ -110,8 +110,20 @@ export function MainNav() {
               Guide
             </Link>
 
+
             {isAuthenticated ? (
               <>
+                <Link
+                  href="/admin/carriers"
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    isActive("/admin/carriers")
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  Carriers
+                </Link>
                 <Link href="/flifo">
                   <Button
                     className="gap-2"
@@ -140,7 +152,7 @@ export function MainNav() {
                         <p className="text-sm font-medium leading-none">
                           {user?.name
                             ? user?.name?.charAt(0)?.toUpperCase() +
-                              user?.name?.slice(1)?.toLowerCase()
+                            user?.name?.slice(1)?.toLowerCase()
                             : ""}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
@@ -227,11 +239,21 @@ export function MainNav() {
             {isAuthenticated ? (
               <>
                 <Link
+                  href="/admin/carriers"
+                  className={cn(
+                    "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                    isActive("/admin/carriers") && "bg-muted"
+                  )}
+                >
+                  <Plane className="h-4 w-4" />
+                  <span>Carriers</span>
+                </Link>
+                <Link
                   href="/flifo"
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
                     isActive("/flifo") &&
-                      "bg-primary text-primary-foreground hover:bg-primary/90"
+                    "bg-primary text-primary-foreground hover:bg-primary/90"
                   )}
                 >
                   <Plane className="h-4 w-4" />
