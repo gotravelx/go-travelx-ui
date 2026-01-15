@@ -25,7 +25,7 @@ export default function MarketingPage() {
       <div className="flex flex-col min-h-screen">
         {/* Hero Section */}
         <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/30">
-          <div className="container px-4 md:px-6">
+          <div className="container px-4 md:px-6 mt-[2rem] ">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
                 <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
@@ -76,7 +76,7 @@ export default function MarketingPage() {
 
         {/* About Section */}
         <section className="py-16 md:py-24">
-          <div className="container px-4 md:px-6">
+          <div className="container px-4 md:px-6 mt-[1rem]">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
                 About Our Platform
@@ -98,7 +98,7 @@ export default function MarketingPage() {
                 <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-start">
                   <div className="space-y-4">
                     <h3 className="text-2xl font-bold">
-                    FLIFO (Flight Information) Data Oracle
+                      FLIFO (Flight Information) Data Oracle
                     </h3>
                     <p className="text-muted-foreground">
                       Our FLIFO (Flight Information) Data Oracle provides real-time,
@@ -320,7 +320,7 @@ export default function MarketingPage() {
 
         {/* CTA Section */}
         <section className="py-16 md:py-24 bg-muted/30">
-          <div className="container px-4 md:px-6">
+          <div className="container px-4 md:px-6 mt-[1rem]">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">

@@ -12,7 +12,7 @@ export default function WhitepaperPage() {
       <div className="flex flex-col min-h-screen">
         {/* Hero Section */}
         <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/30">
-          <div className="container px-4 md:px-6">
+          <div className="container px-4 md:px-6 mt-[2rem]">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
                 <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
@@ -80,7 +80,7 @@ export default function WhitepaperPage() {
 
         {/* Whitepaper Content Section */}
         <section className="py-16 md:py-24">
-          <div className="container px-4 md:px-6">
+          <div className="container px-4 md:px-6 mt-[1rem]">
             <div className="grid gap-8 lg:grid-cols-3">
               <div className="lg:col-span-1">
                 <div className="sticky top-24">

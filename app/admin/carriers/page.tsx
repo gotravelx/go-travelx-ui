@@ -199,10 +199,10 @@ export default function CarriersAdminPage() {
     return (
         <div className="container mx-auto py-10 px-4 mt-16">
             <Card className="glass-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+                <CardHeader className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 pb-7">
                     <CardTitle className="text-2xl font-bold">Carrier Management</CardTitle>
-                    <div className="flex gap-2">
-                        <div className="relative w-64 mr-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                        <div className="relative w-full sm:w-64">
                             <Search className="absolute left-2 top-2.5 h-[1.3rem] w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search carriers..."
@@ -214,12 +214,14 @@ export default function CarriersAdminPage() {
                                 className="pl-8"
                             />
                         </div>
-                        <Button variant="outline" size="icon" onClick={fetchCarriers} disabled={isLoading}>
-                            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-                        </Button>
-                        <Button onClick={() => handleOpenDialog()} className="gradient-border">
-                            <Plus className="mr-2 h-4 w-4" /> Add Carrier
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="icon" onClick={fetchCarriers} disabled={isLoading}>
+                                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                            </Button>
+                            <Button onClick={() => handleOpenDialog()} className="gradient-border">
+                                <Plus className="mr-2 h-4 w-4" /> Add Carrier
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
