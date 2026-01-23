@@ -149,6 +149,19 @@ export function MainNav() {
                       Flight Info
                     </Button>
                   </Link>
+                  <a
+                    href="https://flight-info-ui.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      className="gap-2 bg-foreground text-background hover:bg-foreground/90 hover:text-background transition-all duration-200 hover:scale-105 active:scale-95 border-none shadow-sm hover:shadow-md"
+                    >
+                      <Plane className="h-4 w-4" />
+                      2.0 GOTRAVELX
+                    </Button>
+                  </a>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -216,103 +229,115 @@ export function MainNav() {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <nav
-          aria-label="Mobile Menu"
-          className="md:hidden border-t bg-background"
-        >
-          <div className="container py-4 px-4 space-y-4">
-            <Link
-              href="/"
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                isActive("/") && "bg-muted"
-              )}
-            >
-              <Home className="h-4 w-4" />
-              <span>Home</span>
-            </Link>
-            <Link
-              href="/about"
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                isActive("/about") && "bg-muted"
-              )}
-            >
-              <BookOpen className="h-4 w-4" />
-              <span>About</span>
-            </Link>
-            <Link
-              href="/marketing"
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                isActive("/marketing") && "bg-muted"
-              )}
-            >
-              <BookOpen className="h-4 w-4" />
-              <span>Marketing</span>
-            </Link>
+      {
+        isMenuOpen && (
+          <nav
+            aria-label="Mobile Menu"
+            className="md:hidden border-t bg-background"
+          >
+            <div className="container py-4 px-4 space-y-4">
+              <Link
+                href="/"
+                className={cn(
+                  "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                  isActive("/") && "bg-muted"
+                )}
+              >
+                <Home className="h-4 w-4" />
+                <span>Home</span>
+              </Link>
+              <Link
+                href="/about"
+                className={cn(
+                  "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                  isActive("/about") && "bg-muted"
+                )}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>About</span>
+              </Link>
+              <Link
+                href="/marketing"
+                className={cn(
+                  "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                  isActive("/marketing") && "bg-muted"
+                )}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Marketing</span>
+              </Link>
 
-            {isMounted && (
-              isAuthenticated ? (
-                <>
-                  <Link
-                    href="/admin/carriers"
-                    className={cn(
-                      "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                      isActive("/admin/carriers") && "bg-muted"
-                    )}
-                  >
-                    <Plane className="h-4 w-4" />
-                    <span>Carriers</span>
-                  </Link>
-                  <Link
-                    href="/flifo"
-                    className={cn(
-                      "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
-                      isActive("/flifo") &&
-                      "bg-primary text-primary-foreground hover:bg-primary/90"
-                    )}
-                  >
-                    <Plane className="h-4 w-4" />
-                    <span>Flight Tracking</span>
-                  </Link>
-                  <div className="border-t pt-4 mt-4">
-                    <div className="flex items-center gap-2 p-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {user?.name ? getInitials(user.name) : "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{user?.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {user?.username}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start mt-2 text-red-500 hover:text-red-600 hover:bg-red-100/10"
-                      onClick={logout}
+
+              {isMounted && (
+                isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/admin/carriers"
+                      className={cn(
+                        "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                        isActive("/admin/carriers") && "bg-muted"
+                      )}
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Log out
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  className="flex items-center gap-2 p-2 rounded-md bg-primary text-primary-foreground"
-                >
-                  <span>Sign In</span>
-                </Link>
-              )
-            )}
-          </div>
-        </nav>
-      )}
-    </header>
+                      <Plane className="h-4 w-4" />
+                      <span>Carriers</span>
+                    </Link>
+                    <Link
+                      href="/flifo"
+                      className={cn(
+                        "flex items-center gap-2 p-2 rounded-md hover:bg-muted",
+                        isActive("/flifo") &&
+                        "bg-primary text-primary-foreground hover:bg-primary/90"
+                      )}
+                    >
+                      <Plane className="h-4 w-4" />
+                      <span>Flight Tracking</span>
+                    </Link>
+                    <a
+                      href="https://flight-info-ui.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 p-2 rounded-md bg-foreground text-background hover:bg-foreground/90 hover:text-background transition-all duration-200 hover:scale-[1.02] active:scale-95 shadow-sm"
+                    >
+                      <Plane className="h-4 w-4" />
+                      <span>2.0 GOTRAVELX</span>
+                    </a>
+                    <div className="border-t pt-4 mt-4">
+                      <div className="flex items-center gap-2 p-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {user?.name ? getInitials(user.name) : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{user?.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {user?.username}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start mt-2 text-red-500 hover:text-red-600 hover:bg-red-100/10"
+                        onClick={logout}
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Log out
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-2 p-2 rounded-md bg-primary text-primary-foreground"
+                  >
+                    <span>Sign In</span>
+                  </Link>
+                )
+              )}
+            </div>
+          </nav>
+        )
+      }
+    </header >
   );
 }
