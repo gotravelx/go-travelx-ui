@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -74,6 +74,20 @@ export default function UnSubscribeDataTable({
   // Popup for open link (Tab / Window)
   const [openLinkDialog, setOpenLinkDialog] = useState(false);
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
+  const [scannerBaseUrl, setScannerBaseUrl] = useState(
+    "https://columbus.caminoscan.com/tx/"
+  );
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      (window.location.hostname === "gotravelx.com" ||
+        window.location.hostname === "www.gotravelx.com" ||
+        window.location.hostname === "localhost")
+    ) {
+      setScannerBaseUrl("https://caminoscan.com/tx/");
+    }
+  }, []);
 
   const toggleRow = (flightNumber: string) => {
     // Takes flightNumber
@@ -433,7 +447,7 @@ export default function UnSubscribeDataTable({
                           }
                         >
                           {isUnsubscribing ===
-                          subscription.subscription.flightNumber ? (
+                            subscription.subscription.flightNumber ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             "Unsubscribe"
@@ -451,7 +465,7 @@ export default function UnSubscribeDataTable({
                         }
                       >
                         {expandedRow ===
-                        subscription.subscription.flightNumber ? (
+                          subscription.subscription.flightNumber ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <ChevronRight className="h-4 w-4" />
@@ -714,7 +728,7 @@ export default function UnSubscribeDataTable({
                 }
               >
                 {isUnsubscribing ===
-                confirmingSubscription.subscription.flightNumber ? (
+                  confirmingSubscription.subscription.flightNumber ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Unsubscribing...
@@ -740,7 +754,7 @@ export default function UnSubscribeDataTable({
               onClick={() => {
                 if (pendingTxHash)
                   window.open(
-                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    `${scannerBaseUrl}${pendingTxHash}`,
                     "_blank"
                   );
                 setOpenLinkDialog(false);
@@ -753,7 +767,7 @@ export default function UnSubscribeDataTable({
               onClick={() => {
                 if (pendingTxHash)
                   window.open(
-                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    `${scannerBaseUrl}${pendingTxHash}`,
                     "_blank",
                     "noopener,noreferrer,width=900,height=700"
                   );

@@ -38,8 +38,8 @@ export default function ViewFlightDatTable({
   currentPage = 1,
   itemsPerPage = 5,
   totalItems = 0,
-  onPageChange = () => {},
-  onItemsPerPageChange = () => {},
+  onPageChange = () => { },
+  onItemsPerPageChange = () => { },
 }: FlightDataTableProps) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [selectedFlight, setSelectedFlight] = useState<FlightData | null>(null);
@@ -48,6 +48,7 @@ export default function ViewFlightDatTable({
   const [localItemsPerPage, setLocalItemsPerPage] = useState(itemsPerPage);
   const [openLinkDialog, setOpenLinkDialog] = useState(false);
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
+  const [scannerBaseUrl, setScannerBaseUrl] = useState("https://columbus.caminoscan.com/tx/");
 
   useEffect(() => {
     setLocalCurrentPage(currentPage)
@@ -56,6 +57,18 @@ export default function ViewFlightDatTable({
   useEffect(() => {
     setLocalItemsPerPage(itemsPerPage)
   }, [itemsPerPage])
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      (window.location.hostname === "gotravelx.com" ||
+        window.location.hostname === "www.gotravelx.com" ||
+        window.location.hostname === "localhost")
+    ) {
+      setScannerBaseUrl("https://caminoscan.com/tx/");
+    }
+  }, []);
+
 
   const totalPages = Math.ceil(totalItems / localItemsPerPage)
 
@@ -287,7 +300,7 @@ export default function ViewFlightDatTable({
                                   <Copy className="h-3 w-3" />
                                 </Button>
                                 <a
-                                  href={`https://columbus.caminoscan.com/tx/${flight.blockchainTxHash}`}
+                                  href={`${scannerBaseUrl}${flight.blockchainTxHash}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-primary hover:underline"
@@ -445,20 +458,20 @@ export default function ViewFlightDatTable({
                                 <div className="text-muted-foreground">Delay:</div>
                                 <div>{flight?.arrivalState || "TBD"}</div>
                                 {flight.marketedFlightSegment && flight.marketedFlightSegment.length > 0 && (
-                                    <>
-                                      <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
-                                        Codeshare Details:
-                                      </div>
-                                      {flight.marketedFlightSegment.map((segment, idx) => (
-                                          <Fragment key={idx}>
-                                            <div className="text-muted-foreground pl-2">Airline:</div>
-                                            <div>
-                                              {segment.MarketingAirlineCode || "TBD"} {segment.FlightNumber || "TBD"}
-                                            </div>
-                                          </Fragment>
-                                        ))}
-                                    </>
-                                  )}
+                                  <>
+                                    <div className="text-muted-foreground col-span-2 mt-2 font-semibold">
+                                      Codeshare Details:
+                                    </div>
+                                    {flight.marketedFlightSegment.map((segment, idx) => (
+                                      <Fragment key={idx}>
+                                        <div className="text-muted-foreground pl-2">Airline:</div>
+                                        <div>
+                                          {segment.MarketingAirlineCode || "TBD"} {segment.FlightNumber || "TBD"}
+                                        </div>
+                                      </Fragment>
+                                    ))}
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -594,7 +607,7 @@ export default function ViewFlightDatTable({
           {selectedFlight && <FlightStatusView flightData={selectedFlight} />}
         </DialogContent>
       </Dialog>
-        {/*window open */}
+      {/*window open */}
       <Dialog open={openLinkDialog} onOpenChange={setOpenLinkDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -606,7 +619,7 @@ export default function ViewFlightDatTable({
               onClick={() => {
                 if (pendingTxHash)
                   window.open(
-                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    `${scannerBaseUrl}${pendingTxHash}`,
                     "_blank"
                   );
                 setOpenLinkDialog(false);
@@ -619,7 +632,7 @@ export default function ViewFlightDatTable({
               onClick={() => {
                 if (pendingTxHash)
                   window.open(
-                    `https://columbus.caminoscan.com/tx/${pendingTxHash}`,
+                    `${scannerBaseUrl}${pendingTxHash}`,
                     "_blank",
                     "noopener,noreferrer,width=900,height=700"
                   );
